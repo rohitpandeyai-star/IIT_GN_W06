@@ -8,7 +8,7 @@ Answer each question in one to three sentences. The worked example comes from a 
 
 > **Worked example.** The client is the home-collection unit of a diagnostics chain. Patients pay per test (B2C); partner hospitals and corporate health camps pay on monthly invoices (B2B). We are the analytics vendor, and the unit head renews us only if idle phlebotomist slots fall.
 
-**Our answer:**
+**Our answer:** The client is the Client Hotel Group under NDA. Bookings are done by two channels B2B Partners and B2C Guests. We are the analytics vendor and, the client renews subscription for the module only if the module pays for itself in Euros.
 
 <!-- answer:3 -->
 
@@ -16,7 +16,10 @@ Answer each question in one to three sentences. The worked example comes from a 
 
 > **Worked example.** The city operations lead fixes each route's bookings every evening for the next morning. An empty slot costs about Rs 450 of phlebotomist time and fuel. A patient we cannot reach in time costs about Rs 600 in a voucher and a rebooking, plus a complaint.
 
-**Our answer:**
+**Our answer:** The Revenue Manager, (who oversees two hotels) oversells each night with a flat rule :
+the flat rule is : (Hotel's Average Cancellation Rate * Bookings for that Night) - Few Rooms for Safety.
+If we underbook it and we get cancellation : (Average Booking Stay Rate * Nights)
+If we overbook it and get extra guests : ( 300 EUR per extra guests)
 
 <!-- answer:3 -->
 
@@ -24,7 +27,7 @@ Answer each question in one to three sentences. The worked example comes from a 
 
 > **Worked example.** How many extra visits to book on each route for tomorrow morning, from the bookings known at the end of today, about how many booked patients will not be there when the phlebotomist arrives.
 
-**Our answer:**
+**Our answer:** How many rooms to oversell for each hotel for the next 14 nights at each hotel. Based on data available every morning.
 
 <!-- answer:3 -->
 
@@ -32,7 +35,7 @@ Answer each question in one to three sentences. The worked example comes from a 
 
 > **Worked example.** The route-morning: one phlebotomist, one morning, about 12 slots. The overbooking is set per route, so per-patient answers are only useful once they are added up per route.
 
-**Our answer:**
+**Our answer:** 
 
 <!-- answer:2 -->
 
@@ -42,7 +45,17 @@ _Give each one a numerator, a denominator, a window and the exclusions. Draw the
 
 > **Worked example.** North star: idle slots per route-morning, averaged over a calendar month, excluding routes the lab cancelled. Guardrail: patients turned away per 1,000 completed visits, per calendar month, all routes, at most 5.
 
-**Our answer:**
+**Our answer:** 
+North Star : 
+  Numerator : 
+  Denominator :
+  Window :
+  Exclusions :
+Guardrail:
+  Numerator : 
+  Denominator :
+  Window :
+  Exclusions :
 
 <!-- answer:4 -->
 
