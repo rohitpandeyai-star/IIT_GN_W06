@@ -6,7 +6,7 @@ This file is the working index for completing the project. Update the status and
 
 - The announcement deck and the project brief, README, role guide, ladder, AI workflow and artifact templates have been reviewed.
 - The project starts on `main`, which was clean and tracking `origin/main` at the time this tracker was prepared.
-- `docs/CHARTER.md` has a deliberately rough, AI-assisted draft at the user direction; both notebooks now show its draft number-check statuses. Their pre-existing cached outputs show counts/date range, split counts, and the column index; no new data checks were run. The course-required no-AI paper frame and charter reconciliation remain pending.
+- `docs/CHARTER.md` has a deliberately rough, AI-assisted draft at the user direction. Both notebooks now contain executed Pandas checks for counts, cancellation claims, and date splits; proof-period cancellation labels remain unused. Charter reconciliation and the course-required no-AI paper frame remain pending.
 - Rohit Pandey is assigned to all four roles, as requested. Project work and challenger sign-offs remain pending until completed.
 - Do not commit the downloaded bookings CSV. `src/contract.py` is supplied and must not be edited.
 
@@ -111,7 +111,7 @@ For a three-person team, use the alternate assignments in `docs/ROLES.md`; the u
 |---:|---|---|---|---|
 | 0 | Complete | `c4e7b11` | Included in tracker update push | Source review complete; tracker creation checkpoint committed. |
 | 1 | In progress | `b03e701` | Included in tracker update push | AI-assisted rough charter draft; the course-required no-AI paper frame and data checks remain to be completed. |
-| 2 | In progress | `21b0369` | Included in tracker update push | Charter status tables added to both notebooks. Cached outputs are noted; no new data checks or charter reconciliation have been done. |
+| 2 | In progress | | Pending | Pandas cells now display row/column counts, cancellation rates on train and choose only, and date-split counts. Proof cancellation labels remain untouched; charter reconciliation is pending. |
 | 3 | Not started | | Pending | |
 | 4 | Not started | | Pending | |
 | 5 | Not started | | Pending | |
