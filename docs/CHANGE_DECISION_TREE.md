@@ -310,10 +310,33 @@ The log begins from the clean `main` baseline below. It distinguishes user reque
           "pushed_to": "origin/main"
         }
       ]
+    },
+    {
+      "phase_sequence": 10,
+      "phase_id": "defence_preparation",
+      "purpose": "Prepare a concise, evidence-based guide for explaining the project and its current limits.",
+      "events": [
+        {
+          "sequence": 16,
+          "commit": "13e90fc6775ed1cbd4507836dd5b67d240019d20",
+          "parent": "97b3e0bdafa62628609c784e6a1db6bcc8dbd679",
+          "timestamp_local": "2026-11-17",
+          "message": "docs: add defence preparation guide",
+          "kind": "study_guide",
+          "trigger": "User asked for a concise decision tree and relevant project facts to prepare for questions the next day.",
+          "decision": "Create docs/DEFENCE_QUICK_GUIDE.md with the decision flow, checked numbers, likely questions, and explicit limits on current claims; add it to the execution tracker tree.",
+          "reason": "A short, evidence-linked study aid helps the user explain what is known and distinguish it from assumptions and unfinished project work.",
+          "files_changed": ["docs/DEFENCE_QUICK_GUIDE.md", "docs/EXECUTION_TRACKER.md"],
+          "verification": "Guide content reflects the tracker, evaluation contract, brief, and notebook checks. No model or proof performance is claimed.",
+          "pushed_to": "origin/main"
+        }
+      ]
     }
   ],
   "current_snapshot": {
     "as_of": "2026-11-17",
+    "latest_recorded_commit": "13e90fc6775ed1cbd4507836dd5b67d240019d20",
+    "defence_guide": "docs/DEFENCE_QUICK_GUIDE.md; study aid only, and explicitly distinguishes measured checks, client assumptions, and pending work.",
     "last_known_commit_before_this_ledger": "d12068b79a0df6b9747c73a16a8f62a81afd3583",
     "working_tree_before_this_ledger": "clean",
     "role_assignment": {"Client Lead": "Rohit Pandey", "Data Lead": "Rohit Pandey", "Model Lead": "Rohit Pandey", "Build Lead": "Rohit Pandey"},
