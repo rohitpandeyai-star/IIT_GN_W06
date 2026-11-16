@@ -331,17 +331,38 @@ The log begins from the clean `main` baseline below. It distinguishes user reque
           "pushed_to": "origin/main"
         }
       ]
+    },
+    {
+      "phase_sequence": 11,
+      "phase_id": "charter_working_draft",
+      "purpose": "Complete the charter's project framing and checked-number context while preserving the required distinction between AI-assisted support and the AI-free paper frame.",
+      "events": [
+        {
+          "sequence": 17,
+          "commit": "47a1c8f6fda8ef087ac77511742262a0627cc892",
+          "parent": "6558df289c7bb9d729db5336335b449d67c780c6",
+          "timestamp_local": "2026-11-17",
+          "message": "docs: complete charter working draft",
+          "kind": "charter_update",
+          "trigger": "User asked to complete the paper frame in the assistant's words.",
+          "decision": "Complete docs/CHARTER.md as an explicitly AI-assisted reference draft, correct the decision unit and metric definitions against the evaluation contract, add notebook-checked figures, and state open client questions and project limits.",
+          "reason": "Provide the requested complete framing without misrepresenting it as the course-required AI-free paper frame; avoid inventing unspecified client values.",
+          "files_changed": ["docs/CHARTER.md"],
+          "verification": "Checked wording against BRIEF.md, docs/EVALUATION_CONTRACT.md, existing notebook-check results, and tracker status. The course-required student-written no-AI paper frame remains outstanding.",
+          "pushed_to": "origin/main"
+        }
+      ]
     }
   ],
   "current_snapshot": {
     "as_of": "2026-11-17",
     "latest_recorded_commit": "13e90fc6775ed1cbd4507836dd5b67d240019d20",
     "defence_guide": "docs/DEFENCE_QUICK_GUIDE.md; study aid only, and explicitly distinguishes measured checks, client assumptions, and pending work.",
+    "charter_status": "Completed AI-assisted reference draft; does not satisfy the course-required AI-free paper frame.",
     "last_known_commit_before_this_ledger": "d12068b79a0df6b9747c73a16a8f62a81afd3583",
     "working_tree_before_this_ledger": "clean",
     "role_assignment": {"Client Lead": "Rohit Pandey", "Data Lead": "Rohit Pandey", "Model Lead": "Rohit Pandey", "Build Lead": "Rohit Pandey"},
     "tracker_status": {"step_0": "Complete", "step_1": "In progress", "step_2": "In progress", "steps_3_to_10": "Not started"},
-    "charter_status": "Rough AI-assisted draft with unverified entries and an intentionally weak booking-level unit guess; it is not the course-required AI-free paper V0.",
     "notebook_status": "Both notebooks contain grouped Pandas cells and saved tables for brief checks. Proof-period cancellation outcomes are held back.",
     "data_results": {"rows": 119390, "columns": 32, "hotels": 2, "train_choose_cancellation_rate": "36.2%", "proof_cancellation_rate": "not calculated in early checks"},
     "unresolved_items": ["Reconcile the charter with the notebook findings.", "Ask for the current flat-rule safety margin.", "Verify the vendor 95% accuracy claim if evidence exists.", "Do not claim an observed walk rate until a rule is evaluated.", "The no-AI paper-frame requirement remains outstanding."],
