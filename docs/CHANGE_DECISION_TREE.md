@@ -373,11 +373,32 @@ The log begins from the clean `main` baseline below. It distinguishes user reque
           "pushed_to": "origin/main"
         }
       ]
+    },
+    {
+      "phase_sequence": 13,
+      "phase_id": "step1_charter_and_rfp",
+      "purpose": "Complete Step 1 supporting documents with explicit thresholds, checked facts, and unanswered client questions.",
+      "events": [
+        {
+          "sequence": 19,
+          "commit": "f1d2521b6eb9d9208663fb541e134f5ebce394b6",
+          "parent": "5a0314bc7bb112106e89fa75c6028fcd07e6a3a5",
+          "timestamp_local": "2026-11-17",
+          "message": "docs: complete assisted charter and RFP materials",
+          "kind": "step1_documentation",
+          "trigger": "User asked to complete Step 1 with AI and label it as assisted.",
+          "decision": "Fill docs/RFP.md with hotel-specific requirements and business-unit acceptance measures; correct an unsupported commercial assertion in docs/DOMAIN.md; update the tracker while keeping Step 1 in progress.",
+          "reason": "Make the project framing and acceptance criteria actionable without inventing client values or presenting AI-assisted work as the course-required AI-free paper frame.",
+          "files_changed": ["docs/RFP.md", "docs/DOMAIN.md", "docs/EXECUTION_TRACKER.md"],
+          "verification": "Checked definitions and periods against BRIEF.md and docs/EVALUATION_CONTRACT.md. The safety margin, per-hotel guardrail, minimum savings, and commercial terms remain client questions.",
+          "pushed_to": "origin/main"
+        }
+      ]
     }
   ],
   "current_snapshot": {
     "as_of": "2026-11-17",
-    "latest_recorded_commit": "9d9f0309bcc21c4730332570b9cdf76bf9c410ac",
+    "latest_recorded_commit": "f1d2521b6eb9d9208663fb541e134f5ebce394b6",
     "paper_frame_draft": "docs/PAPER_FRAME_AI_ASSISTED.md; AI-assisted study draft, not course-compliant AI-free V0.",
     "defence_guide": "docs/DEFENCE_QUICK_GUIDE.md; study aid only, and explicitly distinguishes measured checks, client assumptions, and pending work.",
     "charter_status": "Completed AI-assisted reference draft; does not satisfy the course-required AI-free paper frame.",

@@ -2,8 +2,8 @@
 
 > **AI-assisted working draft.** Prepared at the user's request. The project course requires its paper-frame V0 to be written without AI; this RFP draft does not satisfy that requirement. It is a working requirements document, with unspecified client thresholds and commercial facts left open for confirmation.
 
-**Issued by:** Revenue team for a two-hotel group in Portugal (client name withheld)  
-**For:** Revenue science / software vendors  
+**Issued by:** Revenue team for a two-hotel group in Portugal (client name withheld)
+**For:** Revenue science / software vendors
 **Decision owner:** Revenue manager (confirm final approver)
 
 ## 1. Background
