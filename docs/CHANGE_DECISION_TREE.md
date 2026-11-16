@@ -436,21 +436,43 @@ The log begins from the clean `main` baseline below. It distinguishes user reque
           "pushed_to": "origin/main"
         }
       ]
+    },
+    {
+      "phase_sequence": 16,
+      "phase_id": "learner_led_column_audit",
+      "purpose": "Replace the AI-only column classification with a sequential notebook process where the learner reviews evidence and makes each decision.",
+      "events": [
+        {
+          "sequence": 22,
+          "commit": "bcb07ad08f3fbbf3af31de86dab073266da50985",
+          "parent": "90aeb083afd683939ef3aeab5e0ca880060f0bc2",
+          "timestamp_local": "2026-11-17",
+          "message": "notebooks: add user-led column audit workshop",
+          "kind": "learner_workshop",
+          "trigger": "User said the audit must be completed by them sequentially in Jupyter, with the goal of understanding the evidence and making their own decisions.",
+          "decision": "Create a 45-cell notebook with evidence grouped by topic, no prefilled classifications, and a final completeness check; mark the earlier AI-only bins as provisional and reopen Step 2.",
+          "reason": "Support learning and preserve the user's ownership of classification choices rather than treating AI suggestions as their audit.",
+          "files_changed": ["notebooks/01_column_audit_workshop.ipynb", "docs/COLUMNS.md", "docs/DECISIONS.md", "docs/EXECUTION_TRACKER.md"],
+          "verification": "Notebook structure checked against the CSV header: all 32 columns appear exactly once in evidence groups and once in blank decision prompts; code cells have no saved outputs and were not executed.",
+          "pushed_to": "origin/main"
+        }
+      ]
     }
   ],
   "current_snapshot": {
     "as_of": "2026-11-17",
-    "latest_recorded_commit": "72c23ade473f778b244470eed03fda7d2cfd7548",
+    "latest_recorded_commit": "bcb07ad08f3fbbf3af31de86dab073266da50985",
     "paper_frame_draft": "docs/PAPER_FRAME_AI_ASSISTED.md; AI-assisted study draft, not course-compliant AI-free V0.",
     "defence_guide": "docs/DEFENCE_QUICK_GUIDE.md; study aid only, and explicitly distinguishes measured checks, client assumptions, and pending work.",
     "charter_status": "Completed AI-assisted reference draft; does not satisfy the course-required AI-free paper frame.",
     "last_known_commit_before_this_ledger": "d12068b79a0df6b9747c73a16a8f62a81afd3583",
     "working_tree_before_this_ledger": "clean",
     "role_assignment": {"Client Lead": "Rohit Pandey", "Data Lead": "Rohit Pandey", "Model Lead": "Rohit Pandey", "Build Lead": "Rohit Pandey"},
-    "tracker_status": {"step_0": "Complete", "step_1": "Complete for the user's AI-assisted workflow; course AI-free condition unmet", "step_2": "Complete", "steps_3_to_10": "Not started"},
+    "tracker_status": {"step_0": "Complete", "step_1": "Complete for the user's AI-assisted workflow; course AI-free condition unmet", "step_2": "In progress; learner-led notebook decisions outstanding", "steps_3_to_10": "Not started"},
+    "column_audit": "AI bins are preliminary; notebooks/01_column_audit_workshop.ipynb has blank learner prompts for all 32 columns.",
     "notebook_status": "Both notebooks contain grouped Pandas cells and saved tables for brief checks. Proof-period cancellation outcomes are held back.",
     "data_results": {"rows": 119390, "columns": 32, "hotels": 2, "train_choose_cancellation_rate": "36.2%", "proof_cancellation_rate": "not calculated in early checks"},
-    "unresolved_items": ["The course-required AI-free paper frame remains unmet by the AI-assisted draft.", "Ask for the current flat-rule safety margin.", "Confirm whether the walk ceiling applies per hotel as well as group-wide.", "Verify the vendor 95% accuracy claim if evidence exists.", "Do not claim an observed walk rate until a rule is evaluated."],
+    "unresolved_items": ["The learner must run the column-audit notebook cell by cell and record their own bins and reasons.", "The course-required AI-free paper frame remains unmet by the AI-assisted draft.", "Ask for the current flat-rule safety margin.", "Confirm whether the walk ceiling applies per hotel as well as group-wide.", "Verify the vendor 95% accuracy claim if evidence exists.", "Do not claim an observed walk rate until a rule is evaluated."],
     "implementation_scope": {"files_not_changed": ["src/contract.py", "src/features.py", "src/backtest.py", "src/nightly.py"], "test_suite_run": false}
   }
 }

@@ -33,3 +33,14 @@
 - The public dataset article describes values extracted from booking/change-log records as of the day before arrival. This does not establish every feature's value at initial booking time.
 - The existing early notebook profile did not calculate proof cancellation outcomes. No method performance or savings were computed in this session.
 - The AI-free course paper-frame requirement remains unmet by these labeled AI-assisted materials.
+
+## Follow-up: learner-led audit
+
+The user clarified that the column audit must be completed by them, sequentially, in a Jupyter notebook, so they understand the evidence and make their own decisions. In response:
+
+- Created `notebooks/01_column_audit_workshop.ipynb` with 45 ordered cells, grouped evidence displays, and blank bin/reason prompts for each of the 32 CSV columns.
+- The notebook only shows value examples from train + choose; proof-period cancellation labels are not inspected. Its final cell saves a separate review file only after the learner has entered a valid bin and reason for every column.
+- Re-labeled `docs/COLUMNS.md` and `docs/DECISIONS.md` as AI-generated preliminary suggestions/observations. They are not considered the learner's completed audit.
+- Reopened Step 2 in the execution tracker. It remains in progress until the learner runs the notebook and records their choices.
+
+The notebook structure was checked to confirm that all 32 CSV fields appear exactly once in both the evidence groups and blank decision prompts. The cells were not executed and no classifications were chosen in this follow-up.
