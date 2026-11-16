@@ -1,21 +1,21 @@
 # Data Decisions and Team Objections
 
-> **AI-assisted working log.** This pass documents the current initial profile and conservative feature-timing choices. Add a dated row for each later cleaning, filtering, or feature decision; do not silently rewrite earlier decisions.
+> **AI-assisted preliminary log.** The entries below record observed handling and suggestions from the assistant; they are not the learner's final data decisions. Work through `notebooks/01_column_audit_workshop.ipynb` in order, then update this log in the learner's own words. Add dated entries for later cleaning, filtering, or feature decisions; do not silently rewrite earlier decisions.
 
 ## Data decisions
 
-| Date | Decision | Reason / evidence | Rows touched | Logged by |
+| Date | Observed handling or proposed choice (pending learner review) | Evidence / reason to consider | Rows touched | Status |
 |---|---|---|---:|---|
-| 2026-11-17 | Keep the raw booking rows unchanged in the initial profile; no rows were removed or deduplicated and no values were recoded. | Initial profile covers 119,390 rows and 32 columns. No cleaning operation was performed in the current notebooks. | 0 changed; 119,390 reviewed | Rohit Pandey, Data Lead |
-| 2026-11-17 | Use the arrival-date split from `src/contract.py`: train 49,157, choose 29,546, proof 40,687. | This preserves the required time order; early notebook outcomes were summarized only for train/choose. | 0 removed; all 119,390 assigned to a period | Rohit Pandey, Data Lead |
-| 2026-11-17 | Hold proof cancellation outcomes out of the early profile and tuning. | Proof is for one final evaluation after settings are frozen. Existing early checks calculated only proof counts/dates, not proof cancellation rate. | 0 removed; 40,687 proof rows held for later scoring | Rohit Pandey, Data Lead |
-| 2026-11-17 | Keep City Hotel and Resort Hotel separate in summaries and later candidate reports. | Dataset has two distinct hotel values. Train+choose cancellation rates differ: City 41.3%, Resort 26.3%. The same supplied contract applies, but no evidence establishes identical operating rules. | 0 removed; all 119,390 retained | Rohit Pandey, Data Lead |
-| 2026-11-17 | Do not treat `agent` or `company`'s source `NULL` category as a missing-value error or recode it in this pass. | Dataset article says NULL in these categories means not applicable (for example, no travel agent). No recoding was performed. | 0 changed | Rohit Pandey, Data Lead |
-| 2026-11-17 | Exclude bin 2 and bin 3 columns from the selected MVP predictors until point-in-time availability is verified; reserve `is_canceled` as the target only. | The dataset article describes extraction from booking records/change logs as of the day before arrival, not a full original-booking snapshot. `booking_changes`, country, status, and status date can reveal later events. See `docs/COLUMNS.md`. | 0 rows removed; predictor restriction applies to future model inputs | Rohit Pandey, Data Lead |
+| 2026-11-17 | Initial profile left raw rows and values unchanged; no rows were removed, deduplicated, or recoded. | Existing profile covers 119,390 rows and 32 columns; no cleaning operation was recorded. | 0 changed; 119,390 reviewed | Observed fact; learner review pending |
+| 2026-11-17 | The contract uses arrival-date train/choose/proof splits: 49,157 / 29,546 / 40,687 bookings. | Existing notebook profile reports these counts; contract defines the periods. | 0 removed; all 119,390 assigned to a period | Observed fact; learner review pending |
+| 2026-11-17 | Earlier profile held proof cancellation outcomes out of its summary. | Proof is for one final evaluation after choices freeze; existing early checks reported proof count/date only. | 0 removed; 40,687 proof rows reserved | Prior procedure; learner review pending |
+| 2026-11-17 | Suggested separate City Hotel and Resort Hotel reporting. | Two hotel values; train+choose cancellation rates are 41.3% and 26.3%. This does not prove different operating rules. | 0 removed; all 119,390 retained | AI suggestion; learner decision pending |
+| 2026-11-17 | Existing notes say not to recode the `NULL` category for `agent` or `company`. | Dataset article describes these `NULL` values as not applicable, such as no travel agent. No recoding was performed in the initial profile. | 0 changed | AI suggestion based on source; learner review pending |
+| 2026-11-17 | Earlier AI audit suggested excluding uncertain/late columns from model predictors until point-in-time availability is verified, and using `is_canceled` only as the target. | Source article describes values captured from booking/change logs as of the day before arrival. See the learner's sequential notebook and `docs/COLUMNS.md`. | 0 rows removed; provisional predictor recommendation only | AI suggestion; learner decision pending |
 
 ### Different hotel groups / decision rules
 
-The data identifies two properties as City Hotel and Resort Hotel, with different train+choose cancellation rates. This supports separate reporting and retaining `hotel` as a grouping field. The brief and evaluation contract do not provide separate rules or thresholds by hotel; the current shared walk ceiling is 10 per 1,000 arrivals. Do not infer different capacity, cancellation policy, or customer rules from the rate difference alone. Ask the client whether it needs an additional per-hotel guardrail.
+The data identifies two properties as City Hotel and Resort Hotel, with different train+choose cancellation rates. The assistant proposed separate reporting and retaining `hotel` as a grouping field. Decide whether you agree. The brief and evaluation contract do not provide separate rules or thresholds by hotel; the shared walk ceiling is 10 per 1,000 arrivals. A rate difference alone does not prove different capacity, cancellation policy, or customer rules.
 
 ## Team decisions and objections
 

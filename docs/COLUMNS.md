@@ -2,7 +2,7 @@
 
 **Owner:** Data Lead. **Use:** feature audit, PRD, and slide 4.
 
-> **AI-assisted audit draft.** Bin assignments are conservative interpretations of the dataset article and the course's booking-time rule. The source CSV is a snapshot reconstructed from the property-management system; the article says values were taken from the booking record/change log as of the day before arrival. A column's presence in this export does not prove its value was known at the original booking time. Validate the chosen snapshot for the intended operating time before using it.
+> **AI-generated preliminary suggestions, not the learner's audit.** Do not treat these bins as your decisions. The learner is reviewing every field sequentially in `notebooks/01_column_audit_workshop.ipynb`; replace or reconcile this file only after recording their choices. The source CSV is a snapshot reconstructed from the property-management system; the article says values were taken from booking/change records as of the day before arrival. A column's presence in this export does not prove its value was known at the original booking time.
 
 Bins:
 
@@ -12,7 +12,7 @@ Bins:
 
 The dataset reference is Antonio, de Almeida and Nunes (2019), especially Table 1 and section 2, [*Hotel booking demand datasets*](https://doi.org/10.1016/j.dib.2018.11.126). The article describes the day-before-arrival extraction, the booking change log, possible changes to guest attributes, and country sometimes being unknown until check-in. “Source” abbreviations in the article include BO (bookings), BL (booking change log), TR (transactions), and related property-management tables.
 
-| Column | Bin | Why | Evidence / treatment |
+| Column | Preliminary AI bin | AI's rationale to review | Evidence to consider |
 |---|---:|---|---|
 | `hotel` | 1 | Property for which the booking is made; no evidence that a booking changes hotels. | BO; property identity. Keep as grouping/input. |
 | `is_canceled` | 3 | Outcome label (includes the course's no-show treatment). | BO; target only, never predictor. |

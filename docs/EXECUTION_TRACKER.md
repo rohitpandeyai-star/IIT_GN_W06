@@ -7,7 +7,7 @@ This file is the working index for completing the project. Update the status and
 - The announcement deck and the project brief, README, role guide, ladder, AI workflow and artifact templates have been reviewed.
 - The project starts on `main`, which was clean and tracking `origin/main` at the time this tracker was prepared.
 - Step 1 now has an AI-assisted charter, paper-frame study draft, and hotel RFP, plus corrected domain wording for unverified commercial facts. These do not satisfy the course-required AI-free paper frame, which remains for the student to write. Both notebooks have commented, labeled Pandas checks with visible outputs; early checks held back proof cancellation outcomes.
-- Step 2 now has a conservative timing bin for every CSV field and an initial decision log. Only four fields are currently treated as fixed at booking; uncertain or later values are excluded from model inputs until point-in-time availability is verified. The CSV header was checked against all 32 audit rows.
+- Step 2 is reopened at the user's request: the AI-generated bins are preliminary suggestions, not the learner's decisions. `notebooks/01_column_audit_workshop.ipynb` guides the learner through evidence and blank decision cells one group at a time. Do not close Step 2 until their decisions and reasons are recorded.
 - Rohit Pandey is assigned to all four roles, as requested. Project work and challenger sign-offs remain pending until completed.
 - Do not commit the downloaded bookings CSV. `src/contract.py` is supplied and must not be edited.
 
@@ -23,7 +23,8 @@ IIT_GN_W06/
 │   ├── hotels.csv                    [Generated input; do not commit]
 │   └── data_explore.ipynb            [Data Lead: exploratory checks]
 ├── notebooks/
-│   └── 00_start_here.ipynb           [Data Lead: first profile and data checks]
+│   ├── 00_start_here.ipynb           [Data Lead: first profile and data checks]
+│   └── 01_column_audit_workshop.ipynb [Learner-led, cell-by-cell review of all 32 column timings]
 ├── docs/
 │   ├── EXECUTION_TRACKER.md           [Living sequence, status and checkpoint log]
 │   ├── SOURCE_CONTEXT.md              [Reference synthesis of supplied Word files and announcement deck]
@@ -33,8 +34,9 @@ IIT_GN_W06/
 │   ├── CHARTER.md                    [Client Lead: paper frame, metrics, checked numbers]
 │   ├── RFP.md                        [Client Lead: client requirements and acceptance terms]
 │   ├── DOMAIN.md                     [Reference: hotel terms]
-│   ├── COLUMNS.md                    [Data Lead: populated conservative timing bins for all 32 columns]
-│   ├── DECISIONS.md                  [Data Lead: initial data handling choices and open objections]
+│   ├── COLUMNS.md                    [AI preliminary bin suggestions; replace after learner review]
+│   ├── COLUMNS_USER_REVIEW.md         [Generated only from the learner's completed notebook decisions]
+│   ├── DECISIONS.md                  [AI preliminary notes and the learner's final data choices]
 │   ├── grill_01_charter.md           [Client Lead: Tuesday grill and resulting changes]
 │   ├── grill_02_prd.md               [Build Lead: Thursday grill and resulting changes]
 │   ├── PRD.md                        [Build Lead: options, chosen method, design and limits]
@@ -74,7 +76,7 @@ Statuses: `Complete`, `In progress`, `Not started`, or `Blocked`. A step is comp
 |---:|---|---|---|---|---|
 | 0 | Setup / source review | Team | This tracker; assign role names in `docs/CHARTER.md` and `README.md` at Step 1 | Tracker committed; the team knows the role owners and starts from a recorded Git state | Complete |
 | 1 | Tuesday / stages 0–2, paper frame | Client Lead, with all roles contributing facts | `docs/CHARTER.md`, `docs/DOMAIN.md`, `docs/RFP.md`, `docs/PAPER_FRAME_AI_ASSISTED.md` | Frame decision/unit, both costs, north star and guardrail; check brief numbers or record client questions; finish RFP periods and business-unit thresholds. AI assistance disclosed at user direction; this does not meet the course AI-free paper-frame requirement. | Complete |
-| 2 | Tuesday / stages 0–2, data pass | Data Lead; Client Lead checks brief facts; Model Lead checks target; Build Lead checks usable table | `data/data_explore.ipynb`, `notebooks/00_start_here.ipynb`, `docs/COLUMNS.md`, `docs/DECISIONS.md` | Profile bookings; log cleaning/filtering choices and row counts; bin all 32 columns; compare hotel categories and record evidence/unknowns. Candidate leakage AUC runs are deferred to Step 5. | In progress |
+| 2 | Tuesday / stages 0–2, data pass | Data Lead; Client Lead checks brief facts; Model Lead checks target; Build Lead checks usable table | `data/data_explore.ipynb`, `notebooks/00_start_here.ipynb`, `notebooks/01_column_audit_workshop.ipynb`, `docs/COLUMNS.md`, `docs/DECISIONS.md` | Learner runs notebook cell by cell, reviews evidence, chooses a bin/reason for every field, then records their own decisions. Candidate leakage AUC runs are deferred to Step 5. | In progress |
 | 3 | Tuesday / after paper frame and data pass | Client Lead owns Grill 1; Build Lead writes agent rules; Data Lead maintains index | `docs/grill_01_charter.md`, `ai_logs/`, `ai_logs/INDEX.md`, `AGENTS.md`, `CLAUDE.md`, `.github/copilot-instructions.md` | Complete the 45-minute grill and record at least three document changes; log the chat; write at least five actionable project rules from decisions; follow `docs/AI_WORKFLOW.md` for coding-guideline setup | Not started |
 | 4 | Wednesday / stages 3 and 5 planning | Build Lead; all roles own their decision input | `docs/PRD.md`, `docs/BUILD_PLAN.md`, `docs/DECISIONS.md` | Before seeing results, compare two approaches, name the choice and flip condition, answer the wish-list item with a number, define the client table and set owners, hours, done checks and evidence for POC/MVP/final | Not started |
 | 5 | Wednesday–Thursday / stage 4 POC | Model Lead owns backtest; Data Lead owns feature audit; Client Lead checks money rule; Build Lead checks reproducibility | `src/features.py`, `src/backtest.py`, `docs/COLUMNS.md`, `docs/DECISIONS.md`, `docs/PRD.md`, `docs/BUILD_PLAN.md`, `evidence/` | One command compares flat rule, lookup table and at least two learned models on the same time split; select buffers on choose period under the ceiling; run proof once; report AUC, nightly error, rooms, euros and walks/1,000; chosen rule uses no late columns or random split | Not started |
@@ -115,7 +117,7 @@ For a three-person team, use the alternate assignments in `docs/ROLES.md`; the u
 |---:|---|---|---|---|
 | 0 | Complete | `c4e7b11` | Included in tracker update push | Source review complete; tracker creation checkpoint committed. |
 | 1 | Complete | `1aa8414` | Included in this main-branch push | AI-assisted charter, paper-frame draft and RFP prepared at user direction. Course AI-free requirement remains unmet and is disclosed. Client questions remain recorded. |
-| 2 | Complete | `72c23ad` | Included in this main-branch push | Confirmed all 32 CSV fields appear exactly once in the timing audit; documented no row cleaning/filtering/recode/dedup, preserved hotel-level differences, and held proof labels for final evaluation. |
+| 2 | In progress | `90aeb08` | Included in this main-branch push | The prior AI-only bin audit is provisional. Created a 45-cell learner-led notebook; classifications remain blank until the user reviews and records them. |
 | 3 | Not started | | Pending | |
 | 4 | Not started | | Pending | |
 | 5 | Not started | | Pending | |
