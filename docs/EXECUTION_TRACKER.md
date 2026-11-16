@@ -6,7 +6,7 @@ This file is the working index for completing the project. Update the status and
 
 - The announcement deck and the project brief, README, role guide, ladder, AI workflow and artifact templates have been reviewed.
 - The project starts on `main`, which was clean and tracking `origin/main` at the time this tracker was prepared.
-- `docs/CHARTER.md` now has a deliberately rough, AI-assisted draft at the user direction; it is not the course-required no-AI paper frame. Other project deliverables and implementations remain pending.
+- `docs/CHARTER.md` has a deliberately rough, AI-assisted draft at the user direction; both notebooks now show its draft number-check statuses. Their pre-existing cached outputs show counts/date range, split counts, and the column index; no new data checks were run. The course-required no-AI paper frame and charter reconciliation remain pending.
 - Rohit Pandey is assigned to all four roles, as requested. Project work and challenger sign-offs remain pending until completed.
 - Do not commit the downloaded bookings CSV. `src/contract.py` is supplied and must not be edited.
 
@@ -70,7 +70,7 @@ Statuses: `Complete`, `In progress`, `Not started`, or `Blocked`. A step is comp
 |---:|---|---|---|---|---|
 | 0 | Setup / source review | Team | This tracker; assign role names in `docs/CHARTER.md` and `README.md` at Step 1 | Tracker committed; the team knows the role owners and starts from a recorded Git state | Complete |
 | 1 | Tuesday / stages 0–2, paper frame | Client Lead, with all roles contributing facts | `docs/CHARTER.md`, `docs/DOMAIN.md`, `docs/RFP.md` | On paper before any AI: frame the decision and unit; define both costs, north star and guardrail; check every brief number or record a client question; finish the RFP with periods and business-unit thresholds | In progress |
-| 2 | Tuesday / stages 0–2, data pass | Data Lead; Client Lead checks brief facts; Model Lead checks target; Build Lead checks usable table | `data/data_explore.ipynb`, `notebooks/00_start_here.ipynb`, `docs/COLUMNS.md`, `docs/DECISIONS.md` | Profile the bookings; log every cleaning/filtering choice and row count; bin every supplied column by when it becomes known; identify bookings governed by different rules and record evidence | Not started |
+| 2 | Tuesday / stages 0–2, data pass | Data Lead; Client Lead checks brief facts; Model Lead checks target; Build Lead checks usable table | `data/data_explore.ipynb`, `notebooks/00_start_here.ipynb`, `docs/COLUMNS.md`, `docs/DECISIONS.md` | Profile the bookings; log every cleaning/filtering choice and row count; bin every supplied column by when it becomes known; identify bookings governed by different rules and record evidence | In progress |
 | 3 | Tuesday / after paper frame and data pass | Client Lead owns Grill 1; Build Lead writes agent rules; Data Lead maintains index | `docs/grill_01_charter.md`, `ai_logs/`, `ai_logs/INDEX.md`, `AGENTS.md`, `CLAUDE.md`, `.github/copilot-instructions.md` | Complete the 45-minute grill and record at least three document changes; log the chat; write at least five actionable project rules from decisions; follow `docs/AI_WORKFLOW.md` for coding-guideline setup | Not started |
 | 4 | Wednesday / stages 3 and 5 planning | Build Lead; all roles own their decision input | `docs/PRD.md`, `docs/BUILD_PLAN.md`, `docs/DECISIONS.md` | Before seeing results, compare two approaches, name the choice and flip condition, answer the wish-list item with a number, define the client table and set owners, hours, done checks and evidence for POC/MVP/final | Not started |
 | 5 | Wednesday–Thursday / stage 4 POC | Model Lead owns backtest; Data Lead owns feature audit; Client Lead checks money rule; Build Lead checks reproducibility | `src/features.py`, `src/backtest.py`, `docs/COLUMNS.md`, `docs/DECISIONS.md`, `docs/PRD.md`, `docs/BUILD_PLAN.md`, `evidence/` | One command compares flat rule, lookup table and at least two learned models on the same time split; select buffers on choose period under the ceiling; run proof once; report AUC, nightly error, rooms, euros and walks/1,000; chosen rule uses no late columns or random split | Not started |
@@ -111,7 +111,7 @@ For a three-person team, use the alternate assignments in `docs/ROLES.md`; the u
 |---:|---|---|---|---|
 | 0 | Complete | `c4e7b11` | Included in tracker update push | Source review complete; tracker creation checkpoint committed. |
 | 1 | In progress | `b03e701` | Included in tracker update push | AI-assisted rough charter draft; the course-required no-AI paper frame and data checks remain to be completed. |
-| 2 | Not started | | Pending | |
+| 2 | In progress | | Pending | Charter status tables added to both notebooks. Cached outputs are noted; no new data checks or charter reconciliation have been done. |
 | 3 | Not started | | Pending | |
 | 4 | Not started | | Pending | |
 | 5 | Not started | | Pending | |
