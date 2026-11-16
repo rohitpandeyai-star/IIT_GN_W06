@@ -394,21 +394,63 @@ The log begins from the clean `main` baseline below. It distinguishes user reque
           "pushed_to": "origin/main"
         }
       ]
+    },
+    {
+      "phase_sequence": 14,
+      "phase_id": "step1_user_directed_closure",
+      "purpose": "Close the requested AI-assisted Step 1 workflow and move to the data pass, while preserving the course-compliance caveat.",
+      "events": [
+        {
+          "sequence": 20,
+          "commit": "1aa8414bd026c510ed9704c6f68bec8e80c2ae3d",
+          "parent": "7b661d7bb952d125634bd917e36a2c0512015adb",
+          "timestamp_local": "2026-11-17",
+          "message": "docs: close assisted Step 1 checkpoint",
+          "kind": "user_directed_step_closure",
+          "trigger": "User asked to complete the RFP step, move ahead, and ignore the instruction that the work had to be done by the student.",
+          "decision": "Mark Step 1 complete for the user's AI-assisted workflow because the charter, study frame, domain note, and RFP are prepared; keep the course's AI-free paper-frame requirement visibly recorded as unmet.",
+          "reason": "Follow the user's explicit instruction without claiming the work is course-compliant or AI-free.",
+          "files_changed": ["docs/EXECUTION_TRACKER.md"],
+          "verification": "Tracker marks Step 1 complete and states the remaining course requirement and client questions.",
+          "pushed_to": "origin/main"
+        }
+      ]
+    },
+    {
+      "phase_sequence": 15,
+      "phase_id": "step2_column_timing_audit",
+      "purpose": "Document conservative point-in-time availability for the full dataset and record initial data handling choices before model work.",
+      "events": [
+        {
+          "sequence": 21,
+          "commit": "72c23ade473f778b244470eed03fda7d2cfd7548",
+          "parent": "1aa8414bd026c510ed9704c6f68bec8e80c2ae3d",
+          "timestamp_local": "2026-11-17",
+          "message": "docs: complete initial data timing audit",
+          "kind": "data_audit",
+          "trigger": "After the user directed the project to move forward, the next tracker step called for full-column timing bins and logged data decisions.",
+          "decision": "Populate all 32 column bins conservatively, record that no rows were cleaned/filtered/recoded/deduplicated, preserve hotel-level reporting, hold proof outcomes, and index this AI session.",
+          "reason": "The public source describes values extracted from booking/change logs as of the day before arrival; that export alone does not prove values were fixed when each booking was first made.",
+          "files_changed": ["docs/COLUMNS.md", "docs/DECISIONS.md", "ai_logs/INDEX.md", "ai_logs/20261117_client_frame_data_audit.md"],
+          "verification": "Compared the CSV header with the audit: 32 columns, 32 audit rows, exact name match, and every row has a bin 1/2/3. No model or proof outcomes were computed.",
+          "pushed_to": "origin/main"
+        }
+      ]
     }
   ],
   "current_snapshot": {
     "as_of": "2026-11-17",
-    "latest_recorded_commit": "f1d2521b6eb9d9208663fb541e134f5ebce394b6",
+    "latest_recorded_commit": "72c23ade473f778b244470eed03fda7d2cfd7548",
     "paper_frame_draft": "docs/PAPER_FRAME_AI_ASSISTED.md; AI-assisted study draft, not course-compliant AI-free V0.",
     "defence_guide": "docs/DEFENCE_QUICK_GUIDE.md; study aid only, and explicitly distinguishes measured checks, client assumptions, and pending work.",
     "charter_status": "Completed AI-assisted reference draft; does not satisfy the course-required AI-free paper frame.",
     "last_known_commit_before_this_ledger": "d12068b79a0df6b9747c73a16a8f62a81afd3583",
     "working_tree_before_this_ledger": "clean",
     "role_assignment": {"Client Lead": "Rohit Pandey", "Data Lead": "Rohit Pandey", "Model Lead": "Rohit Pandey", "Build Lead": "Rohit Pandey"},
-    "tracker_status": {"step_0": "Complete", "step_1": "In progress", "step_2": "In progress", "steps_3_to_10": "Not started"},
+    "tracker_status": {"step_0": "Complete", "step_1": "Complete for the user's AI-assisted workflow; course AI-free condition unmet", "step_2": "Complete", "steps_3_to_10": "Not started"},
     "notebook_status": "Both notebooks contain grouped Pandas cells and saved tables for brief checks. Proof-period cancellation outcomes are held back.",
     "data_results": {"rows": 119390, "columns": 32, "hotels": 2, "train_choose_cancellation_rate": "36.2%", "proof_cancellation_rate": "not calculated in early checks"},
-    "unresolved_items": ["Reconcile the charter with the notebook findings.", "Ask for the current flat-rule safety margin.", "Verify the vendor 95% accuracy claim if evidence exists.", "Do not claim an observed walk rate until a rule is evaluated.", "The no-AI paper-frame requirement remains outstanding."],
+    "unresolved_items": ["The course-required AI-free paper frame remains unmet by the AI-assisted draft.", "Ask for the current flat-rule safety margin.", "Confirm whether the walk ceiling applies per hotel as well as group-wide.", "Verify the vendor 95% accuracy claim if evidence exists.", "Do not claim an observed walk rate until a rule is evaluated."],
     "implementation_scope": {"files_not_changed": ["src/contract.py", "src/features.py", "src/backtest.py", "src/nightly.py"], "test_suite_run": false}
   }
 }

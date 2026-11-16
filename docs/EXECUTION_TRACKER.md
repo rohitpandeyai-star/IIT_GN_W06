@@ -7,6 +7,7 @@ This file is the working index for completing the project. Update the status and
 - The announcement deck and the project brief, README, role guide, ladder, AI workflow and artifact templates have been reviewed.
 - The project starts on `main`, which was clean and tracking `origin/main` at the time this tracker was prepared.
 - Step 1 now has an AI-assisted charter, paper-frame study draft, and hotel RFP, plus corrected domain wording for unverified commercial facts. These do not satisfy the course-required AI-free paper frame, which remains for the student to write. Both notebooks have commented, labeled Pandas checks with visible outputs; early checks held back proof cancellation outcomes.
+- Step 2 now has a conservative timing bin for every CSV field and an initial decision log. Only four fields are currently treated as fixed at booking; uncertain or later values are excluded from model inputs until point-in-time availability is verified. The CSV header was checked against all 32 audit rows.
 - Rohit Pandey is assigned to all four roles, as requested. Project work and challenger sign-offs remain pending until completed.
 - Do not commit the downloaded bookings CSV. `src/contract.py` is supplied and must not be edited.
 
@@ -113,8 +114,8 @@ For a three-person team, use the alternate assignments in `docs/ROLES.md`; the u
 | Step | Status | Commit hash | GitHub push | Notes / evidence |
 |---:|---|---|---|---|
 | 0 | Complete | `c4e7b11` | Included in tracker update push | Source review complete; tracker creation checkpoint committed. |
-| 1 | Complete | `7b661d7` | Included in tracker update push | AI-assisted charter, paper-frame draft and RFP prepared at user direction. Course AI-free requirement remains unmet and is disclosed. Client questions remain recorded. |
-| 2 | In progress | `3ae076e` | Included in tracker update push | Existing notebook profile is supplemented by the current column-timing and data-decision audit; proof outcomes remain held. Pending final checkpoint. |
+| 1 | Complete | `1aa8414` | Included in this main-branch push | AI-assisted charter, paper-frame draft and RFP prepared at user direction. Course AI-free requirement remains unmet and is disclosed. Client questions remain recorded. |
+| 2 | Complete | `72c23ad` | Included in this main-branch push | Confirmed all 32 CSV fields appear exactly once in the timing audit; documented no row cleaning/filtering/recode/dedup, preserved hotel-level differences, and held proof labels for final evaluation. |
 | 3 | Not started | | Pending | |
 | 4 | Not started | | Pending | |
 | 5 | Not started | | Pending | |
