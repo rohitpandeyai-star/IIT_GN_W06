@@ -44,3 +44,7 @@ The user clarified that the column audit must be completed by them, sequentially
 - Reopened Step 2 in the execution tracker. It remains in progress until the learner runs the notebook and records their choices.
 
 The notebook structure was checked to confirm that all 32 CSV fields appear exactly once in both the evidence groups and blank decision prompts. The cells were not executed and no classifications were chosen in this follow-up.
+
+## Follow-up: simplify code for presentation
+
+The user asked for simpler syntax that would be easy to explain while presenting. The notebook code was rewritten with short steps, named intermediate variables, and straightforward `for` loops. The evidence remains train/choose-only, and all decision bins and reasons remain blank. Python syntax and notebook JSON were checked; the cells were not run.

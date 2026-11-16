@@ -457,11 +457,32 @@ The log begins from the clean `main` baseline below. It distinguishes user reque
           "pushed_to": "origin/main"
         }
       ]
+    },
+    {
+      "phase_sequence": 17,
+      "phase_id": "notebook_code_simplification",
+      "purpose": "Make the learner-led audit notebook easy to understand and present, while keeping all decisions in the learner's hands.",
+      "events": [
+        {
+          "sequence": 23,
+          "commit": "f9adce5db2216d7f58aa4ed82780993b4b6b1efe",
+          "parent": "bcb07ad08f3fbbf3af31de86dab073266da50985",
+          "timestamp_local": "2026-11-17",
+          "message": "notebooks: simplify audit workshop code",
+          "kind": "readability_refactor",
+          "trigger": "User asked to simplify syntax so the code is easy to understand while presenting.",
+          "decision": "Replace compact chained expressions and list comprehensions with named intermediate values and straightforward loops in the user-led audit notebook.",
+          "reason": "Keep the code legible for explanation and preserve the learner's blank decision prompts.",
+          "files_changed": ["notebooks/01_column_audit_workshop.ipynb"],
+          "verification": "Notebook JSON parsed and each Python cell passed a syntax parse; no notebook cells were executed and no classifications were added.",
+          "pushed_to": "origin/main"
+        }
+      ]
     }
   ],
   "current_snapshot": {
     "as_of": "2026-11-17",
-    "latest_recorded_commit": "bcb07ad08f3fbbf3af31de86dab073266da50985",
+    "latest_recorded_commit": "f9adce5db2216d7f58aa4ed82780993b4b6b1efe",
     "paper_frame_draft": "docs/PAPER_FRAME_AI_ASSISTED.md; AI-assisted study draft, not course-compliant AI-free V0.",
     "defence_guide": "docs/DEFENCE_QUICK_GUIDE.md; study aid only, and explicitly distinguishes measured checks, client assumptions, and pending work.",
     "charter_status": "Completed AI-assisted reference draft; does not satisfy the course-required AI-free paper frame.",
