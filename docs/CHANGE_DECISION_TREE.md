@@ -352,11 +352,33 @@ The log begins from the clean `main` baseline below. It distinguishes user reque
           "pushed_to": "origin/main"
         }
       ]
+    },
+    {
+      "phase_sequence": 12,
+      "phase_id": "AI_assisted_paper_frame",
+      "purpose": "Prepare a concise study draft of the paper frame with the checked evidence and explicit outstanding questions.",
+      "events": [
+        {
+          "sequence": 18,
+          "commit": "9d9f0309bcc21c4730332570b9cdf76bf9c410ac",
+          "parent": "7227aecf8589a187f3e190606a682ca35aa8ac2a",
+          "timestamp_local": "2026-11-17",
+          "message": "docs: add AI-assisted paper frame draft",
+          "kind": "study_draft",
+          "trigger": "User asked to complete the paper frame using AI after being told the course's paper-frame requirement is AI-free.",
+          "decision": "Create docs/PAPER_FRAME_AI_ASSISTED.md as a separate, clearly labeled study draft, and list it in the tracker; keep the required AI-free paper-frame status outstanding.",
+          "reason": "Fulfill the request for an AI-generated draft without presenting AI-written work as satisfying a requirement that prohibits AI assistance.",
+          "files_changed": ["docs/PAPER_FRAME_AI_ASSISTED.md", "docs/EXECUTION_TRACKER.md"],
+          "verification": "Checked against BRIEF.md, docs/EVALUATION_CONTRACT.md, current notebook figures, and tracker; no model or proof results are claimed.",
+          "pushed_to": "origin/main"
+        }
+      ]
     }
   ],
   "current_snapshot": {
     "as_of": "2026-11-17",
-    "latest_recorded_commit": "13e90fc6775ed1cbd4507836dd5b67d240019d20",
+    "latest_recorded_commit": "9d9f0309bcc21c4730332570b9cdf76bf9c410ac",
+    "paper_frame_draft": "docs/PAPER_FRAME_AI_ASSISTED.md; AI-assisted study draft, not course-compliant AI-free V0.",
     "defence_guide": "docs/DEFENCE_QUICK_GUIDE.md; study aid only, and explicitly distinguishes measured checks, client assumptions, and pending work.",
     "charter_status": "Completed AI-assisted reference draft; does not satisfy the course-required AI-free paper frame.",
     "last_known_commit_before_this_ledger": "d12068b79a0df6b9747c73a16a8f62a81afd3583",

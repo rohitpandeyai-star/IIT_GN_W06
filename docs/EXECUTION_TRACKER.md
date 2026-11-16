@@ -113,7 +113,7 @@ For a three-person team, use the alternate assignments in `docs/ROLES.md`; the u
 | Step | Status | Commit hash | GitHub push | Notes / evidence |
 |---:|---|---|---|---|
 | 0 | Complete | `c4e7b11` | Included in tracker update push | Source review complete; tracker creation checkpoint committed. |
-| 1 | In progress | `47a1c8f` | Pending | Completed AI-assisted reference charter; course-required paper frame must still be written without AI, and client questions/data reconciliation remain open. |
+| 1 | In progress | `9d9f030` | Pending | Added an AI-assisted paper-frame study draft; it does not satisfy the course's AI-free requirement. Student-written paper frame and client/data reconciliation remain open. |
 | 2 | In progress | `3ae076e` | Included in tracker update push | Added the explicit two-hotel count to both notebook tables; proof cancellation labels remain untouched. Charter reconciliation is pending. |
 | 3 | Not started | | Pending | |
 | 4 | Not started | | Pending | |
