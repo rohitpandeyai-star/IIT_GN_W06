@@ -7,7 +7,7 @@ This file is the working index for completing the project. Update the status and
 - The announcement deck and the project brief, README, role guide, ladder, AI workflow and artifact templates have been reviewed.
 - The project starts on `main`, which was clean and tracking `origin/main` at the time this tracker was prepared.
 - No project deliverables have been filled or implemented yet. The initial source review and this tracker are the only completed work recorded here.
-- Team member names are not known yet; assign people to the four roles before starting Step 1.
+- Rohit Pandey is assigned to all four roles, as requested. Project work and challenger sign-offs remain pending until completed.
 - Do not commit the downloaded bookings CSV. `src/contract.py` is supplied and must not be edited.
 
 ## File tree by role and sequence
@@ -81,6 +81,8 @@ Statuses: `Complete`, `In progress`, `Not started`, or `Blocked`. A step is comp
 | 10 | Saturday / defence | Whole team; panel selects respondent | Frozen repository, presentation, `models/`, `evidence/` | Run the MVP live from the frozen commit; give the six-minute question period; every member can explain every reported number, data bin, method, caveat and AI comparison | Not started |
 
 ## Role ownership reference
+
+Assigned team member for Client Lead, Data Lead, Model Lead, and Build Lead: **Rohit Pandey**.
 
 | Role | Owns | Challenges |
 |---|---|---|

@@ -85,10 +85,10 @@ _Every number in the brief gets a row. A number you could not check gets a quest
 
 | Role | Name | Owns |
 |---|---|---|
-| Client Lead | | |
-| Data Lead | | |
-| Model Lead | | |
-| Build Lead | | |
+| Client Lead | Rohit Pandey | |
+| Data Lead | Rohit Pandey | |
+| Model Lead | Rohit Pandey | |
+| Build Lead | Rohit Pandey | |
 
 ### 9. What is the one question we are sending the client?
 

@@ -42,10 +42,10 @@ A challenger signs by writing the commit hash they checked. An artifact counts a
 
 | Member | Role | Recording link on the LMS |
 |---|---|---|
-| | Client Lead | |
-| | Data Lead | |
-| | Model Lead | |
-| | Build Lead | |
+| Rohit Pandey | Client Lead | |
+| Rohit Pandey | Data Lead | |
+| Rohit Pandey | Model Lead | |
+| Rohit Pandey | Build Lead | |
 
 ## Where does the data come from?
 
