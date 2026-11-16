@@ -28,6 +28,7 @@ IIT_GN_W06/
 │   ├── SOURCE_CONTEXT.md              [Reference synthesis of supplied Word files and announcement deck]
 │   ├── CHANGE_DECISION_TREE.md        [Sequential JSON history of changes, decisions, reasons, and checks]
 │   ├── DEFENCE_QUICK_GUIDE.md          [Short, evidence-based defence preparation and likely questions]
+│   ├── PAPER_FRAME_AI_ASSISTED.md      [AI-assisted paper-frame study draft; not the required AI-free V0]
 │   ├── CHARTER.md                    [Client Lead: paper frame, metrics, checked numbers]
 │   ├── RFP.md                        [Client Lead: client requirements and acceptance terms]
 │   ├── DOMAIN.md                     [Reference: hotel terms]
