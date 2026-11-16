@@ -67,7 +67,7 @@ Statuses: `Complete`, `In progress`, `Not started`, or `Blocked`. A step is comp
 
 | Step | Day / ladder stage | Owner(s) | Files to fill or run | Completion check | Status |
 |---:|---|---|---|---|---|
-| 0 | Setup / source review | Team | This tracker; assign role names in `docs/CHARTER.md` and `README.md` at Step 1 | Tracker committed; the team knows the role owners and starts from a recorded Git state | In progress |
+| 0 | Setup / source review | Team | This tracker; assign role names in `docs/CHARTER.md` and `README.md` at Step 1 | Tracker committed; the team knows the role owners and starts from a recorded Git state | Complete |
 | 1 | Tuesday / stages 0–2, paper frame | Client Lead, with all roles contributing facts | `docs/CHARTER.md`, `docs/DOMAIN.md`, `docs/RFP.md` | On paper before any AI: frame the decision and unit; define both costs, north star and guardrail; check every brief number or record a client question; finish the RFP with periods and business-unit thresholds | Not started |
 | 2 | Tuesday / stages 0–2, data pass | Data Lead; Client Lead checks brief facts; Model Lead checks target; Build Lead checks usable table | `data/data_explore.ipynb`, `notebooks/00_start_here.ipynb`, `docs/COLUMNS.md`, `docs/DECISIONS.md` | Profile the bookings; log every cleaning/filtering choice and row count; bin every supplied column by when it becomes known; identify bookings governed by different rules and record evidence | Not started |
 | 3 | Tuesday / after paper frame and data pass | Client Lead owns Grill 1; Build Lead writes agent rules; Data Lead maintains index | `docs/grill_01_charter.md`, `ai_logs/`, `ai_logs/INDEX.md`, `AGENTS.md`, `CLAUDE.md`, `.github/copilot-instructions.md` | Complete the 45-minute grill and record at least three document changes; log the chat; write at least five actionable project rules from decisions; follow `docs/AI_WORKFLOW.md` for coding-guideline setup | Not started |
@@ -106,7 +106,7 @@ For a three-person team, use the alternate assignments in `docs/ROLES.md`; the u
 
 | Step | Status | Commit hash | GitHub push | Notes / evidence |
 |---:|---|---|---|---|
-| 0 | In progress | | Pending | Source review complete; tracker created. Record its checkpoint hash after the initial commit. |
+| 0 | Complete | `c4e7b11` | Included in tracker update push | Source review complete; tracker creation checkpoint committed. |
 | 1 | Not started | | Pending | |
 | 2 | Not started | | Pending | |
 | 3 | Not started | | Pending | |
