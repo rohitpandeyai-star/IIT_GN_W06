@@ -28,12 +28,12 @@ IIT_GN_W06/
 │   ├── SOURCE_CONTEXT.md              [Reference synthesis of supplied Word files and announcement deck]
 │   ├── CHANGE_DECISION_TREE.md        [Sequential JSON history of changes, decisions, reasons, and checks]
 │   ├── DEFENCE_QUICK_GUIDE.md          [Short, evidence-based defence preparation and likely questions]
-│   ├── PAPER_FRAME_AI_ASSISTED.md      [AI-assisted paper-frame study draft; not the required AI-free V0]
+│   ├── PAPER_FRAME_AI_ASSISTED.md      [AI-assisted paper-frame study draft; course requirement status disclosed]
 │   ├── CHARTER.md                    [Client Lead: paper frame, metrics, checked numbers]
 │   ├── RFP.md                        [Client Lead: client requirements and acceptance terms]
 │   ├── DOMAIN.md                     [Reference: hotel terms]
-│   ├── COLUMNS.md                    [Data Lead: timing bins and leakage checks]
-│   ├── DECISIONS.md                  [All owners: data choices and objections]
+│   ├── COLUMNS.md                    [Data Lead: populated conservative timing bins for all 32 columns]
+│   ├── DECISIONS.md                  [Data Lead: initial data handling choices and open objections]
 │   ├── grill_01_charter.md           [Client Lead: Tuesday grill and resulting changes]
 │   ├── grill_02_prd.md               [Build Lead: Thursday grill and resulting changes]
 │   ├── PRD.md                        [Build Lead: options, chosen method, design and limits]
@@ -55,7 +55,7 @@ IIT_GN_W06/
 ├── tests/                            [Given checks for contract behavior]
 ├── evidence/                         [Data Lead: slideNN_what.png proof screenshots]
 ├── ai_logs/
-│   ├── INDEX.md                      [Data Lead: index every AI session]
+│   ├── INDEX.md                      [Data Lead: index every AI session; current session indexed]
 │   └── YYYYMMDD_role_tool_purpose.md [Session logs and pasted text]
 └── ai_benchmark/                     [AI build artifacts on ai-benchmark branch]
     ├── PLAN_AI.md
@@ -72,8 +72,8 @@ Statuses: `Complete`, `In progress`, `Not started`, or `Blocked`. A step is comp
 | Step | Day / ladder stage | Owner(s) | Files to fill or run | Completion check | Status |
 |---:|---|---|---|---|---|
 | 0 | Setup / source review | Team | This tracker; assign role names in `docs/CHARTER.md` and `README.md` at Step 1 | Tracker committed; the team knows the role owners and starts from a recorded Git state | Complete |
-| 1 | Tuesday / stages 0–2, paper frame | Client Lead, with all roles contributing facts | `docs/CHARTER.md`, `docs/DOMAIN.md`, `docs/RFP.md` | On paper before any AI: frame the decision and unit; define both costs, north star and guardrail; check every brief number or record a client question; finish the RFP with periods and business-unit thresholds | In progress |
-| 2 | Tuesday / stages 0–2, data pass | Data Lead; Client Lead checks brief facts; Model Lead checks target; Build Lead checks usable table | `data/data_explore.ipynb`, `notebooks/00_start_here.ipynb`, `docs/COLUMNS.md`, `docs/DECISIONS.md` | Profile the bookings; log every cleaning/filtering choice and row count; bin every supplied column by when it becomes known; identify bookings governed by different rules and record evidence | In progress |
+| 1 | Tuesday / stages 0–2, paper frame | Client Lead, with all roles contributing facts | `docs/CHARTER.md`, `docs/DOMAIN.md`, `docs/RFP.md`, `docs/PAPER_FRAME_AI_ASSISTED.md` | Frame decision/unit, both costs, north star and guardrail; check brief numbers or record client questions; finish RFP periods and business-unit thresholds. AI assistance disclosed at user direction; this does not meet the course AI-free paper-frame requirement. | Complete |
+| 2 | Tuesday / stages 0–2, data pass | Data Lead; Client Lead checks brief facts; Model Lead checks target; Build Lead checks usable table | `data/data_explore.ipynb`, `notebooks/00_start_here.ipynb`, `docs/COLUMNS.md`, `docs/DECISIONS.md` | Profile bookings; log cleaning/filtering choices and row counts; bin all 32 columns; compare hotel categories and record evidence/unknowns. Candidate leakage AUC runs are deferred to Step 5. | In progress |
 | 3 | Tuesday / after paper frame and data pass | Client Lead owns Grill 1; Build Lead writes agent rules; Data Lead maintains index | `docs/grill_01_charter.md`, `ai_logs/`, `ai_logs/INDEX.md`, `AGENTS.md`, `CLAUDE.md`, `.github/copilot-instructions.md` | Complete the 45-minute grill and record at least three document changes; log the chat; write at least five actionable project rules from decisions; follow `docs/AI_WORKFLOW.md` for coding-guideline setup | Not started |
 | 4 | Wednesday / stages 3 and 5 planning | Build Lead; all roles own their decision input | `docs/PRD.md`, `docs/BUILD_PLAN.md`, `docs/DECISIONS.md` | Before seeing results, compare two approaches, name the choice and flip condition, answer the wish-list item with a number, define the client table and set owners, hours, done checks and evidence for POC/MVP/final | Not started |
 | 5 | Wednesday–Thursday / stage 4 POC | Model Lead owns backtest; Data Lead owns feature audit; Client Lead checks money rule; Build Lead checks reproducibility | `src/features.py`, `src/backtest.py`, `docs/COLUMNS.md`, `docs/DECISIONS.md`, `docs/PRD.md`, `docs/BUILD_PLAN.md`, `evidence/` | One command compares flat rule, lookup table and at least two learned models on the same time split; select buffers on choose period under the ceiling; run proof once; report AUC, nightly error, rooms, euros and walks/1,000; chosen rule uses no late columns or random split | Not started |
@@ -113,8 +113,8 @@ For a three-person team, use the alternate assignments in `docs/ROLES.md`; the u
 | Step | Status | Commit hash | GitHub push | Notes / evidence |
 |---:|---|---|---|---|
 | 0 | Complete | `c4e7b11` | Included in tracker update push | Source review complete; tracker creation checkpoint committed. |
-| 1 | In progress | `f1d2521` | Pending | AI-assisted charter/paper-frame draft and RFP are prepared; domain commercial wording corrected. The no-AI paper frame and client answers (including the safety margin) remain open. |
-| 2 | In progress | `3ae076e` | Included in tracker update push | Added the explicit two-hotel count to both notebook tables; proof cancellation labels remain untouched. Charter reconciliation is pending. |
+| 1 | Complete | `7b661d7` | Included in tracker update push | AI-assisted charter, paper-frame draft and RFP prepared at user direction. Course AI-free requirement remains unmet and is disclosed. Client questions remain recorded. |
+| 2 | In progress | `3ae076e` | Included in tracker update push | Existing notebook profile is supplemented by the current column-timing and data-decision audit; proof outcomes remain held. Pending final checkpoint. |
 | 3 | Not started | | Pending | |
 | 4 | Not started | | Pending | |
 | 5 | Not started | | Pending | |
