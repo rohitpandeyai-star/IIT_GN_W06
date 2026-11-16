@@ -297,7 +297,7 @@ The log begins from the clean `main` baseline below. It distinguishes user reque
       "events": [
         {
           "sequence": 15,
-          "commit": null,
+          "commit": "562de9a2b428b949bc771f9dc399c693315c83f8",
           "parent": "d12068b79a0df6b9747c73a16a8f62a81afd3583",
           "timestamp_local": "2026-11-17",
           "message": "docs: add structured change and decision tree",
@@ -306,7 +306,7 @@ The log begins from the clean `main` baseline below. It distinguishes user reque
           "decision": "Create docs/CHANGE_DECISION_TREE.md and add it to the execution tracker's docs tree.",
           "reason": "Provide a navigable, machine-readable history of why each artifact changed, what files changed, what was verified, and which commit contains the change.",
           "files_changed": ["docs/CHANGE_DECISION_TREE.md", "docs/EXECUTION_TRACKER.md"],
-          "verification": "To be completed after the ledger is committed and pushed.",
+          "verification": "The JSON block parses successfully; the creation commit is 562de9a2b428b949bc771f9dc399c693315c83f8 and will be pushed with this finalization update.",
           "pushed_to": "origin/main"
         }
       ]
