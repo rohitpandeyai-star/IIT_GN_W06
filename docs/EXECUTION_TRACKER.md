@@ -25,6 +25,7 @@ IIT_GN_W06/
 │   └── 00_start_here.ipynb           [Data Lead: first profile and data checks]
 ├── docs/
 │   ├── EXECUTION_TRACKER.md           [Living sequence, status and checkpoint log]
+│   ├── SOURCE_CONTEXT.md              [Reference synthesis of supplied Word files and announcement deck]
 │   ├── CHARTER.md                    [Client Lead: paper frame, metrics, checked numbers]
 │   ├── RFP.md                        [Client Lead: client requirements and acceptance terms]
 │   ├── DOMAIN.md                     [Reference: hotel terms]
