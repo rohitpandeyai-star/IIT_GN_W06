@@ -25,6 +25,6 @@ These are standard hospitality revenue-management terms. Where the dataset defin
 
 - **Business customers (B2B).** Tour operators and offline travel agents, groups, corporate travel desks and airlines buy rooms in volume, often under contract. In the data they appear through `market_segment`, `agent` and `company`.
 - **Guests (B2C).** Individual travellers book directly with the hotel or through an online travel agency. An OTA sits on both sides: a business partner to the hotel, a shop to the guest.
-- **The software vendor.** RateGain sells revenue software to the hotel group. It is paid by the hotel, so its work has to pay for itself in the hotel's euros.
+- **The software vendor.** RateGain is named as the supplier in the course scenario. The brief does not give a contract price or confirm who pays whom, so treat the commercial arrangement as an open question rather than a verified fact. The business case should still be judged in hotel euros using the supplied scoring contract.
 
 In `agent` and `company`, an empty value means "booked without one", which is a category of its own and not a missing value.

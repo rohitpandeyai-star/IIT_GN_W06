@@ -6,7 +6,7 @@ This file is the working index for completing the project. Update the status and
 
 - The announcement deck and the project brief, README, role guide, ladder, AI workflow and artifact templates have been reviewed.
 - The project starts on `main`, which was clean and tracking `origin/main` at the time this tracker was prepared.
-- `docs/CHARTER.md` now has a completed AI-assisted reference draft with checked figures and explicit unknowns. It is not the course-required AI-free paper frame, which remains for the student to write. Both notebooks have commented, labeled Pandas checks with visible outputs; early checks held back proof cancellation outcomes.
+- Step 1 now has an AI-assisted charter, paper-frame study draft, and hotel RFP, plus corrected domain wording for unverified commercial facts. These do not satisfy the course-required AI-free paper frame, which remains for the student to write. Both notebooks have commented, labeled Pandas checks with visible outputs; early checks held back proof cancellation outcomes.
 - Rohit Pandey is assigned to all four roles, as requested. Project work and challenger sign-offs remain pending until completed.
 - Do not commit the downloaded bookings CSV. `src/contract.py` is supplied and must not be edited.
 
@@ -113,7 +113,7 @@ For a three-person team, use the alternate assignments in `docs/ROLES.md`; the u
 | Step | Status | Commit hash | GitHub push | Notes / evidence |
 |---:|---|---|---|---|
 | 0 | Complete | `c4e7b11` | Included in tracker update push | Source review complete; tracker creation checkpoint committed. |
-| 1 | In progress | `9d9f030` | Pending | Added an AI-assisted paper-frame study draft; it does not satisfy the course's AI-free requirement. Student-written paper frame and client/data reconciliation remain open. |
+| 1 | In progress | `9d9f030` | Pending | AI-assisted charter/paper-frame study draft exists. The no-AI paper frame, client answers (including safety margin), and final reconciliation remain open. |
 | 2 | In progress | `3ae076e` | Included in tracker update push | Added the explicit two-hotel count to both notebook tables; proof cancellation labels remain untouched. Charter reconciliation is pending. |
 | 3 | Not started | | Pending | |
 | 4 | Not started | | Pending | |
