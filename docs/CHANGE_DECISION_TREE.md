@@ -667,22 +667,43 @@ The log begins from the clean `main` baseline below. It distinguishes user reque
           "pushed_to": "origin/main"
         }
       ]
+    },
+    {
+      "phase_sequence": 27,
+      "phase_id": "notebook_approval_tree",
+      "purpose": "Let the user approve or disapprove each cleaning and feature proposal from the observed data before final matrices are created.",
+      "events": [
+        {
+          "sequence": 33,
+          "commit": "c36fabdbbf07ac2642b351f1d031d39e159d2046",
+          "parent": "006746b",
+          "timestamp_local": "2026-11-17",
+          "message": "notebooks: add observation approval decision tree",
+          "kind": "approval_gates",
+          "trigger": "User clarified that the notebook should split each step by its observation and present an approve/disapprove decision tree for the user.",
+          "decision": "Separate observations, proposed actions, and six editable approval gates. Keep the requested date split as already approved; leave data handling and feature gates pending; block final matrices until required approvals are entered.",
+          "reason": "Make each change traceable to evidence and ensure disapproval pauses a branch rather than causing an unreviewed substitute action.",
+          "files_changed": ["notebooks/02_natural_language_data_prep.ipynb", "docs/DECISIONS.md", "docs/EXECUTION_TRACKER.md", "ai_logs/INDEX.md", "ai_logs/20261117_datalead_prep_decision_tree.md"],
+          "verification": "Executed the notebook with all six gates pending; final X_train/X_choose/X_proof matrices were not created. Raw data remains unchanged and proof outcomes remain unexamined. Changes pushed to origin/main.",
+          "pushed_to": "origin/main"
+        }
+      ]
     }
   ],
   "current_snapshot": {
     "as_of": "2026-11-17",
-    "latest_recorded_commit": "f33a3b4f2e3c1a8573a5cfce6b11aa1d410de045",
+    "latest_recorded_commit": "c36fabdbbf07ac2642b351f1d031d39e159d2046",
     "paper_frame_draft": "docs/PAPER_FRAME_AI_ASSISTED.md; AI-assisted study draft, not course-compliant AI-free V0.",
     "defence_guide": "docs/DEFENCE_QUICK_GUIDE.md; study aid only, and explicitly distinguishes measured checks, client assumptions, and pending work.",
     "charter_status": "Completed AI-assisted reference draft; does not satisfy the course-required AI-free paper frame.",
     "last_known_commit_before_this_ledger": "d12068b79a0df6b9747c73a16a8f62a81afd3583",
     "working_tree_before_this_ledger": "clean",
     "role_assignment": {"Client Lead": "Rohit Pandey", "Data Lead": "Rohit Pandey", "Model Lead": "Rohit Pandey", "Build Lead": "Rohit Pandey"},
-    "tracker_status": {"step_0": "Complete", "step_1": "Complete for the user's AI-assisted workflow; course AI-free condition unmet", "step_2": "Complete; all 32 learner choices and reasons recorded", "step_3": "In progress; compressed grill and project rules recorded, 45-minute format and screenshot outstanding", "step_4": "Complete; PRD, build plan, and planning proposal recorded; final method selection is Step 5", "step_5": "In progress; split, all-column train EDA, no-change cleaning decision, and provisional feature matrices executed; final timing review and models pending", "steps_6_to_10": "Not started"},
+    "tracker_status": {"step_0": "Complete", "step_1": "Complete for the user's AI-assisted workflow; course AI-free condition unmet", "step_2": "Complete; all 32 learner choices and reasons recorded", "step_3": "In progress; compressed grill and project rules recorded, 45-minute format and screenshot outstanding", "step_4": "Complete; PRD, build plan, and planning proposal recorded; final method selection is Step 5", "step_5": "In progress; split and train EDA executed; six cleaning/feature approval gates pending; final matrices blocked; model comparison not started", "steps_6_to_10": "Not started"},
     "column_audit": "All 32 learner bins and reasons are recorded in docs/COLUMNS_USER_REVIEW.md; timing judgments remain subject to point-in-time verification.",
     "notebook_status": "Both notebooks contain grouped Pandas cells and saved tables for brief checks. Proof-period cancellation outcomes are held back.",
     "data_results": {"rows": 119390, "columns": 32, "hotels": 2, "train_choose_cancellation_rate": "36.2%", "proof_cancellation_rate": "not calculated in early checks"},
-    "unresolved_items": ["The course-required AI-free paper frame remains unmet by the AI-assisted draft.", "Confirm the current flat-rule safety margin and whether it varies by hotel or season.", "Confirm if the group-wide walk ceiling is sufficient or if per-hotel ceilings are required.", "Confirm the final approver, walk-cost owner, override process, live snapshot requirement, and no-show treatment.", "Request evidence and definition for the vendor 95% accuracy claim.", "Do not claim savings or walk performance until the rule is evaluated on the frozen proof period.", "Step 3 needs the course-format 45-minute grill and genuine screenshot evidence, or a course-owner waiver.", "Confirm the candidate fields are available at the intended prediction time; select and compare models/buffers using train/choose only; proof outcomes remain unexamined until settings are frozen."],
+    "unresolved_items": ["The course-required AI-free paper frame remains unmet by the AI-assisted draft.", "Confirm the current flat-rule safety margin and whether it varies by hotel or season.", "Confirm if the group-wide walk ceiling is sufficient or if per-hotel ceilings are required.", "Confirm the final approver, walk-cost owner, override process, live snapshot requirement, and no-show treatment.", "Request evidence and definition for the vendor 95% accuracy claim.", "Do not claim savings or walk performance until the rule is evaluated on the frozen proof period.", "Step 3 needs the course-format 45-minute grill and genuine screenshot evidence, or a course-owner waiver.", "User must review six approve/disapprove gates before final feature matrices are created.", "Confirm candidate fields are available at the intended prediction time; compare models/buffers using train/choose only; proof outcomes remain unexamined until settings are frozen."],
     "implementation_scope": {"files_not_changed": ["src/contract.py", "src/features.py", "src/backtest.py", "src/nightly.py"], "test_suite_run": false}
   }
 }
