@@ -53,8 +53,27 @@ The data identifies two properties as City Hotel and Resort Hotel, with differen
 5. Treat the learner's Bin 1 fields as a provisional feature pool, not a final engineered set. Verify timing, choose the usable features, and fit any encoders/imputers/derived transformations on train only; apply the fixed transformations to choose and proof.
 6. Only after these checks compare the flat rule, lookup, logistic regression, shallow tree, Random Forest, XGBoost, and CatBoost if runtime permits. Select method and buffer on choose under the walk ceiling, freeze, then evaluate proof once.
 
-This is the ordered plan; none of the EDA, cleaning, feature engineering, or model comparisons above are claimed complete by this entry.
+The initial notebook run completed the split, train-period profile, retain-raw decision, and provisional feature matrices for steps 1–5. No row/value cleaning was applied. Final feature/timing approval and all model comparisons remain pending.
 
 ### Split execution record — 2026-11-17
 
 `notebooks/02_natural_language_data_prep.ipynb` loaded the source unchanged and assigned all 119,390 rows using `contract.split_periods()`: train 49,157 rows (2015-07-01–2016-06-30), choose 29,546 (2016-07-01–2016-12-31), proof 40,687 (2017-01-01–2017-08-31). The notebook displayed only counts, dates, and hotel names for proof; it did not compute proof cancellation outcomes. No CSV partitions were written and no cleaning was performed.
+
+### Initial data-preparation results — 2026-11-17
+
+Recorded from executed cells in `notebooks/02_natural_language_data_prep.ipynb`; the profile covers all 32 source columns on train:
+
+| Check | Result | Decision |
+|---|---|---|
+| Training dimensions | 49,157 rows x 33 columns including derived `arrival_date` | Use the contract split; source itself has 119,390 rows x 32 columns. |
+| Exact repeated rows in train | 16,291 duplicate occurrences after the first matching row | Keep them. There is no reservation ID in these columns to prove they are erroneous bookings. |
+| Missing values in train | `company` 46,123; `agent` 6,960; `country` 284; `children` 4 | Do not fill these fields in this step; they are outside the provisional feature pool. |
+| Candidate feature missingness | Zero missing in train, choose, and proof for `hotel`, `is_repeated_guest`, `previous_cancellations`, and `previous_bookings_not_canceled` | No imputation is needed for the current candidate set. Proof target values were not used. |
+| Training target | 17,585 cancellations of 49,157 bookings (35.8%); City Hotel 41.7%, Resort Hotel 25.2%. Across the 12 training months, City Hotel rates ranged 24.4%–67.2% and Resort Hotel 13.5%–34.8%. | Descriptive train-only profile; highlights variation, not a model result or proof of a stable seasonal rule. |
+| Checked numeric ranges | No negative values in adults, children, babies, stay nights, ADR, or prior-booking counts; maxima include 55 adults and ADR 5,400 | Preserve unusual non-negative values pending schema/client evidence; do not clip based on magnitude alone. |
+| Raw cleaning | Zero rows removed; zero values recoded or clipped | Keep raw table unchanged. |
+| Provisional feature matrices | Seven features: repeated-guest flag, two prior counts, their `log1p` versions, and two hotel one-hot columns. Shapes: train 49,157 x 7; choose 29,546 x 7; proof 40,687 x 7. No missing feature values. | Feature transforms are for candidate evaluation only; source timing still needs verification. No proof outcomes were examined. |
+
+The train profile also records each source column's type, missingness, distinct count, and three most common values, plus numeric minimum/median/99th percentile/maximum and negative count. `is_canceled`, `reservation_status`, and `reservation_status_date` are excluded from predictors because they are the target or post-outcome fields. Prior-count zeros are common (43,348/49,157 for previous cancellations; 47,813/49,157 for previous non-cancelled bookings), motivating the provisional `log1p` features.
+
+These are descriptive checks and a provisional feature preparation. No model has been fit, no method/buffer selected, and no proof cancellation metric calculated.
