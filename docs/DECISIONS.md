@@ -81,3 +81,12 @@ These are descriptive checks and a provisional feature preparation. No model has
 ### User approval gates — pending (2026-11-17)
 
 `notebooks/02_natural_language_data_prep.ipynb` now presents each observation and proposed action separately. No cleaning or feature proposal is treated as approved. Pending gates are: retain exact repeated rows; leave non-candidate missing values unchanged; retain unusual non-negative values; use the four Bin 1 fields provisionally; include or omit `log1p` count features; and use train-derived one-hot hotel indicators. The period split was directly requested and is complete. Final feature matrices remain blocked until required gates are approved; a disapproved required gate pauses work for discussion.
+
+### Exact-repeat investigation results — 2026-11-17
+
+Recorded from executed cells in `notebooks/03_duplicate_investigation.ipynb` (training period only):
+
+- The 49,157 training rows contain 3,472 exact repeated row patterns covering 19,763 rows. There are 16,291 later occurrences beyond each pattern's first row; the largest exact pattern appears 150 times.
+- The repeated-group rows include 11,383 canceled bookings, 8,217 check-outs, and 163 no-shows. Matching fields include the outcome/status columns, but that does not prove the repeated rows are invalid exports.
+- A **hypothetical** collapse of exact repeats would leave 32,866 training rows, lower the train cancellation rate from 35.77% to 22.17%, and reduce booking counts on 657 hotel-arrival nights.
+- No booking identifier is present to establish a correct deduplication key. The source and current working data remain unchanged. The Step 1 choice to retain or disapprove remains the user's decision.
