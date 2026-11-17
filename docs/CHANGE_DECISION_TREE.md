@@ -646,22 +646,43 @@ The log begins from the clean `main` baseline below. It distinguishes user reque
           "pushed_to": "origin/main"
         }
       ]
+    },
+    {
+      "phase_sequence": 26,
+      "phase_id": "execute_train_eda_and_feature_prep",
+      "purpose": "Carry out the data-preparation steps after the period split and record evidence-based cleaning and provisional feature decisions.",
+      "events": [
+        {
+          "sequence": 32,
+          "commit": "f33a3b4f2e3c1a8573a5cfce6b11aa1d410de045",
+          "parent": "2e739bf",
+          "timestamp_local": "2026-11-17",
+          "message": "notebooks: execute train EDA and feature prep",
+          "kind": "data_preparation_execution",
+          "trigger": "User clarified that the natural-language data-preparation notebook should execute every step and report results.",
+          "decision": "Execute all-column training EDA, document a no-row/no-value-change cleaning decision, and prepare a provisional seven-feature set from audited Bin 1 inputs with log1p prior-count features and train-derived hotel indicators.",
+          "reason": "Use the data evidence to decide whether changes are justified; retain ambiguous exact repeats and unusual values rather than deleting or clipping without a booking identifier or schema evidence.",
+          "files_changed": ["notebooks/02_natural_language_data_prep.ipynb", "docs/PRD.md", "docs/DECISIONS.md", "docs/EXECUTION_TRACKER.md", "ai_logs/INDEX.md", "ai_logs/20261117_datalead_execute_data_prep.md"],
+          "verification": "Eight notebook code cells were executed and outputs saved. Train: 49,157 rows, 35.8% canceled; 16,291 exact repeated rows retained; missingness is reported; seven-feature matrices have shapes 49,157x7, 29,546x7, 40,687x7. No proof cancellation outcomes, model fit, or raw cleaning occurred. Changes pushed to origin/main.",
+          "pushed_to": "origin/main"
+        }
+      ]
     }
   ],
   "current_snapshot": {
     "as_of": "2026-11-17",
-    "latest_recorded_commit": "2e739bfe15771cefd4e0b89d64f51340bd0f6a1c",
+    "latest_recorded_commit": "f33a3b4f2e3c1a8573a5cfce6b11aa1d410de045",
     "paper_frame_draft": "docs/PAPER_FRAME_AI_ASSISTED.md; AI-assisted study draft, not course-compliant AI-free V0.",
     "defence_guide": "docs/DEFENCE_QUICK_GUIDE.md; study aid only, and explicitly distinguishes measured checks, client assumptions, and pending work.",
     "charter_status": "Completed AI-assisted reference draft; does not satisfy the course-required AI-free paper frame.",
     "last_known_commit_before_this_ledger": "d12068b79a0df6b9747c73a16a8f62a81afd3583",
     "working_tree_before_this_ledger": "clean",
     "role_assignment": {"Client Lead": "Rohit Pandey", "Data Lead": "Rohit Pandey", "Model Lead": "Rohit Pandey", "Build Lead": "Rohit Pandey"},
-    "tracker_status": {"step_0": "Complete", "step_1": "Complete for the user's AI-assisted workflow; course AI-free condition unmet", "step_2": "Complete; all 32 learner choices and reasons recorded", "step_3": "In progress; compressed grill and project rules recorded, 45-minute format and screenshot outstanding", "step_4": "Complete; PRD, build plan, and planning proposal recorded; final method selection is Step 5", "step_5": "In progress; 119,390-row contract split executed; full EDA, cleaning, feature selection/engineering, and models pending", "steps_6_to_10": "Not started"},
+    "tracker_status": {"step_0": "Complete", "step_1": "Complete for the user's AI-assisted workflow; course AI-free condition unmet", "step_2": "Complete; all 32 learner choices and reasons recorded", "step_3": "In progress; compressed grill and project rules recorded, 45-minute format and screenshot outstanding", "step_4": "Complete; PRD, build plan, and planning proposal recorded; final method selection is Step 5", "step_5": "In progress; split, all-column train EDA, no-change cleaning decision, and provisional feature matrices executed; final timing review and models pending", "steps_6_to_10": "Not started"},
     "column_audit": "All 32 learner bins and reasons are recorded in docs/COLUMNS_USER_REVIEW.md; timing judgments remain subject to point-in-time verification.",
     "notebook_status": "Both notebooks contain grouped Pandas cells and saved tables for brief checks. Proof-period cancellation outcomes are held back.",
     "data_results": {"rows": 119390, "columns": 32, "hotels": 2, "train_choose_cancellation_rate": "36.2%", "proof_cancellation_rate": "not calculated in early checks"},
-    "unresolved_items": ["The course-required AI-free paper frame remains unmet by the AI-assisted draft.", "Confirm the current flat-rule safety margin and whether it varies by hotel or season.", "Confirm if the group-wide walk ceiling is sufficient or if per-hotel ceilings are required.", "Confirm the final approver, walk-cost owner, override process, live snapshot requirement, and no-show treatment.", "Request evidence and definition for the vendor 95% accuracy claim.", "Do not claim savings or walk performance until the rule is evaluated on the frozen proof period.", "Step 3 needs the course-format 45-minute grill and genuine screenshot evidence, or a course-owner waiver.", "Complete raw schema/quality checks, arrival-date modeling split, train EDA, documented cleaning decisions, and train-only feature preparation before comparing models in Step 5.", "Select the final model and buffer on choose-period results; proof outcomes remain unexamined until freeze."],
+    "unresolved_items": ["The course-required AI-free paper frame remains unmet by the AI-assisted draft.", "Confirm the current flat-rule safety margin and whether it varies by hotel or season.", "Confirm if the group-wide walk ceiling is sufficient or if per-hotel ceilings are required.", "Confirm the final approver, walk-cost owner, override process, live snapshot requirement, and no-show treatment.", "Request evidence and definition for the vendor 95% accuracy claim.", "Do not claim savings or walk performance until the rule is evaluated on the frozen proof period.", "Step 3 needs the course-format 45-minute grill and genuine screenshot evidence, or a course-owner waiver.", "Confirm the candidate fields are available at the intended prediction time; select and compare models/buffers using train/choose only; proof outcomes remain unexamined until settings are frozen."],
     "implementation_scope": {"files_not_changed": ["src/contract.py", "src/features.py", "src/backtest.py", "src/nightly.py"], "test_suite_run": false}
   }
 }
