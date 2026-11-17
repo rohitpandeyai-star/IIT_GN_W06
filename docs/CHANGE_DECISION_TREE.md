@@ -709,11 +709,32 @@ The log begins from the clean `main` baseline below. It distinguishes user reque
           "pushed_to": "origin/main"
         }
       ]
+    },
+    {
+      "phase_sequence": 29,
+      "phase_id": "notebook_code_clarity",
+      "purpose": "Make notebook steps easier to read and present using simple Pandas code and clear intermediate names.",
+      "events": [
+        {
+          "sequence": 35,
+          "commit": "7f36b2401de26041cce69e9adc7fccfd195731ba",
+          "parent": "f9dbdca566c257dff43f5ce8519521d6b40dfb58",
+          "timestamp_local": "2026-11-17",
+          "message": "notebooks: simplify code for clarity",
+          "kind": "notebook_readability_revision",
+          "trigger": "User asked to rewrite all notebook code using simple, clean Pandas code for maximal clarity.",
+          "decision": "Simplify code across all five notebooks, refresh their outputs, and keep learner answers and pending decision gates unchanged.",
+          "reason": "Named steps, straightforward loops, and one shared evidence helper make the work easier to follow and explain.",
+          "files_changed": ["notebooks/00_start_here.ipynb", "notebooks/01_column_audit_workshop.ipynb", "notebooks/02_natural_language_data_prep.ipynb", "notebooks/03_data_cleaning_review.ipynb", "notebooks/03_duplicate_investigation.ipynb", "docs/EXECUTION_TRACKER.md", "docs/CHANGE_DECISION_TREE.md", "ai_logs/INDEX.md", "ai_logs/20261117_datalead_notebook_clarity.md"],
+          "verification": "All five notebooks executed from notebooks/ and saved outputs; all code cells passed syntax parsing. No project test suite was run. Approval gates remain pending; raw source data was not changed and proof cancellation outcomes were not inspected.",
+          "pushed_to": "origin/main"
+        }
+      ]
     }
   ],
   "current_snapshot": {
     "as_of": "2026-11-17",
-    "latest_recorded_commit": "8530cd345901197d1a99ff96b133b5df05b8a666",
+    "latest_recorded_commit": "7f36b2401de26041cce69e9adc7fccfd195731ba",
     "paper_frame_draft": "docs/PAPER_FRAME_AI_ASSISTED.md; AI-assisted study draft, not course-compliant AI-free V0.",
     "defence_guide": "docs/DEFENCE_QUICK_GUIDE.md; study aid only, and explicitly distinguishes measured checks, client assumptions, and pending work.",
     "charter_status": "Completed AI-assisted reference draft; does not satisfy the course-required AI-free paper frame.",
@@ -722,7 +743,7 @@ The log begins from the clean `main` baseline below. It distinguishes user reque
     "role_assignment": {"Client Lead": "Rohit Pandey", "Data Lead": "Rohit Pandey", "Model Lead": "Rohit Pandey", "Build Lead": "Rohit Pandey"},
     "tracker_status": {"step_0": "Complete", "step_1": "Complete for the user's AI-assisted workflow; course AI-free condition unmet", "step_2": "Complete; all 32 learner choices and reasons recorded", "step_3": "In progress; compressed grill and project rules recorded, 45-minute format and screenshot outstanding", "step_4": "Complete; PRD, build plan, and planning proposal recorded; final method selection is Step 5", "step_5": "In progress; split and train EDA executed; six cleaning/feature approval gates pending; final matrices blocked; model comparison not started", "steps_6_to_10": "Not started"},
     "column_audit": "All 32 learner bins and reasons are recorded in docs/COLUMNS_USER_REVIEW.md; timing judgments remain subject to point-in-time verification.",
-    "notebook_status": "Both notebooks contain grouped Pandas cells and saved tables for brief checks. Proof-period cancellation outcomes are held back.",
+    "notebook_status": "All five notebooks use simplified, readable code and have refreshed executed outputs; learner decisions and approval gates remain unchanged; proof cancellation outcomes remain uninspected.",
     "data_results": {"rows": 119390, "columns": 32, "hotels": 2, "train_choose_cancellation_rate": "36.2%", "proof_cancellation_rate": "not calculated in early checks"},
     "unresolved_items": ["The course-required AI-free paper frame remains unmet by the AI-assisted draft.", "Confirm the current flat-rule safety margin and whether it varies by hotel or season.", "Confirm if the group-wide walk ceiling is sufficient or if per-hotel ceilings are required.", "Confirm the final approver, walk-cost owner, override process, live snapshot requirement, and no-show treatment.", "Request evidence and definition for the vendor 95% accuracy claim.", "Do not claim savings or walk performance until the rule is evaluated on the frozen proof period.", "Step 3 needs the course-format 45-minute grill and genuine screenshot evidence, or a course-owner waiver.", "User must review six approve/disapprove gates before final feature matrices are created.", "Confirm candidate fields are available at the intended prediction time; compare models/buffers using train/choose only; proof outcomes remain unexamined until settings are frozen."],
     "implementation_scope": {"files_not_changed": ["src/contract.py", "src/features.py", "src/backtest.py", "src/nightly.py"], "test_suite_run": false}
