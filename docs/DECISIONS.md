@@ -54,3 +54,7 @@ The data identifies two properties as City Hotel and Resort Hotel, with differen
 6. Only after these checks compare the flat rule, lookup, logistic regression, shallow tree, Random Forest, XGBoost, and CatBoost if runtime permits. Select method and buffer on choose under the walk ceiling, freeze, then evaluate proof once.
 
 This is the ordered plan; none of the EDA, cleaning, feature engineering, or model comparisons above are claimed complete by this entry.
+
+### Split execution record — 2026-11-17
+
+`notebooks/02_natural_language_data_prep.ipynb` loaded the source unchanged and assigned all 119,390 rows using `contract.split_periods()`: train 49,157 rows (2015-07-01–2016-06-30), choose 29,546 (2016-07-01–2016-12-31), proof 40,687 (2017-01-01–2017-08-31). The notebook displayed only counts, dates, and hotel names for proof; it did not compute proof cancellation outcomes. No CSV partitions were written and no cleaning was performed.
