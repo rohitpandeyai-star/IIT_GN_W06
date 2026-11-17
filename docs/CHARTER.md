@@ -90,3 +90,8 @@ Rohit Pandey is assigned to Client Lead, Data Lead, Model Lead, and Build Lead, 
 ## 9. Current completion status
 
 This is a completed **AI-assisted reference draft**, not a completed course paper frame. The data profile is partly checked; the column timing audit, reconciliation of the no-AI paper frame, finalized client requirements, candidate comparison, choose-period buffer, proof run, MVP, and required sign-offs remain to be completed. See `docs/EXECUTION_TRACKER.md` for the ordered work and checkpoint record.
+
+
+## Grill 1 update — confirmation gates (2026-11-17)
+
+The compressed AI-assisted grill did not establish new client facts. Before treating the flat rule as a reproducible baseline, obtain its actual safety margin and any hotel or seasonal variation; do not substitute a guessed value. The contract's walk ceiling is group-wide: show hotel-level diagnostics, and treat any per-hotel ceiling as unconfirmed until the client supplies it. The course exercise uses each night's final book; a live morning recommendation requires timestamped reservation snapshots and must be described as a separate operating design. Keep the client questions about final approval, walk-cost ownership, override, and no-show handling open. These are confirmation gates, not assumptions resolved by this document.

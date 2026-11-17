@@ -67,3 +67,13 @@ Expected project artifacts include the reproducible backtest, selected/frozen me
 ## 9. Wish list
 
 The brief's wish-list item is: “Our marketing team would love to find our hidden guest types.” No measurable acceptance criterion is provided. Treat segmentation as exploratory/out of scope for this MVP until the client states what action it would change and how its value will be measured.
+
+
+## Grill 1 update — acceptance and confirmation gates (2026-11-17)
+
+- Do not treat the vendor's reported 95% accuracy as verified or as an acceptance target. Request its metric definition, population, dates, and baseline; judge this project on the supplied cost and walk contract.
+- Preserve the brief's rough cancellation estimate and the historical 36.2% train-plus-choose result as separate observations until their periods and definitions are reconciled.
+- The contract supplies a group-wide walk ceiling. Provide hotel-level results, but do not claim separate hotel compliance unless the client confirms separate thresholds.
+- The exercise evaluates final books. A production morning run needs timestamped reservations and a validated decision-time feature set; this RFP does not claim that capability.
+- Before deployment, confirm the flat-rule margin, final approver, walk-cost owner, manual override process, and operational treatment of no-shows.
+- Keep hidden-guest segmentation outside the MVP until the client identifies a changed decision and a measurable value test.
