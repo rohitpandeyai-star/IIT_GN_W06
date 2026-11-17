@@ -541,22 +541,43 @@ The log begins from the clean `main` baseline below. It distinguishes user reque
           "pushed_to": "origin/main"
         }
       ]
+    },
+    {
+      "phase_sequence": 21,
+      "phase_id": "compressed_charter_grill",
+      "purpose": "Resolve the Step 3 charter grill in one AI-assisted pass at the user's request while keeping client-only facts explicit.",
+      "events": [
+        {
+          "sequence": 27,
+          "commit": "c2d2550915a8f309df4efcb93df090fb09e133bd",
+          "parent": "a7a77fb",
+          "timestamp_local": "2026-11-17",
+          "message": "docs: record compressed charter grill and agent rules",
+          "kind": "grill_and_agent_rules",
+          "trigger": "User asked to answer all grill questions in one pass because they had no time.",
+          "decision": "Record nine explicitly AI-assisted proposed responses; apply provisional confirmation gates to the charter and RFP; add eight actionable repository rules and general coding guidance to AGENTS.md and copy it to CLAUDE.md and .github/copilot-instructions.md.",
+          "reason": "Move the requested work forward without claiming the answers are user-authored or inventing client facts such as the safety margin, per-hotel threshold, authority, or vendor validation.",
+          "files_changed": ["docs/grill_01_charter.md", "docs/CHARTER.md", "docs/RFP.md", "AGENTS.md", "CLAUDE.md", ".github/copilot-instructions.md", "ai_logs/INDEX.md", "ai_logs/20261117_client-lead_codex_grill-charter.md", "ai_logs/karpathy_effect.md", "docs/EXECUTION_TRACKER.md"],
+          "verification": "Documentation diff passed git diff --check and the commit was pushed to origin/main. Step 3 remains in progress: this compressed exchange was not 45 minutes and the required genuine screenshot is still missing.",
+          "pushed_to": "origin/main"
+        }
+      ]
     }
   ],
   "current_snapshot": {
     "as_of": "2026-11-17",
-    "latest_recorded_commit": "6b93a5d1ebc6ca81ca6345609aa33a5d87dbe875",
+    "latest_recorded_commit": "c2d2550915a8f309df4efcb93df090fb09e133bd",
     "paper_frame_draft": "docs/PAPER_FRAME_AI_ASSISTED.md; AI-assisted study draft, not course-compliant AI-free V0.",
     "defence_guide": "docs/DEFENCE_QUICK_GUIDE.md; study aid only, and explicitly distinguishes measured checks, client assumptions, and pending work.",
     "charter_status": "Completed AI-assisted reference draft; does not satisfy the course-required AI-free paper frame.",
     "last_known_commit_before_this_ledger": "d12068b79a0df6b9747c73a16a8f62a81afd3583",
     "working_tree_before_this_ledger": "clean",
     "role_assignment": {"Client Lead": "Rohit Pandey", "Data Lead": "Rohit Pandey", "Model Lead": "Rohit Pandey", "Build Lead": "Rohit Pandey"},
-    "tracker_status": {"step_0": "Complete", "step_1": "Complete for the user's AI-assisted workflow; course AI-free condition unmet", "step_2": "In progress; learner-led notebook decisions outstanding", "steps_3_to_10": "Not started"},
-    "column_audit": "AI bins in docs/COLUMN_AUDIT_ANSWER_KEY_AI_ASSISTED.md are a separate comparison aid; docs/COLUMN_SOURCE_REFERENCE.md has per-field paper details; notebook decisions remain learner-owned and blank.",
+    "tracker_status": {"step_0": "Complete", "step_1": "Complete for the user's AI-assisted workflow; course AI-free condition unmet", "step_2": "Complete; all 32 learner choices and reasons recorded", "step_3": "In progress; compressed grill and project rules recorded, 45-minute format and screenshot outstanding", "steps_4_to_10": "Not started"},
+    "column_audit": "All 32 learner bins and reasons are recorded in docs/COLUMNS_USER_REVIEW.md; timing judgments remain subject to point-in-time verification.",
     "notebook_status": "Both notebooks contain grouped Pandas cells and saved tables for brief checks. Proof-period cancellation outcomes are held back.",
     "data_results": {"rows": 119390, "columns": 32, "hotels": 2, "train_choose_cancellation_rate": "36.2%", "proof_cancellation_rate": "not calculated in early checks"},
-    "unresolved_items": ["The learner must run the column-audit notebook cell by cell and record their own bins and reasons.", "The course-required AI-free paper frame remains unmet by the AI-assisted draft.", "Ask for the current flat-rule safety margin.", "Confirm whether the walk ceiling applies per hotel as well as group-wide.", "Verify the vendor 95% accuracy claim if evidence exists.", "Do not claim an observed walk rate until a rule is evaluated."],
+    "unresolved_items": ["The course-required AI-free paper frame remains unmet by the AI-assisted draft.", "Confirm the current flat-rule safety margin and whether it varies by hotel or season.", "Confirm if the group-wide walk ceiling is sufficient or if per-hotel ceilings are required.", "Confirm the final approver, walk-cost owner, override process, live snapshot requirement, and no-show treatment.", "Request evidence and definition for the vendor 95% accuracy claim.", "Do not claim savings or walk performance until the rule is evaluated on the frozen proof period.", "Step 3 needs the course-format 45-minute grill and genuine screenshot evidence, or a course-owner waiver."],
     "implementation_scope": {"files_not_changed": ["src/contract.py", "src/features.py", "src/backtest.py", "src/nightly.py"], "test_suite_run": false}
   }
 }

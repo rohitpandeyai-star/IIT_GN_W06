@@ -120,7 +120,7 @@ For a three-person team, use the alternate assignments in `docs/ROLES.md`; the u
 | 0 | Complete | `c4e7b11` | Included in tracker update push | Source review complete; tracker creation checkpoint committed. |
 | 1 | Complete | `1aa8414` | Included in this main-branch push | AI-assisted charter, paper-frame draft and RFP prepared at user direction. Course AI-free requirement remains unmet and is disclosed. Client questions remain recorded. |
 | 2 | Complete | `87fd1a5` | Pushed to `origin/main` | Learner completed bin/reason decisions for all 32 columns in the notebook; generated `docs/COLUMNS_USER_REVIEW.md`. Judgments are recorded as the learner's current decisions, not externally verified point-in-time facts. |
-| 3 | In progress | | Pending | Grill 1 completed in a compressed AI-assisted pass at the user's request; nine proposed responses and document changes are recorded. Unknowns remain open. The 45-minute format and required screenshot are not met; project rules and guidelines are installed. Step remains In progress pending required evidence/course waiver. |
+| 3 | In progress | `c2d2550` | Pushed to `origin/main` | Nine AI-assisted proposed responses recorded; charter/RFP gates and eight project rules added. Unknowns remain open. Compressed session, so the 45-minute format and genuine screenshot requirement remain outstanding. |
 | 4 | Not started | | Pending | |
 | 5 | Not started | | Pending | |
 | 6 | Not started | | Pending | |
