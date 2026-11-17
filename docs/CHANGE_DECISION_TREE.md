@@ -688,11 +688,32 @@ The log begins from the clean `main` baseline below. It distinguishes user reque
           "pushed_to": "origin/main"
         }
       ]
+    },
+    {
+      "phase_sequence": 28,
+      "phase_id": "duplicate_investigation",
+      "purpose": "Give the user enough evidence to decide whether exact repeated training rows should be retained, without altering the data.",
+      "events": [
+        {
+          "sequence": 34,
+          "commit": "8530cd345901197d1a99ff96b133b5df05b8a666",
+          "parent": "2b5cdd3",
+          "timestamp_local": "2026-11-17",
+          "message": "notebooks: investigate exact repeated bookings",
+          "kind": "duplicate_analysis_notebook",
+          "trigger": "User asked for another notebook to examine the repeated rows.",
+          "decision": "Create and execute a train-only duplicate investigation notebook with exact group counts, examples, outcome composition, and a hypothetical keep-versus-collapse sensitivity comparison; leave the user's decision pending.",
+          "reason": "The file has no booking ID, and collapsing exact rows has material effects; show those effects without changing the source or choosing for the user.",
+          "files_changed": ["notebooks/03_duplicate_investigation.ipynb", "docs/DECISIONS.md", "docs/EXECUTION_TRACKER.md", "ai_logs/INDEX.md", "ai_logs/20261117_datalead_duplicate_investigation.md"],
+          "verification": "Executed five notebook code cells on train only. Found 3,472 exact patterns; hypothetical collapse removes 16,291 rows, changes the training cancellation rate from 35.77% to 22.17%, and affects 657 hotel-arrival nights. No rows were removed from the project data. Changes pushed to origin/main.",
+          "pushed_to": "origin/main"
+        }
+      ]
     }
   ],
   "current_snapshot": {
     "as_of": "2026-11-17",
-    "latest_recorded_commit": "c36fabdbbf07ac2642b351f1d031d39e159d2046",
+    "latest_recorded_commit": "8530cd345901197d1a99ff96b133b5df05b8a666",
     "paper_frame_draft": "docs/PAPER_FRAME_AI_ASSISTED.md; AI-assisted study draft, not course-compliant AI-free V0.",
     "defence_guide": "docs/DEFENCE_QUICK_GUIDE.md; study aid only, and explicitly distinguishes measured checks, client assumptions, and pending work.",
     "charter_status": "Completed AI-assisted reference draft; does not satisfy the course-required AI-free paper frame.",
