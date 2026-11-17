@@ -1,94 +1,112 @@
-# What exactly are we building, and why this way?
+# Product Requirements Document: Cancellation-Aware Overbooking
 
-**Owner:** Build Lead. **Closes:** ladder stages 3 and 5. **Length:** two pages and one diagram.
+> **Status: AI-assisted working draft, prepared at the user's request.** The method and buffer are not selected from measured results yet. Client-only details remain open questions. This is not a claim that the AI-free paper frame requirement has been met.
 
-Write the options section on Wednesday, before the method table exists, and update it once the table is in. The architecture goes in on Thursday.
+**Owner:** Build Lead — Rohit Pandey (assigned to all roles by the user)
+**Purpose:** Specify the decision, candidate approaches, inputs, output, evaluation, limitations, and production boundary before implementation.
 
-### 1. Who uses it, when, and what do they do with it?
+## 1. Who uses it, when, and what do they do with it?
 
-> **Worked example.** The city operations lead opens the route table every evening, before routes are fixed, and adds the extra visits route by route. They overrule a route when a camp is cancelled at short notice.
+The revenue manager is the intended decision user. For each hotel and arrival night, the tool recommends a non-negative whole-number oversell count, `k`. The manager reviews the recommendation and supporting counts; this MVP does not change reservations automatically.
 
-**Our answer:**
+The course exercise evaluates each night's **final book**. Its 14-night table is therefore a historical/replay exercise using the supplied data, not a live forecast from reservations available on a real morning. A production morning run would need timestamped reservation snapshots and a validated decision-time feature set. The client has not confirmed the live operating time, final approver, or override process.
 
-<!-- answer:3 -->
+## 2. Which approaches could decide, what are their tradeoffs, what do we choose, and what would change our choice?
 
-### 2. Which two ways could we decide, what does each cost, which do we choose, and what would flip it?
+The flat rule is the required benchmark in both comparisons. The two candidate approaches are:
 
-> **Worked example.** (a) A lookup table: the failure rate by booking channel and lead-time band, summed per route. Half a day to build, nothing to retrain. (b) A learned model of each booking's chance of failing, summed per route. Two days to build, retrained monthly. We choose (b) because it cuts idle slots by a further 9% with the guardrail met; we would flip to (a) if the gap fell under 3% on the next quarter's data.
+| Candidate | How it works | Advantages | Costs and risks |
+|---|---|---|---|
+| Hotel-by-guest-history lookup | Estimate cancellation rates from the training period for groups formed from `hotel` and the audited booking-history fields. Sum booking-level rates by hotel-night. | Easy to explain and audit; simple fallback if model results are close. | Small groups may have noisy rates; needs a fallback for unseen or sparse groups; less able to combine several signals. |
+| Logistic regression | Estimate each booking's cancellation probability from the same approved first-bin inputs; sum probabilities by hotel-night. | Compact, interpretable probability model; combines signals without hand-written group rules. | Needs calibration and time-split evaluation; may not improve cost or walks; still depends on correct point-in-time feature availability. |
 
-**Our answer:**
+**Provisional implementation choice:** evaluate both in Step 5, alongside the required flat-rule baseline and at least two learned models in total (logistic regression plus one additional learned method, such as a decision tree). Do not claim a final method now. Prefer the lookup if the candidates are indistinguishable on the choose period; choose a more complex model only if it has lower choose-period cost than the lookup and meets the walk ceiling. In every case, reject a candidate that exceeds the ceiling. Freeze the chosen method and buffer before proof.
 
-<!-- answer:4 -->
+The buffer converts the expected cancellation count into the integer `k`. Choose its value on the choose period by minimizing contract cost subject to no more than 10 walks per 1,000 arrivals; apply the same selection process to the flat-rule safety margin. If no candidate satisfies the ceiling, report that and do not present it as acceptable. Do not adjust settings after looking at proof outcomes; if a post-proof change is made, disclose both runs as the evaluation contract requires.
 
-### 3. What is our answer to the wish-list item?
+## 3. What is our answer to the wish-list item?
 
-_One paragraph with a number. Say which method the item would need and whether its output would change any number the client acts on._
+**MVP scope: zero guest-segmentation outputs.** “Hidden guest types” do not change a defined action in the current brief, so they are excluded from the deliverable. As a proposed internal re-entry test (not a client requirement), revisit segmentation only if the client names an action it would change and a segment-based candidate reduces choose-period cost by at least 5% versus the selected non-segmented candidate while meeting the same walk ceiling. A segment that changes no recommendation or fails that test adds no demonstrated value.
 
-**Our answer:**
+## 4. What exactly is in the table the client reads?
 
-<!-- answer:3 -->
+One row per hotel and arrival night for the requested 14-night window, with:
 
-### 4. What exactly is in the table the client reads?
+- `hotel` and `arrival_date`;
+- number of bookings in the scored book;
+- expected cancellations (sum of booking-level probabilities, or the lookup estimate);
+- selected buffer in rooms;
+- recommended whole-number oversell count `k`;
+- method name and a short reason showing how the count was derived.
 
-> **Worked example.** One row per route and morning: route, date, slots booked, expected failures, buffer, extra visits to book, and a one-line reason.
+The evaluation report also shows empty rooms, walked guests, walks per 1,000 arrivals, and total cost in euros, for the chosen method and flat-rule baseline, across the proof period. Show hotel-level results as diagnostics, while applying the supplied group-wide walk ceiling unless the client confirms separate per-hotel ceilings.
 
-**Our answer:**
+For the course command `python src/nightly.py --from 2017-08-18 --nights 14`, identify the result as a historical replay on the supplied dataset. It must not be described as an actual future 14-day operating forecast.
 
-<!-- answer:2 -->
+## 5. Which inputs do we use, by bin?
 
-### 5. Which inputs do we use, by bin?
+For candidate predictors, use only fields the learner classified as Bin 1 in `docs/COLUMNS_USER_REVIEW.md`, subject to verification against point-in-time booking records before operational use:
 
-_Point to `docs/COLUMNS.md` and list here only the columns the method reads, each with its bin._
+| Field | Learner's bin | Use |
+|---|---:|---|
+| `hotel` | 1 | Group bookings by property; report separately. |
+| `is_repeated_guest` | 1 | Candidate predictor / lookup grouping field. |
+| `previous_cancellations` | 1 | Candidate predictor / lookup grouping field. |
+| `previous_bookings_not_canceled` | 1 | Candidate predictor / lookup grouping field. |
 
-**Our answer:**
+`is_canceled` is the training target and proof outcome, never a predictor. `adr`, stay nights, and cancellation outcomes are used only where required by the scoring contract for evaluation; they are not candidate model predictors. Other Bin 2 or Bin 3 columns are excluded from the candidate predictors unless a timestamped source later proves when the value becomes available and the team records a new decision. The learner's bins are recorded decisions, not independent proof of PMS timing.
 
-<!-- answer:3 -->
+## 6. Where do the numbers come from, and how is the buffer set and frozen?
 
-### 6. Where do the numbers come from, and how is the buffer set and frozen?
+Use `src/contract.py` without modification. Split rows by arrival date: train before 2016-07-01, choose 2016-07-01 through 2016-12-31, and proof 2017-01-01 through 2017-08-31. Fit candidate rates/models using training data; compare candidates and select each buffer on choose data; evaluate the frozen selection once on proof.
 
-> **Worked example.** Each booking gets a probability of failing; the probabilities are summed per route; the buffer is the number of slots subtracted from that sum, chosen on the choose period as the cheapest buffer that keeps the guardrail, then frozen for the proof period.
+For booking-probability methods, sum the probabilities for each hotel-night to get expected cancellations. For the lookup, sum the assigned historical group rates. Convert this estimate and the candidate buffer into a non-negative whole-number oversell recommendation. Record the exact rounding rule in `src/backtest.py` and apply it consistently to candidates and the flat baseline.
 
-**Our answer:**
+The flat-rule hotel's cancellation rate comes from train data. Its safety margin is not specified in the client brief, so the project must label the chosen benchmark margin as a choose-period setting and not as the client's verified production value. Compare all rules on the same nights. A rule is acceptable only if its proof-period walk rate is at most 10 per 1,000 arrivals; show cost, empty rooms, and walks together.
 
-<!-- answer:3 -->
+## 7. What is the error bill on the proof period?
 
-### 7. What is the error bill on the proof period?
+**Pending Step 5.** Proof outcomes have not been evaluated for a frozen candidate, so no costs, walk counts, savings, or monthly savings are claimed here. Populate this table from the reproducible backtest after selecting the method and buffer on choose data.
 
-_Euros, rooms and walks per 1,000 for the chosen rule and for the client's flat rule, from `python src/backtest.py`._
+| Rule | Empty rooms | Walked guests | Walks per 1,000 | Cost (EUR) | Monthly saving vs flat rule (EUR) |
+|---|---:|---:|---:|---:|---:|
+| Client flat-rule benchmark | Pending | Pending | Pending | Pending | 0 |
+| Chosen candidate | Pending | Pending | Pending | Pending | Pending |
 
-| Rule | Empty rooms | Walked guests | Walks per 1,000 | Cost (EUR) | Saving a month against the flat rule (EUR) |
-|---|---|---|---|---|---|
-| Client's flat rule | | | | | 0 |
-| Our chosen rule | | | | | |
+Report proof-period totals and hotel-level diagnostics. If monthly savings are shown, state how the proof-period result was converted to a monthly figure; do not imply it is a measured monthly run.
 
-### 8. What does the system look like, first as a black box and then inside?
+## 8. What does the system look like?
 
-_Two drawings. The black box: what goes in, what comes out, who reads it. The white box: every step from the bookings file to the table, with the file or function that does it. Then list what production would add._
+**Black box:** historical bookings file and fixed evaluation contract → data preparation and candidate rule/model → one row per hotel-night with recommended `k` → revenue-manager review. The proof report compares the frozen candidate with the flat rule.
 
-**Our diagram:** `docs/architecture.png`
+**White box:** `src/data.py` obtains the supplied dataset → `src/features.py` selects and documents approved predictors → `src/backtest.py` fits/compares candidates, chooses buffers on choose data, and scores the frozen choice on proof using `src/contract.py` → `src/nightly.py` writes the requested 14-night replay table from the frozen method.
 
-**What production would add:**
+**Diagram:** `docs/architecture.png` is pending the build/MVP stage; the text above records the intended flow, not an implemented architecture.
 
-<!-- answer:3 -->
+**Production would add:** timestamped reservation snapshots and a point-in-time feature audit; connection to the hotel's source system; access control and run monitoring; an explicit revenue-manager approval/override path; drift monitoring and a retraining policy; and a pilot with per-hotel operating constraints confirmed by the client.
 
-### 9. What are the limits?
+## 9. What are the limits?
 
-> **Worked example.** Runs in under five minutes on a laptop; every number has a one-line reason; no patient name leaves the lab's systems.
+- The source contains 119,390 bookings, two anonymized hotel categories, and dates from 2015-07-01 to 2017-08-31; it does not establish current operating conditions.
+- The proof period is historical and the required 14-night command is a replay, not a live morning forecast.
+- The checked train-plus-choose cancellation rate is 36.2%, while the brief's “about one in four” is a separate rough client observation. Their populations and definitions need reconciliation.
+- The current flat-rule safety margin, any per-hotel walk ceiling, final approver, walk-cost ownership, override process, and operational treatment of no-shows are unconfirmed.
+- Historical feature values do not, by themselves, prove availability at the original booking or intended morning decision time.
+- No method, buffer, savings, proof walk rate, or vendor-accuracy claim has been validated yet.
+- The supplied walk ceiling is group-wide; hotel-level reports are diagnostics unless the client specifies separate constraints.
 
-**Our answer:**
+## 10. What could go wrong?
 
-<!-- answer:2 -->
+| Risk | Effect | Response |
+|---|---|---|
+| Late or post-outcome information leaks into predictors | Inflated offline results that cannot be reproduced at decision time | Restrict candidates to the learner's provisional Bin 1 fields; verify snapshots before production; keep outcomes target-only. |
+| Cancellation patterns change by season, hotel, or booking mix | Choose-period performance may not persist | Compare against the flat baseline, show hotel-level results, disclose the short historical span, and monitor a future pilot. |
+| Sparse lookup groups or uncalibrated model probabilities | Unstable expected cancellations and poor oversell counts | Define a fallback for sparse groups, assess calibration, and select only on choose data under the walk ceiling. |
+| Walks cluster at one property despite a group-wide pass | A group total can conceal a local operating problem | Report each hotel separately and ask the client whether per-hotel limits are needed. |
+| Full final-book data is mistaken for morning-available data | Staff may rely on a forecast that uses future reservations | Label the result as historical replay; require timestamped snapshots for a live version. |
+| Client treats the vendor's “95% accuracy” as comparable | Misleading comparison with an undefined metric | Request the metric, dates, population, and baseline; judge this project with the supplied euro and walk contract. |
+| Proof is used repeatedly to tune settings | Held-out estimate becomes biased | Freeze choices first, run proof once, and disclose any post-proof change with both results. |
 
-### 10. What could go wrong?
+## 11. What is out of scope?
 
-> **Worked example.** Camps cancelled at short notice cluster on the same routes; the failure rate drifts after a price change; route leads stop trusting the table after one bad morning.
-
-**Our answer:**
-
-<!-- answer:3 -->
-
-### 11. What is out of scope?
-
-**Our answer:**
-
-<!-- answer:2 -->
+Automated reservation changes, hotel-system integration, live morning snapshots, unverified use of amendable or post-outcome fields, a client-approved production margin, guest segmentation without an action and value case, and a deployment claim are outside this MVP. The MVP is a reproducible historical comparison and a human-review 14-night replay. No result is presented as production-ready until the timing, approval, and operating questions above are resolved.
