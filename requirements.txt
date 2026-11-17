@@ -7,3 +7,6 @@ matplotlib==3.11.2    # charts for your slides and your evidence folder
 joblib==1.6.0         # saves and loads a fitted model
 pytest==9.1.1         # runs tests/
 ipykernel==7.4.0      # lets VS Code run notebooks
+# Added 18 November 2026 for notebooks/11_train_models.ipynb; installed and run on Python 3.14, not yet checked on 3.12.
+xgboost==3.4.1        # gradient-boosted trees
+catboost==1.2.10      # gradient-boosted trees

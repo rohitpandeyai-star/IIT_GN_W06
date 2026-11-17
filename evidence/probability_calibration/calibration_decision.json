@@ -1,0 +1,17 @@
+{
+  "base_model": "logistic_regression",
+  "base_settings": {
+    "C": 0.1
+  },
+  "rule": "use calibrated probabilities only if Choose Brier score AND Choose log loss both improve",
+  "choose_brier_uncalibrated": 0.20906609937251733,
+  "choose_brier_calibrated": 0.2010803774182625,
+  "choose_log_loss_uncalibrated": 0.6104556816054038,
+  "choose_log_loss_calibrated": 0.5857425928330905,
+  "hotels_where_calibration_lowered_brier": [
+    "City Hotel"
+  ],
+  "use_calibrated_probabilities": true,
+  "calibrator_intercept": -2.331608914325286,
+  "calibrator_coefficient": 5.954046917302593
+}

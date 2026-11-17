@@ -1,0 +1,7 @@
+hotel,model,brier_score
+City Hotel,dummy,0.24398979895734332
+City Hotel,logistic_regression,0.21887771229633926
+City Hotel,random_forest,0.21886565351282547
+Resort Hotel,dummy,0.20888539633595146
+Resort Hotel,logistic_regression,0.1939604308127865
+Resort Hotel,random_forest,0.19163224896510134

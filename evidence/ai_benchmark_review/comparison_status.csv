@@ -1,0 +1,4 @@
+comparison_area,status,what_can_be_claimed
+Expanded internal model benchmark,Evidence files available in evidence/expanded_benchmark,The saved experiment metrics can be analysed and reported
+Separate assignment AI branch,Not available in current working tree,No line-by-line AI comparison or AI mistake list can yet be claimed
+Team implementation gaps,Three gaps documented in docs/COMPARISON.md,"These are documented team-build limitations, not AI branch findings"

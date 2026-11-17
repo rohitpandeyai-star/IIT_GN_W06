@@ -1,0 +1,11 @@
+check,evidence,status
+Source file inspected,Displayed and reviewed in sections 3 to 5 of this notebook,Done
+Feature schema reconciled (code),src/features.py matches Notebook 05; tests/test_features.py guards it,Done
+Feature schema reconciled (saved model),"models/xgboost.joblib schema {'cat': ['hotel', 'country', 'market_segment', 'distribution_channel', 'agent', 'company'], 'num': ['is_repeated_guest', 'previous_cancellations', 'previous_bookings_not_canceled']}",MISMATCH: artifact uses held-back `country`; must be retrained
+Synthetic aggregation test,Expected cancellation sum and missing-night flag,Passed
+Conformal rank test,Rank 2 and value 1.0 for 148 residuals at alpha 0.01,Passed
+Historical smoke test,python src/nightly.py --input data/hotels.csv --from 2017-08-18 --nights 14,"Failed (exit code 1): ValueError: Saved model feature schema does not match the approved features.py schema. Model: categorical=['hotel', 'country', 'market_segment', 'distribution_channel', 'agent', 'company'], numeric=['is_repeated_guest', 'previous_cancellations', 'previous_bookings_not_canceled']. Approved: categoric"
+Artifact library versions,Pickled with scikit-learn 1.8.0 / XGBoost 3.1.3; loaded with scikit-learn 1.9.1 / XGBoost 3.4.1,11 version warning(s) on load
+As-of snapshot,Input contains only bookings known and active at decision time,Not implemented
+Capacity integration,Physical room inventory and room-equivalent mapping verified,Not available
+Walk validation,Compare predictions with actual relocation/walk records,Not available

@@ -1,0 +1,35 @@
+{
+  "frozen_at": "2026-11-18T01:57:07",
+  "frozen_before_test": true,
+  "decided_by": "user instruction (2026-11-18): run the chosen model on test; recommendation from notebooks/13_validation_results_explained.ipynb",
+  "chosen_method": "CatBoost",
+  "model_file": "data/models/CatBoost.joblib",
+  "model_sha256": "7e88c38b10a5a390c934e9f3780fb39b3092a0cf5a21230c1037a7d4589e173a",
+  "preprocessor_file": "data/preprocessed/preprocessor.joblib",
+  "preprocessor_sha256": "61668e8ae1bcc3e244ab1f491a431a5aa78cf34587b482bd0c867d427a9d59ab",
+  "fitted_on": "train only (arrivals before 2016-07-01); not refitted on train + choose, because the buffers were chosen for the train-only fit",
+  "rule": "k = max(0, floor(expected cancellations) - buffer), buffer per hotel",
+  "primary": {
+    "buffer_structure": "separate buffer per hotel; group-wide walk ceiling only",
+    "chosen_buffers": {
+      "City Hotel": 6,
+      "Resort Hotel": 3
+    },
+    "flat_rule_buffers": {
+      "City Hotel": 20,
+      "Resort Hotel": 4
+    }
+  },
+  "secondary_reported_for_transparency": {
+    "buffer_structure": "one shared buffer for both hotels (notebook 12)",
+    "chosen_buffer": 5,
+    "flat_rule_buffer": 16
+  },
+  "flat_rule_hotel_rates_from_train": {
+    "City Hotel": 0.416627,
+    "Resort Hotel": 0.251511
+  },
+  "walk_ceiling_per_1000_arrivals": 10.0,
+  "walk_cost_eur": 300.0,
+  "choose_period_evidence": "notebook 13: CatBoost -1.4% vs flat rule (per-hotel buffers), cheaper in 74% of week resamples; not a reliable difference"
+}

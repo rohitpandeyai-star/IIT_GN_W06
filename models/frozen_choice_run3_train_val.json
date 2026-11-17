@@ -1,0 +1,68 @@
+{
+  "frozen_at": "2026-11-18T02:05:41",
+  "run": 3,
+  "frozen_before_test": true,
+  "changed_after_test": true,
+  "disclosure": "Run 3 refits the preprocessor, CatBoost and XGBoost on train + choose, decided after run 1's test result (CatBoost train-only: EUR 150,459 more than the flat rule). All settings picked on choose are kept. Run 2 (XGBoost train-only) was frozen but never executed. All runs are reported.",
+  "fitted_on": "train + choose (arrivals 2015-07-01 to 2016-12-31)",
+  "primary_method": "CatBoost",
+  "also_reported": [
+    "XGBoost"
+  ],
+  "preprocessor_file": "data/models_train_val/preprocessor.joblib",
+  "preprocessor_sha256": "fbab075bb393fd8aa5bfa3ff73a3e21081b20fddaccf7989926bd2d8da68167a",
+  "models": {
+    "CatBoost": {
+      "file": "data/models_train_val/CatBoost.joblib",
+      "sha256": "197a50ed12a6be9f798a261aa732b03d2b77e6f7025d20b8e0b2bac1a86aebff"
+    },
+    "XGBoost": {
+      "file": "data/models_train_val/XGBoost.joblib",
+      "sha256": "4694f2ce192c335c47062806c24b2c3683fede63148a8b90375c7bb706941369"
+    }
+  },
+  "rule": "k = max(0, floor(expected cancellations) - buffer), buffer per hotel",
+  "primary": {
+    "buffer_structure": "separate buffer per hotel; group-wide walk ceiling only",
+    "model_buffers": {
+      "CatBoost": {
+        "City Hotel": 6,
+        "Resort Hotel": 3
+      },
+      "XGBoost": {
+        "City Hotel": 6,
+        "Resort Hotel": 3
+      }
+    },
+    "flat_rule_buffers": {
+      "City Hotel": 20,
+      "Resort Hotel": 4
+    }
+  },
+  "secondary_reported_for_transparency": {
+    "buffer_structure": "one shared buffer for both hotels",
+    "model_buffers": {
+      "CatBoost": 5,
+      "XGBoost": 5
+    },
+    "flat_rule_buffer": 16
+  },
+  "flat_rule_hotel_rates_from_train": {
+    "City Hotel": 0.416627,
+    "Resort Hotel": 0.251511
+  },
+  "fairness_check_flat_rule_rates_from_train_and_choose": {
+    "City Hotel": 0.413164,
+    "Resort Hotel": 0.262937
+  },
+  "walk_ceiling_per_1000_arrivals": 10.0,
+  "walk_cost_eur": 300.0,
+  "val_expected_count_shift_rooms": {
+    "CatBoost / group": 3.16,
+    "CatBoost / City Hotel": 4.96,
+    "CatBoost / Resort Hotel": 1.37,
+    "XGBoost / group": 3.19,
+    "XGBoost / City Hotel": 5.04,
+    "XGBoost / Resort Hotel": 1.34
+  }
+}

@@ -1,0 +1,2 @@
+model,model_settings,policy,cost_eur,empty_rooms,walked_guests,walks_per_1000,ceiling_met,nights
+logistic_regression,{'C': 0.1},flat_rule_margin_17,3935875.6,8186,155,6.21,True,486

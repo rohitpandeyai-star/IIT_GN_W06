@@ -1,0 +1,52 @@
+{
+  "command": [
+    "C:\\Users\\Lenovo\\AppData\\Local\\Programs\\Python\\Python314\\python.exe",
+    "src/nightly.py",
+    "--input",
+    "data/hotels.csv",
+    "--from",
+    "2017-08-18",
+    "--nights",
+    "14",
+    "--output",
+    "outputs/notebook14_smoke_test.csv"
+  ],
+  "return_code": 1,
+  "stderr_tail": [
+    "  File \"C:\\Users\\Lenovo\\Desktop\\Build_2_Repo\\IIT_GN_W06\\src\\nightly.py\", line 108, in validate_model_schema",
+    "    raise ValueError(",
+    "    ...<4 lines>...",
+    "    )",
+    "ValueError: Saved model feature schema does not match the approved features.py schema. Model: categorical=['hotel', 'country', 'market_segment', 'distribution_channel', 'agent', 'company'], numeric=['is_repeated_guest', 'previous_cancellations', 'previous_bookings_not_canceled']. Approved: categorical=['hotel', 'market_segment', 'distribution_channel', 'agent', 'company'], numeric=['is_repeated_guest', 'previous_cancellations', 'previous_bookings_not_canceled']. Retrain the artifact on the approved features; do not edit the schema to fit the artifact."
+  ],
+  "artifact_schema": {
+    "cat": [
+      "hotel",
+      "country",
+      "market_segment",
+      "distribution_channel",
+      "agent",
+      "company"
+    ],
+    "num": [
+      "is_repeated_guest",
+      "previous_cancellations",
+      "previous_bookings_not_canceled"
+    ]
+  },
+  "approved_schema": {
+    "cat": [
+      "hotel",
+      "market_segment",
+      "distribution_channel",
+      "agent",
+      "company"
+    ],
+    "num": [
+      "is_repeated_guest",
+      "previous_cancellations",
+      "previous_bookings_not_canceled"
+    ]
+  },
+  "note": "A historical full-file run would prove code execution and output shape only, not live operational validity."
+}

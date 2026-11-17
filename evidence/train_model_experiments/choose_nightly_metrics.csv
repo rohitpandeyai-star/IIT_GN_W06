@@ -1,0 +1,4 @@
+model,hotel_arrival_nights,mean_absolute_error_cancellations
+random_forest,368,8.878393029310287
+dummy,368,9.66182090922519
+logistic_regression,368,9.911023729618748

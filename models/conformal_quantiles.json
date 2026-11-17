@@ -1,0 +1,98 @@
+{
+  "Random Forest": {
+    "0.9": {
+      "q_lower": -8.11579728916012,
+      "q_upper": 47.855804414995646,
+      "lower_rank": 7,
+      "upper_rank": 142,
+      "n_calibration_nights": 148
+    },
+    "0.95": {
+      "q_lower": -14.561679564738682,
+      "q_upper": 60.688925635082505,
+      "lower_rank": 3,
+      "upper_rank": 146,
+      "n_calibration_nights": 148
+    }
+  },
+  "MLP": {
+    "0.9": {
+      "q_lower": -3.639798177919861,
+      "q_upper": 52.283771660308275,
+      "lower_rank": 7,
+      "upper_rank": 142,
+      "n_calibration_nights": 148
+    },
+    "0.95": {
+      "q_lower": -9.681226644562912,
+      "q_upper": 64.73220890323947,
+      "lower_rank": 3,
+      "upper_rank": 146,
+      "n_calibration_nights": 148
+    }
+  },
+  "XGBoost": {
+    "0.9": {
+      "q_lower": -5.616345405578613,
+      "q_upper": 50.239173889160156,
+      "lower_rank": 7,
+      "upper_rank": 142,
+      "n_calibration_nights": 148
+    },
+    "0.95": {
+      "q_lower": -9.516090393066406,
+      "q_upper": 66.50603485107422,
+      "lower_rank": 3,
+      "upper_rank": 146,
+      "n_calibration_nights": 148
+    }
+  },
+  "LightGBM": {
+    "0.9": {
+      "q_lower": -5.447365118705557,
+      "q_upper": 49.44618854806805,
+      "lower_rank": 7,
+      "upper_rank": 142,
+      "n_calibration_nights": 148
+    },
+    "0.95": {
+      "q_lower": -9.689802310387616,
+      "q_upper": 62.867769002770615,
+      "lower_rank": 3,
+      "upper_rank": 146,
+      "n_calibration_nights": 148
+    }
+  },
+  "Logistic Elastic Net": {
+    "0.9": {
+      "q_lower": -7.421530692383147,
+      "q_upper": 48.427146424540624,
+      "lower_rank": 7,
+      "upper_rank": 142,
+      "n_calibration_nights": 148
+    },
+    "0.95": {
+      "q_lower": -14.73938216572472,
+      "q_upper": 63.28207370100753,
+      "lower_rank": 3,
+      "upper_rank": 146,
+      "n_calibration_nights": 148
+    }
+  },
+  "CatBoost": {
+    "0.9": {
+      "q_lower": -4.183226713736531,
+      "q_upper": 53.27591189272219,
+      "lower_rank": 7,
+      "upper_rank": 142,
+      "n_calibration_nights": 148
+    },
+    "0.95": {
+      "q_lower": -9.021308539755022,
+      "q_upper": 75.03279075901959,
+      "lower_rank": 3,
+      "upper_rank": 146,
+      "n_calibration_nights": 148
+    }
+  }
+}

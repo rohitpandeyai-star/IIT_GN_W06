@@ -1,0 +1,2 @@
+model,settings,selection_metric,selected_candidate_number
+logistic_regression,{'C': 0.1},mean chronological validation Brier score,1

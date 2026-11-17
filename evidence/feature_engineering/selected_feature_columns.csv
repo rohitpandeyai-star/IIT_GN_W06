@@ -1,0 +1,9 @@
+feature
+hotel
+market_segment
+distribution_channel
+agent
+company
+is_repeated_guest
+previous_cancellations
+previous_bookings_not_canceled

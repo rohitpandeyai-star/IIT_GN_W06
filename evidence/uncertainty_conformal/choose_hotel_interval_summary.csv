@@ -1,0 +1,5 @@
+hotel,interval,hotel_arrival_nights,empirical_coverage,average_interval_width
+City Hotel,normal_approximation_90,184,0.3695652173913043,14.368815455364157
+City Hotel,split_conformal_nominal_90,184,0.8913043478260869,62.994760119007466
+Resort Hotel,normal_approximation_90,184,0.46195652173913043,8.803130491287245
+Resort Hotel,split_conformal_nominal_90,184,0.9945652173913043,43.38655779557656

@@ -90,3 +90,73 @@ Recorded from executed cells in `notebooks/03_duplicate_investigation.ipynb` (tr
 - The repeated-group rows include 11,383 canceled bookings, 8,217 check-outs, and 163 no-shows. Matching fields include the outcome/status columns, but that does not prove the repeated rows are invalid exports.
 - A **hypothetical** collapse of exact repeats would leave 32,866 training rows, lower the train cancellation rate from 35.77% to 22.17%, and reduce booking counts on 657 hotel-arrival nights.
 - No booking identifier is present to establish a correct deduplication key. The source and current working data remain unchanged. The Step 1 choice to retain or disapprove remains the user's decision.
+
+## Frozen choice before the proof run (2026-11-18)
+
+Recorded **before** any proof (test) file was opened, at the user's instruction to run the chosen model on test. Settings are in `models/frozen_choice.json` (with file fingerprints of the model and preprocessor); reasoning in `notebooks/13_validation_results_explained.ipynb`.
+
+| Setting | Frozen value | Chosen how |
+|---|---|---|
+| Method | CatBoost, fitted on train only (`notebooks/11_train_models.ipynb`), on the inputs prepared in `notebooks/10_preprocessing_leakage_checked.ipynb` | Lowest choose-period cost under the walk ceiling, under both buffer structures |
+| Rule | k = max(0, floor(expected cancellations) − buffer) | Same rule for every method |
+| Buffers (primary) | City Hotel 6, Resort Hotel 3 | Cheapest per-hotel pair meeting the group-wide ceiling on choose |
+| Flat-rule benchmark | Train hotel rates (City 41.7%, Resort 25.2%); buffers City 20, Resort 4 | Same selection, same ceiling |
+| Secondary (disclosed) | Shared buffer: CatBoost 5, flat rule 16 | Reported for transparency; flatters the model (notebook 13, Part 5) |
+
+Choose-period evidence: CatBoost −1.4% vs the flat rule with per-hotel buffers, cheaper in 74% of week resamples, 3 of 6 months; **not a reliable difference**. Four inputs remain provisional (timing unverified). Any change after seeing proof results must be disclosed and both runs reported (`docs/EVALUATION_CONTRACT.md`).
+
+## Proof run 1 result (2026-11-18)
+
+`notebooks/14_test_run.ipynb`, frozen settings above. CatBoost cost **EUR 3,365,371** against **EUR 3,214,912** for the flat rule with per-hotel buffers: **EUR 150,459 more (−4.7%), no saving**. Empty rooms 7,322 vs 7,166; walked guests 210 vs 179; walks per 1,000 arrivals 8.42 vs 7.18 — **group guardrail met by both**. By hotel: City Hotel CatBoost EUR 18,259 cheaper; Resort Hotel EUR 168,718 dearer (walks per 1,000: Resort 10.30 vs 11.29, no per-hotel threshold). Test accuracy at a 50% cut-off 63.5% (61.3% for "nobody cancels"), ROC AUC 0.679; predicted cancellation rate 27.2% vs actual 38.7%. Secondary shared-buffer comparison (disclosed beforehand as flattering the model): CatBoost EUR 431,799 cheaper (11.0%).
+
+## Post-proof change: run 2 with XGBoost (2026-11-18) — must be disclosed
+
+At the user's instruction, **after seeing run 1**, the method is changed from CatBoost to **XGBoost**, with its choose-period buffers from notebook 13 unchanged (per hotel: City 6, Resort 3; shared: 5) and the same flat-rule benchmark. Settings: `models/frozen_choice_run2_xgboost.json`. Because this choice was made after test results were seen, run 2 is **test-informed**: both runs must be reported (slide 5, `docs/EVALUATION_CONTRACT.md`), and run 2 cannot be presented as a clean proof result on its own.
+
+## Run 2 superseded; run 3 planned: refit on train + choose (2026-11-18) — must be disclosed
+
+Run 2 (XGBoost, train-only fit) was frozen in `models/frozen_choice_run2_xgboost.json` but **never executed**: at the user's instruction it is replaced by run 3. Run 3 refits the preprocessor (same settings) and **both CatBoost and XGBoost** (same settings as notebook 11) on **train + choose**, which `docs/EVALUATION_CONTRACT.md` allows provided every setting picked on choose is kept: the rule, the buffers (per hotel City 6 / Resort 3 for both models; shared 5), and the flat rule with its **train** rates and buffers (City 20 / Resort 4; shared 16). Declared before the run: **CatBoost is primary** (the method chosen on choose, notebook 13); XGBoost is reported alongside and will not be selected on test results. A flat rule using train + choose rates is reported as a disclosed fairness check. Run 3 follows run 1's test results, so **all runs are reported** (slide 5). Notebooks: `notebooks/15_retrain_train_val.ipynb`, `notebooks/16_final_test_run.ipynb`.
+
+## Proof run 3 result (2026-11-18) — test-informed, reported with run 1
+
+`notebooks/16_final_test_run.ipynb`, settings frozen in `models/frozen_choice_run3_train_val.json` (notebook 15) before test was opened. Benchmark identical to run 1 (flat rule, train rates, per-hotel buffers City 20 / Resort 4): EUR 3,214,912; 7,166 empty rooms; 179 walks; 7.18 walks per 1,000 — guardrail met.
+
+| Run | Method | Cost (EUR) | Empty rooms | Walked guests | Walks per 1,000 | Guardrail | vs flat rule |
+|---|---|---:|---:|---:|---:|---|---:|
+| 1 (frozen before any test result) | CatBoost, train fit | 3,365,371 | 7,322 | 210 | 8.42 | met | −150,459 |
+| 2 | XGBoost, train fit | — | — | — | — | not run (superseded) | — |
+| 3, primary (after run 1) | CatBoost, train + choose fit | 2,804,174 | 5,889 | 327 | 13.11 | **BREACHED** | +410,738 |
+| 3, also reported | XGBoost, train + choose fit | 2,799,388 | 5,883 | 326 | 13.07 | **BREACHED** | +415,524 |
+
+Under `docs/EVALUATION_CONTRACT.md` a rule that saves euros but breaks the ceiling is **rejected**: run 3 is not acceptable. Cause: the refitted models expect more cancellations (notebook 15, Step 5: about +5 rooms per City Hotel night) while the buffers stay at the values chosen for the train-only models, so they oversell more. Re-choosing the buffers on proof results is not permitted. No model run is both cheaper than the flat rule and within the ceiling on proof.
+
+## Pipeline 05–14 (`notebooks/pipeline/`): decisions and freeze, recorded before its Proof run (2026-11-18)
+
+**Historical disclosure:** the Proof period was already inspected in the earlier runs above. This pipeline's Proof evaluation (notebook 12) is therefore **retrospective, not historically blind**, and is reported as such.
+
+| # | Decision | Reason | Where |
+|---|---|---|---|
+| P1 | Notebooks 05–14 copied from the 2026-11-15 working set into `notebooks/pipeline/`; `src/features.py`, `src/nightly.py`, `tests/test_nightly.py`, `models/xgboost*`, `models/conformal_quantiles.json`, `evidence/expanded_benchmark/`, `outputs/nightly_recommendations*` copied from the uncommitted files in `IIT_GN_W06_submission_working.zip` | They existed only outside the repository; hashes in `evidence/pipeline_run/provenance.json` | — |
+| P2 | Each notebook starts by moving to the repository root | They import `src` and write relative `evidence/` paths | first code cell |
+| P3 | Approved inputs: `hotel`, `market_segment`, `distribution_channel`, `agent`, `company`, `is_repeated_guest`, `previous_cancellations`, `previous_bookings_not_canceled`; **`country` excluded** (correct nationality often known only at check-in) | Notebook 05 decision; four inputs remain provisional on timing | 05 |
+| P4 | Notebooks 09–12 read earlier selections from files instead of hand-copied placeholders (`logistic_regression, C=1.0`, `model_buffer_1.0`) | Notebook 08 actually selected **logistic regression C = 0.1** (mean chronological Brier 0.1731); the placeholders would have evaluated an unselected model | 09–12 |
+| P5 | Calibration rule fixed before 09 ran: adopt only if Choose Brier **and** log loss both improve. Result: **adopted** (Brier 0.2091 → 0.2011; log loss 0.6105 → 0.5857). Improves City Hotel Brier (0.2172 → 0.2053), slightly worsens Resort (0.1915 → 0.1919) | Pre-declared rule | 09, `evidence/probability_calibration/calibration_decision.json` |
+| P6 | Policy candidates in 11 = the brief's declared set **plus** two declared families: the contract's flat rule `max(0, ceil(hotel rate × bookings) − m)` and the model with the same margin `max(0, ceil(E) − m)`, m = 0…60. Uncalibrated model policies reported as reference only | `docs/EVALUATION_CONTRACT.md` defines the flat rule with a margin chosen on choose; rule 5; the declared buffers only add rooms | 11 |
+| P7 | Selection: drop policies above 10 walks per 1,000 on Choose, take the lowest cost | Brief and contract | 11 |
+
+**Choose result (notebook 11):** every declared model policy breaches the ceiling (72–173 walks per 1,000). Meeting the ceiling: flat rule margin 17 (EUR 2,414,409; 5,532 empty rooms; 169 walks; 9.06 per 1,000), model (calibrated LR) margin 18 (EUR 2,576,784; 9.76 per 1,000), no overbooking (EUR 4,155,341).
+
+**Frozen before notebook 12 ran** (`evidence/choose_policy_selection/frozen_configuration.json`, 2026-11-18T02:32:44): selected policy **flat rule, margin 17** (train hotel rates City 41.7%, Resort 25.2%; ceil rounding). Declared Proof benchmarks: the same flat rule, and the best model policy on Choose (calibrated logistic regression C = 0.1, margin 18). Notebook 12 checks the 08/09 evidence fingerprints against the freeze before scoring.
+
+## Pipeline 05–14: results and reconciliation, recorded after its Proof run (2026-11-18)
+
+**Proof (notebook 12, retrospective; nothing changed after scoring):** frozen flat rule, margin 17: **EUR 3,935,876; 8,186 empty rooms; 155 walks; 6.21 per 1,000 — group ceiling met.** City Hotel 9.23 per 1,000, Resort Hotel 0.99 (no per-hotel threshold given). Declared model benchmark (calibrated logistic regression C = 0.1, margin 18): EUR 4,172,660; 277 walks; **11.11 per 1,000 — ceiling breached**; EUR 236,784 more than the flat rule. Evidence: `evidence/proof_evaluation/`.
+
+| # | Decision | Reason | Evidence |
+|---|---|---|---|
+| P8 | `src/features.py` now implements the approved feature set (P3): `country` removed and listed in `HELD_BACK`; `tests/test_features.py` fails if a held-back or post-outcome field returns | Notebook 05 required the code to match its decision and a guarding test | `tests/test_features.py` |
+| P9 | `src/nightly.py` validates a saved model against `features.CATEGORICAL`/`NUMERIC` instead of its own hard-coded list (which included `country`) | One schema source; a stale artifact now fails loudly instead of running | notebook 14 |
+| P10 | `models/xgboost.joblib` is **not** reconciled: it was trained with `country` and is rejected by the nightly pipeline. It was not retrained here | Retraining it would also need its conformal state and policy reconciled with the policy actually selected (the flat rule); left as a blocker | `evidence/nightly_pipeline_validation/` |
+| P11 | `evidence/expanded_benchmark/` is treated as **not comparable** with this pipeline: it used `country`, its source code (`src/run_cv_benchmark.py`, `src/mlops_tracking.py`) is absent, and its Proof rows were already exposed | Cannot be reproduced or audited | notebook 13 |
+
+`src/contract.py` is unchanged: its SHA-256 differs from the benchmark's record only because this checkout stores CRLF line endings (LF-normalised hash matches `7be10099…`).

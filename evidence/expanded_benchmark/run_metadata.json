@@ -1,0 +1,76 @@
+{
+  "run_id": "hotel-cancel-20261115-061831",
+  "experiment": "hotel-cancellation-model-family-benchmark",
+  "created_utc": "2026-11-15T06:18:31.200504+00:00",
+  "dataset": "/mnt/data/hotels.csv",
+  "dataset_sha256": "d10cdeb07de9309007f528d6499a2c0467ae7a6b287b80ffd759e11e61801639",
+  "rows": 119390,
+  "features": [
+    "hotel",
+    "country",
+    "market_segment",
+    "distribution_channel",
+    "agent",
+    "company",
+    "is_repeated_guest",
+    "previous_cancellations",
+    "previous_bookings_not_canceled"
+  ],
+  "target": "is_canceled",
+  "seed": 42,
+  "python": "3.13.5",
+  "pandas": "2.2.3",
+  "sklearn": "1.8.0",
+  "cv": "3-fold expanding-window TimeSeriesSplit on arrival dates; no shuffling",
+  "train_period": [
+    "2015-07-01",
+    "2016-06-30"
+  ],
+  "folds": [
+    {
+      "train_n": 11900,
+      "valid_n": 10096,
+      "valid_start": "2015-10-02",
+      "valid_end": "2015-12-31"
+    },
+    {
+      "train_n": 21996,
+      "valid_n": 10963,
+      "valid_start": "2016-01-01",
+      "valid_end": "2016-03-31"
+    },
+    {
+      "train_n": 32959,
+      "valid_n": 16198,
+      "valid_start": "2016-04-01",
+      "valid_end": "2016-06-30"
+    }
+  ],
+  "known_risk": "source snapshot not proven to be original booking-time; metrics are experimental only",
+  "package_versions": {
+    "python": "3.13.5",
+    "pandas": "2.2.3",
+    "numpy": "2.3.5",
+    "scikit_learn": "1.8.0",
+    "xgboost": "3.1.3",
+    "lightgbm": "4.6.0",
+    "catboost": "1.2.8",
+    "optuna": "4.8.0",
+    "imbalanced_learn": "0.14.1"
+  },
+  "experiment_counts": {
+    "cv_model_and_baseline_configurations": 27,
+    "cv_completed": 26,
+    "cv_failed": 1,
+    "manual_hyperparameter_configs": 13,
+    "optuna_trials": 12
+  },
+  "mlflow_installed": false,
+  "tracking_event_count": 52,
+  "source_code_sha256": {
+    "src/run_cv_benchmark.py": "ced0004e0e7a5e53e8fbb4cad57bf2d3e3501864b4740015a4f093b7311337a1",
+    "src/features.py": "18a0d36b5e84e91fb97b89a3858302d8f5f05247ee02a24bc523af7afecf7c79",
+    "src/contract.py": "7be1009987d33827399fa29a75945eff0a4276f65f4a963270d0055fb71f9058",
+    "src/mlops_tracking.py": "9134b178cd4a8978569a2e31f3a5d7f175a41a17311ffe79b7a01f10e2e51a0b"
+  }
+}

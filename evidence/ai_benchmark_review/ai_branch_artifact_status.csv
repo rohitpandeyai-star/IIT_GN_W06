@@ -1,0 +1,4 @@
+artifact,exists_in_current_working_tree,bytes
+ai_benchmark\PLAN_AI.md,False,
+ai_benchmark\run.py,False,
+ai_benchmark\RESULT.md,False,

@@ -1,0 +1,34 @@
+{
+  "purpose": "Provenance of files brought into the repository for the 05-14 pipeline run (2026-11-18). Hashes are of the files as copied, before any edit.",
+  "sources": {
+    "notebooks/pipeline/*.ipynb": "C:/Users/<user>/Downloads (dated 2026-11-15)",
+    "everything else": "IIT_GN_W06_submission_working.zip (2026-11-15): uncommitted working files of an older checkout of this repository (HEAD 1a4a978)"
+  },
+  "files": {
+    "evidence/expanded_benchmark/calibration_comparison.csv": "3bb6cc3f184065044b44db932177871c49ecb63fd447dcb7a857b5d45b32d487",
+    "evidence/expanded_benchmark/choose_policy_comparison.csv": "7dd896d4bd1d0aa9189a04fa7528e6f85463ec59f1d7f14c5df639cca94b673a",
+    "evidence/expanded_benchmark/cv_leaderboard.csv": "60d7a1f533070f8c8a575c25f4b64a0bb8c9fd571522995a0aa44d27f89f70f2",
+    "evidence/expanded_benchmark/feature_drift_psi.csv": "32e4afcb1fa0d0c495a8cdb1580654179cf1640316645046d3473478e190aaae",
+    "evidence/expanded_benchmark/proof_audit_all_models.csv": "a8ee7d99e4a3a679fb2464e06b81621600c51e2042f5f6dfe07bd77b1436755f",
+    "evidence/expanded_benchmark/run_metadata.json": "fca5fa7c50d88cef70d12eea20cc2624795bf53c4f428a1a15df13b599e7f2dd",
+    "evidence/expanded_benchmark/tracking.jsonl": "ca9a4e838d92322da426fecd42d0b640fd41b6e31194fb661e7570a463bb9d9a",
+    "models/conformal_quantiles.json": "beb63597bb92bde98623fcf0cb8aa05b10e4d4eb0cd43e270f0dd3cc5258915b",
+    "models/xgboost.joblib": "87c8dadb8d7451b9cd7afd8cf0511c4ff9eea7433cd8e7b89a5f36d128fe699e",
+    "models/xgboost_conformal_state.joblib": "44161743de21a861359190f059155e8c0b93c2d454fd14da8bd493e0379058be",
+    "notebooks/pipeline/05_feature_engineering.ipynb": "08b0f5fdcd92fba64aabe865926bc5f78f55c67e3551f703bd9d5cf2886356bb",
+    "notebooks/pipeline/06_baselines_and_pooling_lab.ipynb": "49cf860fde8d6671f83ac82a3cb5122ad3179ce846fde1f83ccffd447e6e0893",
+    "notebooks/pipeline/07_train_model_experiments.ipynb": "c0afecc7f5877fd341a0d6194110eb5d697db6d28a1482ae57aba1f63858d689",
+    "notebooks/pipeline/08_hyperparameter_experiments.ipynb": "8f8fa3924a467a61f242cbc6fefe001d3d456aae81c0574854cc1c996aaca719",
+    "notebooks/pipeline/09_probability_calibration.ipynb": "0af5d840ff0ad42612bcc06d60682f66aa9266ca15b17c369af80cfed9baacea",
+    "notebooks/pipeline/10_uncertainty_and_conformal.ipynb": "5ddb5c80a71340c601f4f293147299d1cdcc100b500371635f521f3790295562",
+    "notebooks/pipeline/11_choose_policy_selection.ipynb": "ba0bc598919cc05015c6ae4f7581a8a4963924051070792d3464db8566a7dfc9",
+    "notebooks/pipeline/12_proof_evaluation.ipynb": "e6967c7e5d6480831589a7ffbca782059339e0a66a5528d44175e536ca711c60",
+    "notebooks/pipeline/13_ai_benchmark.ipynb": "2607828d3194ba0c060f5d205078e2fdf38dc497ed238600bd303ea78b74a990",
+    "notebooks/pipeline/14_nightly_pipeline_validation.ipynb": "fc432502ddc79b4dedf2b5bed7f55cd061c468c17fb3f305a20cd253ee26f2dd",
+    "outputs/nightly_recommendations.csv": "cfd65c1e704544a95593502140999864ca91fb4f3505e2c4131739729c1dcbf5",
+    "outputs/nightly_recommendations.manifest.json": "aa46f97178ae95f4d43dd19f692ff82ea9ed4a0252fc61bd37d84de2c0085144",
+    "src/features.py": "18a0d36b5e84e91fb97b89a3858302d8f5f05247ee02a24bc523af7afecf7c79",
+    "src/nightly.py": "bd71c1cdf713a222796d1fbec1db35fbda2add4027013a179f09c2f18cdbf15e",
+    "tests/test_nightly.py": "121165d66d543d3a6a943de415eb7f8e0ac91bbe74594f7c5afcd1a2f04560c4"
+  }
+}

@@ -1,0 +1,9 @@
+feature,type,meaning,reason,timing_status
+hotel,categorical,Which hotel the booking belongs to,The two properties may have different cancellation patterns,Candidate; confirm at booking timestamp
+market_segment,categorical,Commercial market segment associated with the booking,Different booking segments may behave differently,Provisional; confirm it is not reclassified later
+distribution_channel,categorical,Channel through which the booking was made,Different booking channels may have different cancellation behaviour,Provisional; confirm it is not reclassified later
+agent,categorical,"Travel agent identifier, when present","Agent identifiers are labels, not ordered numbers",Provisional; missing means no recorded agent
+company,categorical,"Company identifier, when present","Company identifiers are labels, not ordered numbers",Provisional; missing means no recorded company
+is_repeated_guest,numeric flag,Whether the guest is recorded as a repeat guest,Prior guest history may relate to cancellation behaviour,Provisional; verify history was known before this booking
+previous_cancellations,numeric count,Number of previous cancellations,Past cancellation behaviour may be informative,Provisional; verify count uses only earlier events
+previous_bookings_not_canceled,numeric count,Number of previous bookings that were not cancelled,Past successful stays may be informative,Provisional; verify count uses only earlier events

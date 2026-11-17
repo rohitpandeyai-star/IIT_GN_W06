@@ -1,0 +1,6 @@
+method,hotel_arrival_nights,mean_absolute_error_cancellations
+pooled_m_100,368,9.187536466633675
+pooled_m_50,368,9.189826677614754
+pooled_m_20,368,9.191206268444825
+hotel_specific,368,9.192128284364147
+global,368,9.66182090922519

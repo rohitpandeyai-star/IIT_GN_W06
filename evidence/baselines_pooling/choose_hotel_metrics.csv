@@ -1,0 +1,11 @@
+hotel,method,brier_score
+City Hotel,global,0.24398979895734332
+City Hotel,hotel_specific,0.24156756679278446
+City Hotel,pooled_m_20,0.24156690674837455
+City Hotel,pooled_m_50,0.24156592342801494
+City Hotel,pooled_m_100,0.24156430245055063
+Resort Hotel,global,0.20888539633595146
+Resort Hotel,hotel_specific,0.20458305426621376
+Resort Hotel,pooled_m_20,0.204575115913988
+Resort Hotel,pooled_m_50,0.20456329691770064
+Resort Hotel,pooled_m_100,0.20454383251277874

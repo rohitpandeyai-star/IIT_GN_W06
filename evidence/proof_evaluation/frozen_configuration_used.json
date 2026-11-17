@@ -1,0 +1,67 @@
+{
+  "frozen_at": "2026-11-18T02:32:44",
+  "frozen_before_this_pipeline_scored_proof": true,
+  "historical_disclosure": "The Proof period was inspected in earlier project work (see docs/DECISIONS.md, 2026-11-18). Notebook 12's evaluation is retrospective, not historically blind.",
+  "model": "logistic_regression",
+  "model_settings": {
+    "C": 0.1
+  },
+  "features": [
+    "hotel",
+    "market_segment",
+    "distribution_channel",
+    "agent",
+    "company",
+    "is_repeated_guest",
+    "previous_cancellations",
+    "previous_bookings_not_canceled"
+  ],
+  "probability_method": "calibrated",
+  "calibrator_intercept": -2.331608914325286,
+  "calibrator_coefficient": 5.954046917302593,
+  "selected_policy": "flat_rule_margin_17",
+  "selected_policy_rule": {
+    "family": "flat_rule_margin",
+    "margin": 17
+  },
+  "flat_rule_benchmark": {
+    "policy": "flat_rule_margin_17",
+    "family": "flat_rule_margin",
+    "margin": 17,
+    "hotel_rates_from_train": {
+      "City Hotel": 0.4166271384751605,
+      "Resort Hotel": 0.2515113493783506
+    }
+  },
+  "model_policy_benchmark": {
+    "policy": "model_margin_18",
+    "family": "model_margin",
+    "margin": 18
+  },
+  "rounding": "ceil, then subtract any margin, floored at zero",
+  "selection_rule": "drop policies above the walk ceiling on Choose; take the lowest Choose cost",
+  "choose_scores": {
+    "selected": {
+      "policy": "flat_rule_margin_17",
+      "cost_eur": 2414409.4,
+      "empty_rooms": 5532,
+      "walked_guests": 169,
+      "walks_per_1000": 9.06,
+      "ceiling_met": true
+    },
+    "flat_rule": {
+      "policy": "flat_rule_margin_17",
+      "cost_eur": 2414409.4,
+      "empty_rooms": 5532,
+      "walked_guests": 169,
+      "walks_per_1000": 9.06,
+      "ceiling_met": true
+    }
+  },
+  "inputs_sha256": {
+    "evidence/hyperparameter_experiments/selected_settings.csv": "093b5186ab932d3b1e084261ff0a8bf213fa725937834df7ce42c44513e393ce",
+    "evidence/probability_calibration/calibration_decision.json": "2eced5371674208e233ee6d714a793c829253849c621b199658133672e7d9be8"
+  },
+  "walk_cost_eur": 300.0,
+  "walk_ceiling_per_1000": 10.0
+}

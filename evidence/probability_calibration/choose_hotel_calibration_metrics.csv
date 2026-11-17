@@ -1,0 +1,5 @@
+hotel,probability_method,brier_score
+City Hotel,uncalibrated,0.21720400135258677
+City Hotel,calibrated,0.2053184056838733
+Resort Hotel,uncalibrated,0.19147997739804185
+Resort Hotel,calibrated,0.1919219380326766

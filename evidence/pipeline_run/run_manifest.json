@@ -1,0 +1,151 @@
+{
+  "run_completed": "2026-11-18T02:37:35",
+  "execution_order": [
+    "05_feature_engineering.ipynb",
+    "06_baselines_and_pooling_lab.ipynb",
+    "07_train_model_experiments.ipynb",
+    "08_hyperparameter_experiments.ipynb",
+    "09_probability_calibration.ipynb",
+    "10_uncertainty_and_conformal.ipynb",
+    "11_choose_policy_selection.ipynb",
+    "12_proof_evaluation.ipynb",
+    "13_ai_benchmark.ipynb",
+    "14_nightly_pipeline_validation.ipynb"
+  ],
+  "environment": {
+    "python": "3.14.5",
+    "pandas": "3.0.6",
+    "numpy": "2.5.3",
+    "scikit_learn": "1.9.1",
+    "xgboost": "3.4.1",
+    "matplotlib": "3.11.2",
+    "joblib": "1.6.0",
+    "os": "Windows-10-10.0.19045-SP0"
+  },
+  "data": {
+    "path": "data/hotels.csv",
+    "sha256": "d10cdeb07de9309007f528d6499a2c0467ae7a6b287b80ffd759e11e61801639",
+    "rows": 119390
+  },
+  "contract_sha256": "b6deeff30b1fb72419b3dff41ff5fc9a3f5893a49f6d3e4f13751fc15a0e7b2c",
+  "random_seeds": "random forest random_state=42 (notebooks 07, 08); logistic regression is deterministic (lbfgs)",
+  "notebooks": {
+    "05_feature_engineering.ipynb": {
+      "code_cells": 11,
+      "executed_cells": 11,
+      "cells_with_errors": 0,
+      "sha256_after_run": "4055f6202b7c41e505f35b17b7160609dd5b8e6bfe0a548dc13f5f762c6674e4"
+    },
+    "06_baselines_and_pooling_lab.ipynb": {
+      "code_cells": 12,
+      "executed_cells": 12,
+      "cells_with_errors": 0,
+      "sha256_after_run": "d4e3770030d7e0c6a24de38a4c90d42c9075b120593d955a5783dea737f93778"
+    },
+    "07_train_model_experiments.ipynb": {
+      "code_cells": 13,
+      "executed_cells": 13,
+      "cells_with_errors": 0,
+      "sha256_after_run": "6bac653dc9aa5fc88ce9e3d2328c9cb84135295fbf987b365223e16189f74323"
+    },
+    "08_hyperparameter_experiments.ipynb": {
+      "code_cells": 12,
+      "executed_cells": 12,
+      "cells_with_errors": 0,
+      "sha256_after_run": "78c449505db077cb7ab76cb8fec3367c64e8a399c74cfae8b834955b10de5725"
+    },
+    "09_probability_calibration.ipynb": {
+      "code_cells": 15,
+      "executed_cells": 15,
+      "cells_with_errors": 0,
+      "sha256_after_run": "44f208ad2c1135cefcbe5a496c98c2561277d070995d91a900ca8a1e1bcc9ec7"
+    },
+    "10_uncertainty_and_conformal.ipynb": {
+      "code_cells": 15,
+      "executed_cells": 15,
+      "cells_with_errors": 0,
+      "sha256_after_run": "369457f2b3ee4f343c33b47d5c79293837ac8f0830b471f2b8dbb8c967b2fa08"
+    },
+    "11_choose_policy_selection.ipynb": {
+      "code_cells": 17,
+      "executed_cells": 17,
+      "cells_with_errors": 0,
+      "sha256_after_run": "2fa98f82fbe156a4ba3cd18073c587a13c7ae4331356daa25b8ac140459808d2"
+    },
+    "12_proof_evaluation.ipynb": {
+      "code_cells": 18,
+      "executed_cells": 18,
+      "cells_with_errors": 0,
+      "sha256_after_run": "4c19aaa184a393ec0230d617216cff051a4740ad6a7de3ab8c1953940de31972"
+    },
+    "13_ai_benchmark.ipynb": {
+      "code_cells": 11,
+      "executed_cells": 11,
+      "cells_with_errors": 0,
+      "sha256_after_run": "981591d5bae7e5f1d39529e701a90497e0c5a58adf92b1962720ac32d362498f"
+    },
+    "14_nightly_pipeline_validation.ipynb": {
+      "code_cells": 11,
+      "executed_cells": 11,
+      "cells_with_errors": 0,
+      "sha256_after_run": "b9c8090a2be887f285d6be1e16cb576e37986023d456412fda27400e5060fd89"
+    }
+  },
+  "tests": "pytest -q: 11 passed (tests/test_contract.py, tests/test_nightly.py, tests/test_features.py)",
+  "frozen_configuration": {
+    "path": "evidence/choose_policy_selection/frozen_configuration.json",
+    "sha256": "3e01669b7a659a8b54877a255a2e6f14b6a9b4cb32c510738880696e7eca85e0"
+  },
+  "historical_disclosure": "Proof was inspected in earlier project work; notebook 12 is a retrospective evaluation, not a blind test.",
+  "evidence_sha256": {
+    "evidence/feature_engineering/feature_dictionary.csv": "a2c62819cd25fe56ff346f5aaa9fa17e9a4e9b5496bc1902170acc8ddd5419eb",
+    "evidence/feature_engineering/feature_table_sample.csv": "1d6d2520ed28e4bd98966a2215f60dc33cdbcbdb0ed056df5f1cff1441a6df28",
+    "evidence/feature_engineering/selected_feature_columns.csv": "55d378b5fdd758bc8af248357fc966f367984f3c6815595537c857e0a18d918f",
+    "evidence/baselines_pooling/choose_booking_metrics.csv": "d0fee22a974519e56134100182b9c6945325a30433f3f276988fd08b9ab31840",
+    "evidence/baselines_pooling/choose_hotel_metrics.csv": "eed7f6d013ddaf2f54ace4206b95f17c93a6f0db7ed50ed412bda60b8a10e8c2",
+    "evidence/baselines_pooling/choose_nightly_metrics.csv": "36e61760a21632077e23259771db26bf2e66027cb66ad64dd45b2d41c22a79ef",
+    "evidence/baselines_pooling/train_hotel_rates.csv": "798f6b7c50b5d396e94dbaae4630ad4471c8e245e18830f6703b555349846451",
+    "evidence/baselines_pooling/train_pooled_rates.csv": "fcae18002f1a6ca55f9d75d50a9816b8792885e27af09656ebe0b34e9ae9959c",
+    "evidence/train_model_experiments/choose_baseline_model_comparison.csv": "5397f64fd941c829748815e0913215203b1ddc4ad09b42d8d5e426e114f5e43f",
+    "evidence/train_model_experiments/choose_booking_metrics.csv": "efe315ded63a29a3fe985c05a70d404f46124750cccdef93b11f6a3a2e20ea56",
+    "evidence/train_model_experiments/choose_hotel_metrics.csv": "9f565ee35e4637e5d6beb2aa30de2fad87b2db4667d2f56feac5951fcea1c63b",
+    "evidence/train_model_experiments/choose_model_probabilities.csv": "94824692102c5f1df740ed2a9906bc49ed688cdfa0c3c65c9d62c1f7d037d334",
+    "evidence/train_model_experiments/choose_nightly_metrics.csv": "3e46d936454aca5bbe90d05a380b019333fe60236810603881f7cd334f72ee8a",
+    "evidence/hyperparameter_experiments/candidate_summary.csv": "a28e2138d29d621febd3b55c36f3731697be253524ee3b45eb8c0000ee41000b",
+    "evidence/hyperparameter_experiments/choose_tuned_comparison.csv": "ba3f9026f78dbc9253cb6e273649591574339f977262c64d8154416ae23707c9",
+    "evidence/hyperparameter_experiments/chronological_fold_results.csv": "cde43b63a0c37303b43853ce6296212088f40e792ea205044503650e3e8ce483",
+    "evidence/hyperparameter_experiments/selected_settings.csv": "093b5186ab932d3b1e084261ff0a8bf213fa725937834df7ce42c44513e393ce",
+    "evidence/probability_calibration/calibration_decision.json": "2eced5371674208e233ee6d714a793c829253849c621b199658133672e7d9be8",
+    "evidence/probability_calibration/choose_calibrated_probabilities.csv": "be3a70a886f4a81620c423c16fd9b823dce8d7087e884e304e07c992cbd9b2b7",
+    "evidence/probability_calibration/choose_calibrated_reliability.csv": "a71f630cc858e00af8af430de9e066e644349452404a14e6dac7d08a1d9f74f0",
+    "evidence/probability_calibration/choose_calibration_metrics.csv": "4be86acb91c709c8c704b3d71278a351d030739e2e936a7875d20d994f579abb",
+    "evidence/probability_calibration/choose_hotel_calibration_metrics.csv": "5dceeaba5b432a381ad1f2e5d6cafe6ea854d2276f623cffec823b530d0a5a90",
+    "evidence/probability_calibration/choose_uncalibrated_reliability.csv": "b2098b304d2f8019152f22a8cd1ddd49cc7006d14ab027006bbec1505c63d9ad",
+    "evidence/probability_calibration/train_out_of_fold_probabilities.csv": "138e846df8e67380bc33b02bf5cf269ef1557d3b6e9e4e720d972b8fc9fc2ec9",
+    "evidence/uncertainty_conformal/choose_hotel_interval_summary.csv": "3dfea594e6a1b7ecf9fa634d57ccf6ce70af47e43cbfa9363672af09c1ac7074",
+    "evidence/uncertainty_conformal/choose_interval_summary.csv": "5cc678ac9ffc64946dd15b7f302c868f64b17a7396f66e0acc9f77cd4fbfd4c7",
+    "evidence/uncertainty_conformal/choose_nightly_uncertainty_intervals.csv": "90b41cde8694bd007cdce972b6658b90c8d50d50639f8896e9c6640cf3061a2c",
+    "evidence/uncertainty_conformal/conformal_settings.csv": "78ad7ad3186ee23375e347c429845944b4bd43872a07b417c80f66aee3adfeb0",
+    "evidence/uncertainty_conformal/train_calibration_nightly_residuals.csv": "0d859fcd6e84f3e9e9b39a788a72cf2adede4245a102d9aeff1a877de92ca444",
+    "evidence/choose_policy_selection/choose_hotel_policy_scores.csv": "5d96ee1c1acf4b5307f7c3eea2834282f749712287dde64aaebe6ca3e8145fdd",
+    "evidence/choose_policy_selection/choose_policy_scores.csv": "ea81f486f1286bdac14d9829e054adbc780e892746adfae802df6e5d1191036e",
+    "evidence/choose_policy_selection/choose_selected_policy_nights.csv": "8fb657d5b0c3c16b5074ccf247771c0b0f6b519e87f10c229647b08750a5751f",
+    "evidence/choose_policy_selection/frozen_configuration.json": "3e01669b7a659a8b54877a255a2e6f14b6a9b4cb32c510738880696e7eca85e0",
+    "evidence/choose_policy_selection/selection_record.csv": "a9bc5b11ace2952591ae86c713ad93796636e0883ec9c3e46d5590f62e791403",
+    "evidence/proof_evaluation/frozen_configuration.csv": "47f988040d94cf03713e83a93ed6784ddd25fca877ab6365ca0fb3f1c3bcec7e",
+    "evidence/proof_evaluation/frozen_configuration_used.json": "3e01669b7a659a8b54877a255a2e6f14b6a9b4cb32c510738880696e7eca85e0",
+    "evidence/proof_evaluation/proof_benchmark_comparison.csv": "b7a8b71f9be5fcc5bfa7a0a2d1e7e2b151b65abc36f25b4b1621cdff473dd069",
+    "evidence/proof_evaluation/proof_group_score.csv": "78b46182ea0e26e34c926aab23fe2af0dac171090495d3f65a38741381e77870",
+    "evidence/proof_evaluation/proof_hotel_scores.csv": "ff0d7bd6dbd8e90a1c8fc2d34440d61b0b68f97d40f36b8680d944e9cfee286b",
+    "evidence/proof_evaluation/proof_nightly_results.csv": "fa9366a02cdf3699a72ef184f6625bd7ade699ed0a1b633d03f4aa385463332a",
+    "evidence/ai_benchmark_review/ai_branch_artifact_status.csv": "fa350221bc2178814c20032a557bff602c33662fa851bd686e2618a6a4f42895",
+    "evidence/ai_benchmark_review/ai_branch_findings.csv": "627558bb560999752913a12532a35aa27089368e505d80c133af409aa4b45c94",
+    "evidence/ai_benchmark_review/comparison_status.csv": "6c6bf1cae6adae0eda2fbd0a6e7d31e14eb3b60ffc19ba9c0d9ecf26890774f7",
+    "evidence/ai_benchmark_review/internal_calibration_review.csv": "674354373a4d731e4b6dc055cd4765f6ccb0fd1e2a3336aeb21a9ee1d9a9f4cb",
+    "evidence/ai_benchmark_review/internal_choose_policy_review.csv": "8bbf8c365f8e20fc393a310f0fea8fb3d5f80c5c890cb4815221c87c0ccf6134",
+    "evidence/ai_benchmark_review/internal_cv_leaderboard_review.csv": "a8ee369840450edcce48e10209e2cd794c23bc0d43da097228f5a123faa0c7db",
+    "evidence/ai_benchmark_review/internal_proof_audit_review.csv": "e1d19d35877791b9db68d8f6d7b771cd6166f93507a050906885d75efceb302f",
+    "evidence/nightly_pipeline_validation/smoke_test.json": "236bcd6b20271173c80f96f7e907da41c0e8bb87f2e93e3b1e6743d1822bbef3",
+    "evidence/nightly_pipeline_validation/validation_checklist.csv": "1baabce52e8cbc77efe933fc0cdc5dde3398cbcabe81731ea2878c0993a1a105"
+  }
+}

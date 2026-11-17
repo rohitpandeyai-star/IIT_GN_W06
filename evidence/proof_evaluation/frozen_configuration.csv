@@ -1,0 +1,2 @@
+model,model_settings,policy,buffer_multiplier,proof_used_for_tuning,historically_blind_test
+logistic_regression,{'C': 0.1},flat_rule_margin_17,,False,False

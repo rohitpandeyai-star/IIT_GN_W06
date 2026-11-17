@@ -1,0 +1,21 @@
+hotel,market_segment,distribution_channel,agent,company,is_repeated_guest,previous_cancellations,previous_bookings_not_canceled,is_canceled
+Resort Hotel,Direct,Direct,NO_AGENT,NO_COMPANY,0,0,0,0
+Resort Hotel,Direct,Direct,NO_AGENT,NO_COMPANY,0,0,0,0
+Resort Hotel,Direct,Direct,NO_AGENT,NO_COMPANY,0,0,0,0
+Resort Hotel,Corporate,Corporate,304.0,NO_COMPANY,0,0,0,0
+Resort Hotel,Online TA,TA/TO,240.0,NO_COMPANY,0,0,0,0
+Resort Hotel,Online TA,TA/TO,240.0,NO_COMPANY,0,0,0,0
+Resort Hotel,Direct,Direct,NO_AGENT,NO_COMPANY,0,0,0,0
+Resort Hotel,Direct,Direct,303.0,NO_COMPANY,0,0,0,0
+Resort Hotel,Online TA,TA/TO,240.0,NO_COMPANY,0,0,0,1
+Resort Hotel,Offline TA/TO,TA/TO,15.0,NO_COMPANY,0,0,0,1
+Resort Hotel,Online TA,TA/TO,240.0,NO_COMPANY,0,0,0,1
+Resort Hotel,Online TA,TA/TO,240.0,NO_COMPANY,0,0,0,0
+Resort Hotel,Online TA,TA/TO,240.0,NO_COMPANY,0,0,0,0
+Resort Hotel,Online TA,TA/TO,241.0,NO_COMPANY,0,0,0,0
+Resort Hotel,Online TA,TA/TO,241.0,NO_COMPANY,0,0,0,0
+Resort Hotel,Online TA,TA/TO,240.0,NO_COMPANY,0,0,0,0
+Resort Hotel,Offline TA/TO,TA/TO,8.0,NO_COMPANY,0,0,0,0
+Resort Hotel,Online TA,TA/TO,240.0,NO_COMPANY,0,0,0,0
+Resort Hotel,Corporate,Corporate,NO_AGENT,110.0,0,0,0,0
+Resort Hotel,Direct,Direct,250.0,NO_COMPANY,0,0,0,0

@@ -1,0 +1,23 @@
+method,policy,parameter,cost_eur,empty_rooms,walked_guests,walks_per_1000,ceiling_met,nights
+Random forest + isotonic,uncertainty,1.25,1295631.5,2921,180,9.65,True,368
+MLP small + isotonic,uncertainty,1.8,1305355.13,3142,184,9.86,True,368
+Random forest balanced + isotonic,uncertainty,1.65,1305726.18,2950,186,9.97,True,368
+MLP small,uncertainty,0.25,1308468.96,3115,184,9.86,True,368
+XGBoost + isotonic,uncertainty,1.7,1337377.44,3108,182,9.76,True,368
+LightGBM + isotonic,uncertainty,1.95,1339077.58,3186,180,9.65,True,368
+LightGBM + sigmoid,uncertainty,2.0,1357628.95,3193,184,9.86,True,368
+XGBoost + sigmoid,uncertainty,1.95,1367363.67,3193,177,9.49,True,368
+Random forest balanced + sigmoid,uncertainty,1.9,1371116.97,3115,182,9.76,True,368
+Random forest + sigmoid,uncertainty,1.6,1389576.17,3171,185,9.92,True,368
+MLP small + sigmoid,uncertainty,2.0,1393469.48,3322,178,9.54,True,368
+XGBoost,fixed,0.0,1395867.3,3346,143,7.67,True,368
+Random forest,uncertainty,0.25,1404275.41,3326,186,9.97,True,368
+LightGBM,fixed,0.0,1405462.41,3380,147,7.88,True,368
+CatBoost direct,fixed,0.0,1417907.08,3441,122,6.54,True,368
+Random forest balanced,fixed,9.0,1552644.94,3402,175,9.38,True,368
+Logistic elastic-net,uncertainty,0.2,1613605.64,3893,179,9.6,True,368
+Logistic elastic-net + isotonic,uncertainty,1.9,1619624.47,3894,184,9.86,True,368
+SGD log-loss,fixed,0.0,1771613.19,4323,134,7.18,True,368
+Logistic elastic-net + sigmoid,fixed,9.0,1803109.04,4198,169,9.06,True,368
+Hotel flat rate,fixed,16.0,2387929.64,5442,185,9.92,True,368
+Hotel × market-segment lookup,fixed,18.0,2827242.29,6604,176,9.44,True,368

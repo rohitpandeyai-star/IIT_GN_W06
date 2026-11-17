@@ -1,0 +1,44 @@
+{
+  "frozen_at": "2026-11-18T02:02:05",
+  "frozen_before_test": false,
+  "decided_by": "user instruction (2026-11-18), after seeing run 1",
+  "chosen_method": "XGBoost",
+  "model_file": "data/models/XGBoost.joblib",
+  "model_sha256": "40adbadda1804f78847825a7213c2e8bc9dff404726ca651a28d2bbdb222c8ab",
+  "preprocessor_file": "data/preprocessed/preprocessor.joblib",
+  "preprocessor_sha256": "61668e8ae1bcc3e244ab1f491a431a5aa78cf34587b482bd0c867d427a9d59ab",
+  "fitted_on": "train only (arrivals before 2016-07-01); not refitted on train + choose, because the buffers were chosen for the train-only fit",
+  "rule": "k = max(0, floor(expected cancellations) - buffer), buffer per hotel",
+  "primary": {
+    "buffer_structure": "separate buffer per hotel; group-wide walk ceiling only",
+    "chosen_buffers": {
+      "City Hotel": 6,
+      "Resort Hotel": 3
+    },
+    "flat_rule_buffers": {
+      "City Hotel": 20,
+      "Resort Hotel": 4
+    }
+  },
+  "secondary_reported_for_transparency": {
+    "buffer_structure": "one shared buffer for both hotels (notebook 12)",
+    "chosen_buffer": 5,
+    "flat_rule_buffer": 16
+  },
+  "flat_rule_hotel_rates_from_train": {
+    "City Hotel": 0.416627,
+    "Resort Hotel": 0.251511
+  },
+  "walk_ceiling_per_1000_arrivals": 10.0,
+  "walk_cost_eur": 300.0,
+  "choose_period_evidence": "notebook 13: XGBoost -1.0% vs flat rule (per-hotel buffers), cheaper in 69% of week resamples; not a reliable difference",
+  "run": 2,
+  "changed_after_test": true,
+  "disclosure": "Run 2 changes the method from CatBoost to XGBoost AFTER run 1's test results were seen (run 1: CatBoost cost EUR 150,459 more than the flat rule). Per docs/EVALUATION_CONTRACT.md this change must be disclosed and both runs reported. XGBoost's buffers are its val (choose-period) buffers from notebook 13, unchanged; the flat-rule benchmark is unchanged.",
+  "first_run": {
+    "freeze_file": "models/frozen_choice.json",
+    "freeze_sha256": "1c9c2449fd086fa5072b7914810bf381d34ba41518ac94fe9239e39b20c7cd90",
+    "method": "CatBoost",
+    "saving_eur": -150458.6000000001
+  }
+}
