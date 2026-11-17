@@ -478,11 +478,32 @@ The log begins from the clean `main` baseline below. It distinguishes user reque
           "pushed_to": "origin/main"
         }
       ]
+    },
+    {
+      "phase_sequence": 18,
+      "phase_id": "column_source_reference",
+      "purpose": "Give the learner complete per-column paper evidence needed to make their own timing and leakage decisions.",
+      "events": [
+        {
+          "sequence": 24,
+          "commit": "db110b958436403bd77dc0b9ea0326e53a4660dd",
+          "parent": "257c0fbbeb7a5f5b07a1b4da821eff09ef97f34a",
+          "timestamp_local": "2026-11-17",
+          "message": "docs: add detailed column source reference",
+          "kind": "source_reference",
+          "trigger": "User supplied the Hotel Booking Demand paper PDF and asked for every column's details in Markdown so they could make their own audit decisions.",
+          "decision": "Create docs/COLUMN_SOURCE_REFERENCE.md with all 32 CSV columns, article definitions, source/engineering, published H1/H2 statistics, timing cautions, and decision questions; link it from the column notes and tracker.",
+          "reason": "Provide the evidence per field without assigning a bin or changing the learner's choices.",
+          "files_changed": ["docs/COLUMN_SOURCE_REFERENCE.md", "docs/COLUMNS.md", "docs/EXECUTION_TRACKER.md", "ai_logs/INDEX.md", "ai_logs/20261117_pdf_column_reference.md"],
+          "verification": "Extracted Table 1, Section 2, and Tables 2–7 from the supplied nine-page PDF. Confirmed the reference contains exactly 32 distinct sections matching the 32 CSV columns. Preserved the user's notebook with 16 executed code cells and untouched decision cells.",
+          "pushed_to": "origin/main"
+        }
+      ]
     }
   ],
   "current_snapshot": {
     "as_of": "2026-11-17",
-    "latest_recorded_commit": "f9adce5db2216d7f58aa4ed82780993b4b6b1efe",
+    "latest_recorded_commit": "db110b958436403bd77dc0b9ea0326e53a4660dd",
     "paper_frame_draft": "docs/PAPER_FRAME_AI_ASSISTED.md; AI-assisted study draft, not course-compliant AI-free V0.",
     "defence_guide": "docs/DEFENCE_QUICK_GUIDE.md; study aid only, and explicitly distinguishes measured checks, client assumptions, and pending work.",
     "charter_status": "Completed AI-assisted reference draft; does not satisfy the course-required AI-free paper frame.",
@@ -490,7 +511,7 @@ The log begins from the clean `main` baseline below. It distinguishes user reque
     "working_tree_before_this_ledger": "clean",
     "role_assignment": {"Client Lead": "Rohit Pandey", "Data Lead": "Rohit Pandey", "Model Lead": "Rohit Pandey", "Build Lead": "Rohit Pandey"},
     "tracker_status": {"step_0": "Complete", "step_1": "Complete for the user's AI-assisted workflow; course AI-free condition unmet", "step_2": "In progress; learner-led notebook decisions outstanding", "steps_3_to_10": "Not started"},
-    "column_audit": "AI bins are preliminary; notebooks/01_column_audit_workshop.ipynb has blank learner prompts for all 32 columns.",
+    "column_audit": "AI bins are preliminary; docs/COLUMN_SOURCE_REFERENCE.md has per-field paper details; notebooks/01_column_audit_workshop.ipynb has blank learner prompts for all 32 columns.",
     "notebook_status": "Both notebooks contain grouped Pandas cells and saved tables for brief checks. Proof-period cancellation outcomes are held back.",
     "data_results": {"rows": 119390, "columns": 32, "hotels": 2, "train_choose_cancellation_rate": "36.2%", "proof_cancellation_rate": "not calculated in early checks"},
     "unresolved_items": ["The learner must run the column-audit notebook cell by cell and record their own bins and reasons.", "The course-required AI-free paper frame remains unmet by the AI-assisted draft.", "Ask for the current flat-rule safety margin.", "Confirm whether the walk ceiling applies per hotel as well as group-wide.", "Verify the vendor 95% accuracy claim if evidence exists.", "Do not claim an observed walk rate until a rule is evaluated."],

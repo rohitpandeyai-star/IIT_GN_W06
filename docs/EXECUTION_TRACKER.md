@@ -118,7 +118,7 @@ For a three-person team, use the alternate assignments in `docs/ROLES.md`; the u
 |---:|---|---|---|---|
 | 0 | Complete | `c4e7b11` | Included in tracker update push | Source review complete; tracker creation checkpoint committed. |
 | 1 | Complete | `1aa8414` | Included in this main-branch push | AI-assisted charter, paper-frame draft and RFP prepared at user direction. Course AI-free requirement remains unmet and is disclosed. Client questions remain recorded. |
-| 2 | In progress | `f9adce5` | Included in this main-branch push | The prior AI-only bin audit is provisional. Created a 45-cell learner-led notebook with simple presentation-friendly code; all 32 classification prompts are blank until the user reviews and records them. |
+| 2 | In progress | `db110b9` | Included in this main-branch push | Added the supplied paper's detailed column definitions, provenance, published profiles, and decision questions. The prior AI-only bins remain provisional; learner choices are still pending in the 45-cell notebook. |
 | 3 | Not started | | Pending | |
 | 4 | Not started | | Pending | |
 | 5 | Not started | | Pending | |
