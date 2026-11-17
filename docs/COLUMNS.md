@@ -4,6 +4,8 @@
 
 > **AI-generated preliminary suggestions, not the learner's audit.** Do not treat these bins as your decisions. The learner is reviewing every field sequentially in `notebooks/01_column_audit_workshop.ipynb`; replace or reconcile this file only after recording their choices. The source CSV is a snapshot reconstructed from the property-management system; the article says values were taken from booking/change records as of the day before arrival. A column's presence in this export does not prove its value was known at the original booking time.
 
+For the paper's full definition, source/engineering notes, published hotel-level statistics, and questions for your own decision, see [`docs/COLUMN_SOURCE_REFERENCE.md`](COLUMN_SOURCE_REFERENCE.md).
+
 Bins:
 
 1. **Fixed at booking:** known when the booking is made and does not change.

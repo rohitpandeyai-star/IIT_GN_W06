@@ -7,7 +7,7 @@ This file is the working index for completing the project. Update the status and
 - The announcement deck and the project brief, README, role guide, ladder, AI workflow and artifact templates have been reviewed.
 - The project starts on `main`, which was clean and tracking `origin/main` at the time this tracker was prepared.
 - Step 1 now has an AI-assisted charter, paper-frame study draft, and hotel RFP, plus corrected domain wording for unverified commercial facts. These do not satisfy the course-required AI-free paper frame, which remains for the student to write. Both notebooks have commented, labeled Pandas checks with visible outputs; early checks held back proof cancellation outcomes.
-- Step 2 is reopened at the user's request: the AI-generated bins are preliminary suggestions, not the learner's decisions. `notebooks/01_column_audit_workshop.ipynb` guides the learner through evidence and blank decision cells one group at a time. Do not close Step 2 until their decisions and reasons are recorded.
+- Step 2 is reopened at the user's request: the AI-generated bins are preliminary suggestions, not the learner's decisions. `notebooks/01_column_audit_workshop.ipynb` guides the learner through evidence and blank decision cells one group at a time; the supplied paper's per-column details and profiles are in `docs/COLUMN_SOURCE_REFERENCE.md`. The learner has executed the first 16 code cells; decision cells remain untouched. Do not close Step 2 until their decisions and reasons are recorded.
 - Rohit Pandey is assigned to all four roles, as requested. Project work and challenger sign-offs remain pending until completed.
 - Do not commit the downloaded bookings CSV. `src/contract.py` is supplied and must not be edited.
 
@@ -35,6 +35,7 @@ IIT_GN_W06/
 │   ├── RFP.md                        [Client Lead: client requirements and acceptance terms]
 │   ├── DOMAIN.md                     [Reference: hotel terms]
 │   ├── COLUMNS.md                    [AI preliminary bin suggestions; replace after learner review]
+│   ├── COLUMN_SOURCE_REFERENCE.md    [Paper definitions, source/engineering, hotel stats, and per-column decision questions]
 │   ├── COLUMNS_USER_REVIEW.md         [Generated only from the learner's completed notebook decisions]
 │   ├── DECISIONS.md                  [AI preliminary notes and the learner's final data choices]
 │   ├── grill_01_charter.md           [Client Lead: Tuesday grill and resulting changes]

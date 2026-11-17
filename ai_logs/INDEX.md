@@ -5,6 +5,7 @@
 | File | Role | Tool | Artifact it fed | What we kept | What we discarded |
 |---|---|---|---|---|---|
 | [20261117_client_frame_data_audit.md](20261117_client_frame_data_audit.md) | Client Lead and Data Lead | Codex AI assistant | AI-assisted charter/RFP follow-through, `notebooks/01_column_audit_workshop.ipynb`, `docs/COLUMNS.md`, `docs/DECISIONS.md` | Checked facts, explicit unknowns, and a blank, learner-led evidence worksheet; previous AI bins are only suggestions | Unsupported claims about client payment terms; treating AI bins as learner decisions or claiming course AI-free V0 compliance |
+| [20261117_pdf_column_reference.md](20261117_pdf_column_reference.md) | Data Lead | Codex AI assistant / PDF text extraction | `docs/COLUMN_SOURCE_REFERENCE.md`, `docs/COLUMNS.md` | Paper definitions, provenance, published H1/H2 statistics, timing cautions, and questions for the learner | Any bin/classification made on the learner's behalf |
 | Grill run 1 (required) | Client Lead | Pending | `docs/grill_01_charter.md` | Pending | Pending |
 | Grill run 2 (required) | Build Lead | Pending | `docs/grill_02_prd.md` | Pending | Pending |
 | `karpathy_effect.md` (required) | Build Lead | Pending | `AGENTS.md` | Pending | Pending |
