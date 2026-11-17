@@ -583,22 +583,43 @@ The log begins from the clean `main` baseline below. It distinguishes user reque
           "pushed_to": "origin/main"
         }
       ]
+    },
+    {
+      "phase_sequence": 23,
+      "phase_id": "step_4_build_plan",
+      "purpose": "Complete the pre-build product and delivery plan, with model selection reserved for evidence from Step 5.",
+      "events": [
+        {
+          "sequence": 29,
+          "commit": "b1cfcf6da292aaeb20704d9568f6717229ef76c4",
+          "parent": "b8b4bfc",
+          "timestamp_local": "2026-11-17",
+          "message": "docs: complete step 4 build plan",
+          "kind": "planning_artifacts",
+          "trigger": "User asked to proceed after the PRD was filled and questioned why only logistic regression had been named.",
+          "decision": "Name a depth-limited decision tree (maximum depth 3) as the second learned candidate; fill the POC/MVP/final plan with owners, estimated hours, completion checks, evidence paths, production additions, and cuts; record Step 4 planning proposals.",
+          "reason": "Make the evaluation and delivery sequence concrete before coding while leaving the final model and buffer dependent on choose-period evidence.",
+          "files_changed": ["docs/PRD.md", "docs/BUILD_PLAN.md", "docs/DECISIONS.md", "docs/EXECUTION_TRACKER.md", "ai_logs/INDEX.md", "ai_logs/20261117_build-lead_codex_plan.md"],
+          "verification": "Reviewed Markdown changes and ran git diff --check. No tests or model runs were performed. Planning artifacts are committed and pushed; Step 4 is recorded complete, while method selection remains in Step 5.",
+          "pushed_to": "origin/main"
+        }
+      ]
     }
   ],
   "current_snapshot": {
     "as_of": "2026-11-17",
-    "latest_recorded_commit": "bf08ea5c363de24a18fb55e36529b51daca2bb62",
+    "latest_recorded_commit": "b1cfcf6da292aaeb20704d9568f6717229ef76c4",
     "paper_frame_draft": "docs/PAPER_FRAME_AI_ASSISTED.md; AI-assisted study draft, not course-compliant AI-free V0.",
     "defence_guide": "docs/DEFENCE_QUICK_GUIDE.md; study aid only, and explicitly distinguishes measured checks, client assumptions, and pending work.",
     "charter_status": "Completed AI-assisted reference draft; does not satisfy the course-required AI-free paper frame.",
     "last_known_commit_before_this_ledger": "d12068b79a0df6b9747c73a16a8f62a81afd3583",
     "working_tree_before_this_ledger": "clean",
     "role_assignment": {"Client Lead": "Rohit Pandey", "Data Lead": "Rohit Pandey", "Model Lead": "Rohit Pandey", "Build Lead": "Rohit Pandey"},
-    "tracker_status": {"step_0": "Complete", "step_1": "Complete for the user's AI-assisted workflow; course AI-free condition unmet", "step_2": "Complete; all 32 learner choices and reasons recorded", "step_3": "In progress; compressed grill and project rules recorded, 45-minute format and screenshot outstanding", "step_4": "In progress; PRD filled, build plan and decision record pending", "steps_5_to_10": "Not started"},
+    "tracker_status": {"step_0": "Complete", "step_1": "Complete for the user's AI-assisted workflow; course AI-free condition unmet", "step_2": "Complete; all 32 learner choices and reasons recorded", "step_3": "In progress; compressed grill and project rules recorded, 45-minute format and screenshot outstanding", "step_4": "Complete; PRD, build plan, and planning proposal recorded; final method selection is Step 5", "steps_5_to_10": "Not started"},
     "column_audit": "All 32 learner bins and reasons are recorded in docs/COLUMNS_USER_REVIEW.md; timing judgments remain subject to point-in-time verification.",
     "notebook_status": "Both notebooks contain grouped Pandas cells and saved tables for brief checks. Proof-period cancellation outcomes are held back.",
     "data_results": {"rows": 119390, "columns": 32, "hotels": 2, "train_choose_cancellation_rate": "36.2%", "proof_cancellation_rate": "not calculated in early checks"},
-    "unresolved_items": ["The course-required AI-free paper frame remains unmet by the AI-assisted draft.", "Confirm the current flat-rule safety margin and whether it varies by hotel or season.", "Confirm if the group-wide walk ceiling is sufficient or if per-hotel ceilings are required.", "Confirm the final approver, walk-cost owner, override process, live snapshot requirement, and no-show treatment.", "Request evidence and definition for the vendor 95% accuracy claim.", "Do not claim savings or walk performance until the rule is evaluated on the frozen proof period.", "Step 3 needs the course-format 45-minute grill and genuine screenshot evidence, or a course-owner waiver.", "Complete the Step 4 build plan and decision record before marking planning complete."],
+    "unresolved_items": ["The course-required AI-free paper frame remains unmet by the AI-assisted draft.", "Confirm the current flat-rule safety margin and whether it varies by hotel or season.", "Confirm if the group-wide walk ceiling is sufficient or if per-hotel ceilings are required.", "Confirm the final approver, walk-cost owner, override process, live snapshot requirement, and no-show treatment.", "Request evidence and definition for the vendor 95% accuracy claim.", "Do not claim savings or walk performance until the rule is evaluated on the frozen proof period.", "Step 3 needs the course-format 45-minute grill and genuine screenshot evidence, or a course-owner waiver.", "Select the final model and buffer on choose-period results in Step 5; proof outcomes remain unexamined until freeze."],
     "implementation_scope": {"files_not_changed": ["src/contract.py", "src/features.py", "src/backtest.py", "src/nightly.py"], "test_suite_run": false}
   }
 }

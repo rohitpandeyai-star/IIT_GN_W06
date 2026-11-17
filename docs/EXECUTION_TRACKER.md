@@ -121,7 +121,7 @@ For a three-person team, use the alternate assignments in `docs/ROLES.md`; the u
 | 1 | Complete | `1aa8414` | Included in this main-branch push | AI-assisted charter, paper-frame draft and RFP prepared at user direction. Course AI-free requirement remains unmet and is disclosed. Client questions remain recorded. |
 | 2 | Complete | `87fd1a5` | Pushed to `origin/main` | Learner completed bin/reason decisions for all 32 columns in the notebook; generated `docs/COLUMNS_USER_REVIEW.md`. Judgments are recorded as the learner's current decisions, not externally verified point-in-time facts. |
 | 3 | In progress | `c2d2550` | Pushed to `origin/main` | Nine AI-assisted proposed responses recorded; charter/RFP gates and eight project rules added. Unknowns remain open. Compressed session, so the 45-minute format and genuine screenshot requirement remain outstanding. |
-| 4 | Complete | `bf08ea5` | Pushed to `origin/main` | PRD, build plan, and AI-assisted planning proposals are recorded. Final model and buffer selection are reserved for Step 5 evaluation. |
+| 4 | Complete | `b1cfcf6` | Pushed to `origin/main` | PRD, build plan, and AI-assisted planning proposals are recorded. Final model and buffer selection are reserved for Step 5 evaluation. |
 | 5 | Not started | | Pending | |
 | 6 | Not started | | Pending | |
 | 7 | Not started | | Pending | Benchmark belongs on `ai-benchmark`; its chat index row belongs on `main`. |
