@@ -625,18 +625,39 @@ The log begins from the clean `main` baseline below. It distinguishes user reque
           "pushed_to": "origin/main"
         }
       ]
+    },
+    {
+      "phase_sequence": 25,
+      "phase_id": "natural_language_contract_split",
+      "purpose": "Create an auditable notebook for the first Step 5 data action and partition the complete raw dataset by the agreed dates.",
+      "events": [
+        {
+          "sequence": 31,
+          "commit": "2e739bfe15771cefd4e0b89d64f51340bd0f6a1c",
+          "parent": "e6c9d5b",
+          "timestamp_local": "2026-11-17",
+          "message": "notebooks: split bookings by evaluation periods",
+          "kind": "data_partition_notebook",
+          "trigger": "User asked for a natural-language Jupyter notebook to first load all data and split it using the decided periods.",
+          "decision": "Create a notebook pairing the plain-language request with simple code using `data.read_raw()`, `data.arrival_date()`, and `contract.split_periods()`; summarize counts/date ranges/hotel names and leave proof cancellation outcomes unexamined.",
+          "reason": "Make the first data step transparent and reproducible without mixing it with cleaning, feature engineering, or model fitting.",
+          "files_changed": ["notebooks/02_natural_language_data_prep.ipynb", "docs/DECISIONS.md", "docs/EXECUTION_TRACKER.md", "docs/BUILD_PLAN.md", "ai_logs/INDEX.md", "ai_logs/20261117_datalead_natural_language_split.md"],
+          "verification": "Executed four notebook code cells. All 119,390 rows were assigned: train 49,157 (2015-07-01 to 2016-06-30), choose 29,546 (2016-07-01 to 2016-12-31), proof 40,687 (2017-01-01 to 2017-08-31). Proof summary displayed only counts, dates, and hotel names; no cleaning or model fitting occurred. Changes pushed to origin/main.",
+          "pushed_to": "origin/main"
+        }
+      ]
     }
   ],
   "current_snapshot": {
     "as_of": "2026-11-17",
-    "latest_recorded_commit": "532aabbc6fd8f7fdfdc9c77372d930d3f9919f32",
+    "latest_recorded_commit": "2e739bfe15771cefd4e0b89d64f51340bd0f6a1c",
     "paper_frame_draft": "docs/PAPER_FRAME_AI_ASSISTED.md; AI-assisted study draft, not course-compliant AI-free V0.",
     "defence_guide": "docs/DEFENCE_QUICK_GUIDE.md; study aid only, and explicitly distinguishes measured checks, client assumptions, and pending work.",
     "charter_status": "Completed AI-assisted reference draft; does not satisfy the course-required AI-free paper frame.",
     "last_known_commit_before_this_ledger": "d12068b79a0df6b9747c73a16a8f62a81afd3583",
     "working_tree_before_this_ledger": "clean",
     "role_assignment": {"Client Lead": "Rohit Pandey", "Data Lead": "Rohit Pandey", "Model Lead": "Rohit Pandey", "Build Lead": "Rohit Pandey"},
-    "tracker_status": {"step_0": "Complete", "step_1": "Complete for the user's AI-assisted workflow; course AI-free condition unmet", "step_2": "Complete; all 32 learner choices and reasons recorded", "step_3": "In progress; compressed grill and project rules recorded, 45-minute format and screenshot outstanding", "step_4": "Complete; PRD, build plan, and planning proposal recorded; final method selection is Step 5", "step_5": "Not started; EDA, cleaning decisions, feature work, and model comparison remain", "steps_6_to_10": "Not started"},
+    "tracker_status": {"step_0": "Complete", "step_1": "Complete for the user's AI-assisted workflow; course AI-free condition unmet", "step_2": "Complete; all 32 learner choices and reasons recorded", "step_3": "In progress; compressed grill and project rules recorded, 45-minute format and screenshot outstanding", "step_4": "Complete; PRD, build plan, and planning proposal recorded; final method selection is Step 5", "step_5": "In progress; 119,390-row contract split executed; full EDA, cleaning, feature selection/engineering, and models pending", "steps_6_to_10": "Not started"},
     "column_audit": "All 32 learner bins and reasons are recorded in docs/COLUMNS_USER_REVIEW.md; timing judgments remain subject to point-in-time verification.",
     "notebook_status": "Both notebooks contain grouped Pandas cells and saved tables for brief checks. Proof-period cancellation outcomes are held back.",
     "data_results": {"rows": 119390, "columns": 32, "hotels": 2, "train_choose_cancellation_rate": "36.2%", "proof_cancellation_rate": "not calculated in early checks"},
