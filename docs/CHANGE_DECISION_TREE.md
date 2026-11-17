@@ -499,11 +499,32 @@ The log begins from the clean `main` baseline below. It distinguishes user reque
           "pushed_to": "origin/main"
         }
       ]
+    },
+    {
+      "phase_sequence": 19,
+      "phase_id": "embed_column_details_in_notebook",
+      "purpose": "Put the paper evidence next to each learner decision prompt in the Jupyter notebook.",
+      "events": [
+        {
+          "sequence": 25,
+          "commit": "136b91c316e299a5f945ddf718e06c7a1f0734ef",
+          "parent": "28199ff1f13517315beb5e0536e9263e6918224c",
+          "timestamp_local": "2026-11-17",
+          "message": "notebooks: add paper evidence to column audit groups",
+          "kind": "notebook_reference_update",
+          "trigger": "User asked to paste the relevant column details into the Jupyter notebook as well as the Markdown reference.",
+          "decision": "Add the source-guide details to the matching Markdown cell for each of the ten audit groups, including definitions, source/engineering, published H1/H2 profiles, and decision questions.",
+          "reason": "Keep the evidence beside the learner's decision prompt so they can review and explain each choice in sequence.",
+          "files_changed": ["notebooks/01_column_audit_workshop.ipynb"],
+          "verification": "All 10 groups include paper details. Preserved 16 user-executed code cells and their outputs, all 27 code cells, and every blank bin/reason prompt; no cells were run during this update.",
+          "pushed_to": "origin/main"
+        }
+      ]
     }
   ],
   "current_snapshot": {
     "as_of": "2026-11-17",
-    "latest_recorded_commit": "db110b958436403bd77dc0b9ea0326e53a4660dd",
+    "latest_recorded_commit": "136b91c316e299a5f945ddf718e06c7a1f0734ef",
     "paper_frame_draft": "docs/PAPER_FRAME_AI_ASSISTED.md; AI-assisted study draft, not course-compliant AI-free V0.",
     "defence_guide": "docs/DEFENCE_QUICK_GUIDE.md; study aid only, and explicitly distinguishes measured checks, client assumptions, and pending work.",
     "charter_status": "Completed AI-assisted reference draft; does not satisfy the course-required AI-free paper frame.",

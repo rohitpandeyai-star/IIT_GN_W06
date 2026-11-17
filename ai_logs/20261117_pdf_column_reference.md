@@ -21,3 +21,7 @@ Extract the paper's details into a Markdown file, with detailed information for 
 Extracted text from the nine-page PDF. Used Table 1 on pages 3–5, the extraction method and timing warnings in Section 2 on page 5, and summary Tables 2–7 on pages 6–7. The figures on page 8 were not needed for column definitions or the user decisions. The reference paraphrases the paper; it does not assign audit bins.
 
 At the time this log was written, 16 of the notebook's 27 code cells had execution counts. The learner had not run the decision cells. No data/model tests or proof calculations were run for this request.
+
+## Follow-up: place details in the notebook
+
+The user asked for the relevant column details to also appear inside the Jupyter notebook. Added the matching paper-reference sections to each of the 10 group Markdown cells, including definitions, source/engineering, published H1/H2 profiles, and decision questions. Preserved all 27 code cells, their execution counts and outputs, and every blank bin/reason prompt. No notebook code cell was executed as part of this follow-up.
