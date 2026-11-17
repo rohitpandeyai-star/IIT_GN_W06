@@ -1,6 +1,6 @@
 # Data Decisions and Team Objections
 
-> **AI-assisted preliminary log.** The entries below record observed handling and suggestions from the assistant; they are not the learner's final data decisions. Work through `notebooks/01_column_audit_workshop.ipynb` in order, then update this log in the learner's own words. Add dated entries for later cleaning, filtering, or feature decisions; do not silently rewrite earlier decisions.
+> **AI-assisted preliminary log.** The data entries below distinguish observed handling from proposed choices. The learner's 32 current column bins and reasons are recorded in `docs/COLUMNS_USER_REVIEW.md`; their point-in-time accuracy has not been independently verified. New planning items below are assistant proposals at the user's direction, not client-confirmed facts. Add dated entries for later cleaning, filtering, model, or feature decisions; do not silently rewrite earlier decisions.
 
 ## Data decisions
 
@@ -31,3 +31,13 @@ The data identifies two properties as City Hotel and Resort Hotel, with differen
 - Minimum savings threshold, if the client expects one beyond improving on the flat-rule baseline.
 - Whether a real morning run must use the reservations present at that run time rather than the full final book used by the exercise.
 - Which amendable fields can be reconstructed at the intended prediction timestamp.
+
+## Step 4 planning proposals (2026-11-17)
+
+| Artifact | AI-assisted proposal | Evidence / reason | Status |
+|---|---|---|---|
+| PRD method comparison | Compare a hotel-by-history lookup, logistic regression, and a depth-limited decision tree (maximum depth 3), all against the flat-rule baseline. Prefer the lookup if the more complex candidates do not lower choose-period cost while meeting the same ceiling. | The PRD defines a low-complexity fallback and two distinct learned candidates; no results exist yet. | Candidate plan; final method awaits Step 5 choose-period evidence. |
+| PRD inputs | Restrict candidate predictors to the learner's current Bin 1 fields (`hotel`, `is_repeated_guest`, `previous_cancellations`, `previous_bookings_not_canceled`); use `is_canceled` as target only. | `docs/COLUMNS_USER_REVIEW.md`; source timing still needs point-in-time verification for operational use. | Proposed; review with feature audit in Step 5. |
+| PRD segmentation | Set segmentation outputs to zero in MVP. Reopen only if the client identifies an action and the segmented candidate improves choose-period cost by at least 5% while meeting the walk ceiling. | No action or measurable value for hidden guest types is stated in the brief. The 5% is a proposed internal gate, not a client threshold. | Proposed; client confirmation required before treating it as a requirement. |
+| Build plan | Budget 12 hours for POC, 8 for MVP, and 4 for final evidence/roadmap; record actual time separately. | Initial planning estimate for one person assigned all roles; production estimates are discovery-dependent. | Planning estimate; revise as work is done. |
+| Evaluation discipline | Select all settings on choose data, compare candidates on the same hotel-nights, keep proof outcomes unseen until freeze, then run proof once. | Required by `docs/EVALUATION_CONTRACT.md`; prevents tuning against proof. | Required procedure. |
