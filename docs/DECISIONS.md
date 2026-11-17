@@ -77,3 +77,7 @@ Recorded from executed cells in `notebooks/02_natural_language_data_prep.ipynb`;
 The train profile also records each source column's type, missingness, distinct count, and three most common values, plus numeric minimum/median/99th percentile/maximum and negative count. `is_canceled`, `reservation_status`, and `reservation_status_date` are excluded from predictors because they are the target or post-outcome fields. Prior-count zeros are common (43,348/49,157 for previous cancellations; 47,813/49,157 for previous non-cancelled bookings), motivating the provisional `log1p` features.
 
 These are descriptive checks and a provisional feature preparation. No model has been fit, no method/buffer selected, and no proof cancellation metric calculated.
+
+### User approval gates — pending (2026-11-17)
+
+`notebooks/02_natural_language_data_prep.ipynb` now presents each observation and proposed action separately. No cleaning or feature proposal is treated as approved. Pending gates are: retain exact repeated rows; leave non-candidate missing values unchanged; retain unusual non-negative values; use the four Bin 1 fields provisionally; include or omit `log1p` count features; and use train-derived one-hot hotel indicators. The period split was directly requested and is complete. Final feature matrices remain blocked until required gates are approved; a disapproved required gate pauses work for discussion.

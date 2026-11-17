@@ -122,7 +122,7 @@ For a three-person team, use the alternate assignments in `docs/ROLES.md`; the u
 | 2 | Complete | `87fd1a5` | Pushed to `origin/main` | Learner completed bin/reason decisions for all 32 columns in the notebook; generated `docs/COLUMNS_USER_REVIEW.md`. This checkpoint covers the column timing audit; subsequent notebook records initial train EDA and provisional feature matrices. No raw rows/values were cleaned. Timing judgments are not externally verified point-in-time facts. |
 | 3 | In progress | `c2d2550` | Pushed to `origin/main` | Nine AI-assisted proposed responses recorded; charter/RFP gates and eight project rules added. Unknowns remain open. Compressed session, so the 45-minute format and genuine screenshot requirement remain outstanding. |
 | 4 | Complete | `b1cfcf6` | Pushed to `origin/main` | PRD, build plan, and AI-assisted planning proposals are recorded. Final model and buffer selection are reserved for Step 5 evaluation. |
-| 5 | In progress | `f33a3b4` | Pushed to `origin/main` | Split, all-column train EDA, and provisional feature engineering executed. No raw rows/values changed; 16,291 exact repeated train rows retained. Final feature timing review and model comparison remain; proof target not inspected. |
+| 5 | In progress | `f33a3b4` | Pushed to `origin/main` | Split and train EDA executed; raw data unchanged. Six observation-based cleaning/feature gates now await user approval; final matrices are blocked until required approvals. No proof target inspected or model trained. |
 | 6 | Not started | | Pending | |
 | 7 | Not started | | Pending | Benchmark belongs on `ai-benchmark`; its chat index row belongs on `main`. |
 | 8 | Not started | | Pending | |
