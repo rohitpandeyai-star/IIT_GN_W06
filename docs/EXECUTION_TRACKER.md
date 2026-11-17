@@ -36,6 +36,7 @@ IIT_GN_W06/
 │   ├── DOMAIN.md                     [Reference: hotel terms]
 │   ├── COLUMNS.md                    [AI preliminary bin suggestions; replace after learner review]
 │   ├── COLUMN_SOURCE_REFERENCE.md    [Paper definitions, source/engineering, hotel stats, and per-column decision questions]
+│   ├── COLUMN_AUDIT_ANSWER_KEY_AI_ASSISTED.md [Separate suggested bins and reasoning; not the learner's audit]
 │   ├── COLUMNS_USER_REVIEW.md         [Generated only from the learner's completed notebook decisions]
 │   ├── DECISIONS.md                  [AI preliminary notes and the learner's final data choices]
 │   ├── grill_01_charter.md           [Client Lead: Tuesday grill and resulting changes]
@@ -118,7 +119,7 @@ For a three-person team, use the alternate assignments in `docs/ROLES.md`; the u
 |---:|---|---|---|---|
 | 0 | Complete | `c4e7b11` | Included in tracker update push | Source review complete; tracker creation checkpoint committed. |
 | 1 | Complete | `1aa8414` | Included in this main-branch push | AI-assisted charter, paper-frame draft and RFP prepared at user direction. Course AI-free requirement remains unmet and is disclosed. Client questions remain recorded. |
-| 2 | In progress | `136b91c` | Included in this main-branch push | Added the supplied paper's details inside each notebook group. Preserved 16 executed cells and all blank decisions; learner choices remain pending in the 45-cell notebook. |
+| 2 | In progress | `136b91c` | Included in this main-branch push | Paper details appear in each notebook group. A separate AI-assisted suggested answer key is available for comparison; the learner's decision prompts remain blank. |
 | 3 | Not started | | Pending | |
 | 4 | Not started | | Pending | |
 | 5 | Not started | | Pending | |
