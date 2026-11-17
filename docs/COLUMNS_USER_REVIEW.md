@@ -5,8 +5,8 @@
 | Column | Bin | Reason in my words |
 |---|---:|---|
 | `hotel` | 1 - Fixed at booking | We always know the Hotel in which the booking has been made for |
-| `is_canceled` | 2 - Amendable or timing uncertain | As it is an event which can happen anytime before the guest actually enters the hotel |
-| `lead_time` | 3 - After the fact | We only know after the booking has been completed that what the actual lead time was and can be ammended later on |
+| `is_canceled` | 3 - After the fact | As it is an event which can happen anytime before the guest actually enters the hotel |
+| `lead_time` | 2 - Amendable or timing uncertain | We only know after the booking has been completed that what the actual lead time was and can be ammended later on |
 | `arrival_date_year` | 2 - Amendable or timing uncertain |  It is part of the intended arrival date which can be changed later on |
 | `arrival_date_month` | 2 - Amendable or timing uncertain |  It is part of the intended arrival date which can be changed later on |
 | `arrival_date_week_number` | 2 - Amendable or timing uncertain |  It is part of the intended arrival date which can be changed later on |
@@ -17,7 +17,7 @@
 | `children` | 2 - Amendable or timing uncertain | number of children can also easily change later on |
 | `babies` | 2 - Amendable or timing uncertain |  number of babies can also change later on |
 | `meal` | 2 - Amendable or timing uncertain | can change later on |
-| `country` | 2 - Amendable or timing uncertain | can change later on |
+| `country` | 3 - After the fact | We may not know country until check in |
 | `market_segment` | 2 - Amendable or timing uncertain | uncertain |
 | `distribution_channel` | 2 - Amendable or timing uncertain |  uncertain |
 | `is_repeated_guest` | 1 - Fixed at booking |  this is historical data |
