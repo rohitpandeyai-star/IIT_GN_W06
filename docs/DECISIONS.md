@@ -36,8 +36,21 @@ The data identifies two properties as City Hotel and Resort Hotel, with differen
 
 | Artifact | AI-assisted proposal | Evidence / reason | Status |
 |---|---|---|---|
-| PRD method comparison | Compare a hotel-by-history lookup, logistic regression, and a depth-limited decision tree (maximum depth 3), all against the flat-rule baseline. Prefer the lookup if the more complex candidates do not lower choose-period cost while meeting the same ceiling. | The PRD defines a low-complexity fallback and two distinct learned candidates; no results exist yet. | Candidate plan; final method awaits Step 5 choose-period evidence. |
+| PRD method comparison | Compare a hotel-by-history lookup, logistic regression, a depth-limited decision tree (maximum depth 3), Random Forest, XGBoost, and CatBoost, all against the flat-rule baseline. Prefer the lookup if the more complex candidates do not lower choose-period cost while meeting the same ceiling. | The PRD defines a low-complexity fallback and two distinct learned candidates; no results exist yet. | Candidate plan; final method awaits Step 5 choose-period evidence. |
 | PRD inputs | Restrict candidate predictors to the learner's current Bin 1 fields (`hotel`, `is_repeated_guest`, `previous_cancellations`, `previous_bookings_not_canceled`); use `is_canceled` as target only. | `docs/COLUMNS_USER_REVIEW.md`; source timing still needs point-in-time verification for operational use. | Proposed; review with feature audit in Step 5. |
 | PRD segmentation | Set segmentation outputs to zero in MVP. Reopen only if the client identifies an action and the segmented candidate improves choose-period cost by at least 5% while meeting the walk ceiling. | No action or measurable value for hidden guest types is stated in the brief. The 5% is a proposed internal gate, not a client threshold. | Proposed; client confirmation required before treating it as a requirement. |
-| Build plan | Budget 12 hours for POC, 8 for MVP, and 4 for final evidence/roadmap; record actual time separately. | Initial planning estimate for one person assigned all roles; production estimates are discovery-dependent. | Planning estimate; revise as work is done. |
+| Build plan | Budget 18 hours for POC/data preparation, 8 for MVP, and 4 for final evidence/roadmap; record actual time separately. | Initial planning estimate for one person assigned all roles; production estimates are discovery-dependent. | Planning estimate; revise as work is done. |
 | Evaluation discipline | Select all settings on choose data, compare candidates on the same hotel-nights, keep proof outcomes unseen until freeze, then run proof once. | Required by `docs/EVALUATION_CONTRACT.md`; prevents tuning against proof. | Required procedure. |
+
+## Step 5 data-preparation order (2026-11-17)
+
+> Planning note at the user's correction: the project has not completed full EDA, cleaning, final feature selection, feature engineering, or a modeling-preparation split. The notebooks contain brief-number checks and the contract arrival-date period definitions; those are not the full modeling workflow. `src/features.py` is not present yet.
+
+1. Read the raw file unchanged and inspect its schema/quality (shape, types, missing/sentinel values, duplicates, ranges, and categories) without target-driven cleaning decisions.
+2. Create train, choose, and proof partitions with `src/contract.py` by arrival date. The periods exist; implement and document their use in the modeling pipeline. Do not substitute a random split.
+3. Run target/feature EDA on train. Use choose only for the planned method and buffer comparisons; keep proof outcomes out of EDA, cleaning, feature selection, and tuning until freeze.
+4. For each cleaning or retention choice, record the evidence and the number of values/rows affected. Leave raw values unchanged unless a documented reason supports a transformation.
+5. Treat the learner's Bin 1 fields as a provisional feature pool, not a final engineered set. Verify timing, choose the usable features, and fit any encoders/imputers/derived transformations on train only; apply the fixed transformations to choose and proof.
+6. Only after these checks compare the flat rule, lookup, logistic regression, shallow tree, Random Forest, XGBoost, and CatBoost if runtime permits. Select method and buffer on choose under the walk ceiling, freeze, then evaluate proof once.
+
+This is the ordered plan; none of the EDA, cleaning, feature engineering, or model comparisons above are claimed complete by this entry.

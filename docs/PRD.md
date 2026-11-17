@@ -13,15 +13,18 @@ The course exercise evaluates each night's **final book**. Its 14-night table is
 
 ## 2. Which approaches could decide, what are their tradeoffs, what do we choose, and what would change our choice?
 
-The flat rule is the required benchmark in both comparisons. The two candidate approaches are:
+The flat rule is the required benchmark in both comparisons. The candidate set for Step 5 is:
 
 | Candidate | How it works | Advantages | Costs and risks |
 |---|---|---|---|
 | Hotel-by-guest-history lookup | Estimate cancellation rates from the training period for groups formed from `hotel` and the audited booking-history fields. Sum booking-level rates by hotel-night. | Easy to explain and audit; simple fallback if model results are close. | Small groups may have noisy rates; needs a fallback for unseen or sparse groups; less able to combine several signals. |
 | Logistic regression | Estimate each booking's cancellation probability from the same approved first-bin inputs; sum probabilities by hotel-night. | Compact, interpretable probability model; combines signals without hand-written group rules. | Needs calibration and time-split evaluation; may not improve cost or walks; still depends on correct point-in-time feature availability. |
-| Shallow decision tree (maximum depth 3) | Split bookings into a small number of groups using the same approved inputs, estimate each group's cancellation rate, and sum by hotel-night. | Can capture simple interactions while keeping the paths inspectable; makes a second learned approach explicit. | A small tree can still overfit; group rates need support checks; depth and any pruning must be set without proof data. |
+| Shallow decision tree (maximum depth 3) | Split bookings into a small number of groups using the same approved inputs, estimate each group's cancellation rate, and sum by hotel-night. | Can capture simple interactions while keeping the paths inspectable. | A small tree can still overfit; group rates need support checks; depth and any pruning must be set without proof data. |
+| Random Forest | Average predictions from many bootstrapped decision trees. | Nonlinear benchmark with less dependence on one tree. | May be less calibrated or interpretable; tuning and feature importance do not establish causality. |
+| XGBoost | Gradient-boosted trees trained sequentially to improve errors. | Strong tabular-data candidate; supports interactions. | Requires careful tuning and probability calibration; may overfit the choose period. |
+| CatBoost | Gradient-boosted trees with support for categorical features. | Candidate for mixed categorical and numeric fields such as hotel plus booking-history counts. | More complex than the lookup or logistic baseline; compare fairly on identical inputs and periods. |
 
-**Provisional implementation choice:** evaluate both in Step 5, alongside the required flat-rule baseline and at least two learned models in total: logistic regression and a depth-limited decision tree (maximum depth 3). Compare both with the lookup and flat-rule benchmark on the same periods. Do not claim a final method now. Prefer the lookup if the candidates are indistinguishable on the choose period; choose a more complex model only if it has lower choose-period cost than the lookup and meets the walk ceiling. In every case, reject a candidate that exceeds the ceiling. Freeze the chosen method and buffer before proof.
+**Provisional implementation choice:** compare the lookup with logistic regression, a depth-limited decision tree, Random Forest, XGBoost, and CatBoost in Step 5, alongside the required flat-rule baseline. Use the same approved input set and arrival-date periods for every candidate; if runtime is constrained, record which candidates were omitted and why. Do not claim a final method now. Prefer the lookup if the candidates are indistinguishable on the choose period; choose a more complex model only if it has lower choose-period cost than the lookup and meets the walk ceiling. In every case, reject a candidate that exceeds the ceiling. Freeze the chosen method and buffer before proof.
 
 The buffer converts the expected cancellation count into the integer `k`. Choose its value on the choose period by minimizing contract cost subject to no more than 10 walks per 1,000 arrivals; apply the same selection process to the flat-rule safety margin. If no candidate satisfies the ceiling, report that and do not present it as acceptable. Do not adjust settings after looking at proof outcomes; if a post-proof change is made, disclose both runs as the evaluation contract requires.
 
@@ -46,7 +49,7 @@ For the course command `python src/nightly.py --from 2017-08-18 --nights 14`, id
 
 ## 5. Which inputs do we use, by bin?
 
-For candidate predictors, use only fields the learner classified as Bin 1 in `docs/COLUMNS_USER_REVIEW.md`, subject to verification against point-in-time booking records before operational use:
+The learner's Bin 1 fields form a **provisional candidate pool**, not a completed feature-selection or feature-engineering decision. First profile the split data, check field quality and timing, and record any transformations. Then select among these candidates for a comparable initial feature set, subject to point-in-time verification before operational use:
 
 | Field | Learner's bin | Use |
 |---|---:|---|
@@ -55,15 +58,22 @@ For candidate predictors, use only fields the learner classified as Bin 1 in `do
 | `previous_cancellations` | 1 | Candidate predictor / lookup grouping field. |
 | `previous_bookings_not_canceled` | 1 | Candidate predictor / lookup grouping field. |
 
-`is_canceled` is the training target and proof outcome, never a predictor. `adr`, stay nights, and cancellation outcomes are used only where required by the scoring contract for evaluation; they are not candidate model predictors. Other Bin 2 or Bin 3 columns are excluded from the candidate predictors unless a timestamped source later proves when the value becomes available and the team records a new decision. The learner's bins are recorded decisions, not independent proof of PMS timing.
+`is_canceled` is the training target and proof outcome, never a predictor. `adr`, stay nights, and cancellation outcomes are used only where required by the scoring contract for evaluation; they are not candidate model predictors. Other Bin 2 or Bin 3 columns are excluded from the candidate predictors unless a timestamped source later proves when the value becomes available and the team records a new decision. The learner's bins are recorded decisions, not independent proof of PMS timing. **No full EDA, cleaning decision, final feature selection, feature engineering, or model-preparation pipeline has been completed yet.**
 
 ## 6. Where do the numbers come from, and how is the buffer set and frozen?
 
-Use `src/contract.py` without modification. Split rows by arrival date: train before 2016-07-01, choose 2016-07-01 through 2016-12-31, and proof 2017-01-01 through 2017-08-31. Fit candidate rates/models using training data; compare candidates and select each buffer on choose data; evaluate the frozen selection once on proof.
+Use `src/contract.py` without modification. Preliminary brief-number checks and the arrival-date period definitions already exist, but the full modeling data-preparation workflow is still pending. Complete it in this order:
 
-For booking-probability methods, sum the probabilities for each hotel-night to get expected cancellations. For the lookup, sum the assigned historical group rates. Convert this estimate and the candidate buffer into a non-negative whole-number oversell recommendation. Record the exact rounding rule in `src/backtest.py` and apply it consistently to candidates and the flat baseline.
+1. Read the raw file unchanged. Check shape, column types, missing/sentinel values, duplicate rows, invalid ranges, and category levels without using target outcomes to make data-preparation decisions.
+2. Create train, choose, and proof partitions with the contract by arrival date: train before 2016-07-01, choose 2016-07-01 through 2016-12-31, and proof 2017-01-01 through 2017-08-31. Confirm counts and date ranges.
+3. Perform target and feature EDA on train. Use choose only for the planned method and buffer comparisons. Keep proof outcomes out of EDA, cleaning decisions, feature selection, and tuning until settings are frozen.
+4. Record each cleaning or retention decision, its reason, and the number of rows/values affected. Preserve raw values unless evidence supports a specific transformation.
+5. Treat the learner's Bin 1 fields as a candidate pool, verify timing, and select/engineer usable features. Fit encoders, imputers, and derived transformations on train only; apply the frozen transformations to choose and proof.
+6. Compare the flat rule, lookup, logistic regression, shallow tree, Random Forest, XGBoost, and CatBoost with identical eligible inputs and periods. Select the method and buffer on choose under the walk ceiling, freeze all settings, and evaluate proof once.
 
-The flat-rule hotel's cancellation rate comes from train data. Its safety margin is not specified in the client brief, so the project must label the chosen benchmark margin as a choose-period setting and not as the client's verified production value. Compare all rules on the same nights. A rule is acceptable only if its proof-period walk rate is at most 10 per 1,000 arrivals; show cost, empty rooms, and walks together.
+For booking-probability methods, sum probabilities for each hotel-night to estimate cancellations. For the lookup, sum assigned historical group rates. Convert the estimate and candidate buffer into a non-negative whole-number oversell recommendation. Record the exact rounding rule in `src/backtest.py` and apply it consistently to candidates and the flat baseline.
+
+The flat-rule hotel's cancellation rate comes from train data. Its safety margin is not specified in the client brief, so label the chosen benchmark margin as a choose-period setting, not as the client's verified production value. Compare all rules on the same nights. A rule is acceptable only if its proof-period walk rate is at most 10 per 1,000 arrivals; show cost, empty rooms, and walks together.
 
 ## 7. What is the error bill on the proof period?
 
