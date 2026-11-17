@@ -520,11 +520,32 @@ The log begins from the clean `main` baseline below. It distinguishes user reque
           "pushed_to": "origin/main"
         }
       ]
+    },
+    {
+      "phase_sequence": 20,
+      "phase_id": "separate_column_answer_key",
+      "purpose": "Provide the requested proposed answers without changing the learner's independent audit record.",
+      "events": [
+        {
+          "sequence": 26,
+          "commit": "6b93a5d1ebc6ca81ca6345609aa33a5d87dbe875",
+          "parent": "9c574fc264494d874fcd4ad148dfcc20942fbb5c",
+          "timestamp_local": "2026-11-17",
+          "message": "docs: add separate column audit answer key",
+          "kind": "answer_key_creation",
+          "trigger": "User asked for a separate Markdown file with answers to the column bin questions and the per-column decision questions.",
+          "decision": "Create an explicitly AI-assisted answer key with a proposed bin and reasoning for each of 32 columns, plus answers to cross-column questions; keep it separate from the user notebook and user review output.",
+          "reason": "Give the user a comparison aid while preserving their learner-owned classifications and leaving Step 2 in progress.",
+          "files_changed": ["docs/COLUMN_AUDIT_ANSWER_KEY_AI_ASSISTED.md", "docs/EXECUTION_TRACKER.md", "ai_logs/INDEX.md", "ai_logs/20261117_column_answer_key.md"],
+          "verification": "Confirmed 32 answer rows with bin labels 1, 2, or 3. No notebook decision cell was edited or run.",
+          "pushed_to": "origin/main"
+        }
+      ]
     }
   ],
   "current_snapshot": {
     "as_of": "2026-11-17",
-    "latest_recorded_commit": "136b91c316e299a5f945ddf718e06c7a1f0734ef",
+    "latest_recorded_commit": "6b93a5d1ebc6ca81ca6345609aa33a5d87dbe875",
     "paper_frame_draft": "docs/PAPER_FRAME_AI_ASSISTED.md; AI-assisted study draft, not course-compliant AI-free V0.",
     "defence_guide": "docs/DEFENCE_QUICK_GUIDE.md; study aid only, and explicitly distinguishes measured checks, client assumptions, and pending work.",
     "charter_status": "Completed AI-assisted reference draft; does not satisfy the course-required AI-free paper frame.",
@@ -532,7 +553,7 @@ The log begins from the clean `main` baseline below. It distinguishes user reque
     "working_tree_before_this_ledger": "clean",
     "role_assignment": {"Client Lead": "Rohit Pandey", "Data Lead": "Rohit Pandey", "Model Lead": "Rohit Pandey", "Build Lead": "Rohit Pandey"},
     "tracker_status": {"step_0": "Complete", "step_1": "Complete for the user's AI-assisted workflow; course AI-free condition unmet", "step_2": "In progress; learner-led notebook decisions outstanding", "steps_3_to_10": "Not started"},
-    "column_audit": "AI bins are preliminary; docs/COLUMN_SOURCE_REFERENCE.md has per-field paper details; notebooks/01_column_audit_workshop.ipynb has blank learner prompts for all 32 columns.",
+    "column_audit": "AI bins in docs/COLUMN_AUDIT_ANSWER_KEY_AI_ASSISTED.md are a separate comparison aid; docs/COLUMN_SOURCE_REFERENCE.md has per-field paper details; notebook decisions remain learner-owned and blank.",
     "notebook_status": "Both notebooks contain grouped Pandas cells and saved tables for brief checks. Proof-period cancellation outcomes are held back.",
     "data_results": {"rows": 119390, "columns": 32, "hotels": 2, "train_choose_cancellation_rate": "36.2%", "proof_cancellation_rate": "not calculated in early checks"},
     "unresolved_items": ["The learner must run the column-audit notebook cell by cell and record their own bins and reasons.", "The course-required AI-free paper frame remains unmet by the AI-assisted draft.", "Ask for the current flat-rule safety margin.", "Confirm whether the walk ceiling applies per hotel as well as group-wide.", "Verify the vendor 95% accuracy claim if evidence exists.", "Do not claim an observed walk rate until a rule is evaluated."],
