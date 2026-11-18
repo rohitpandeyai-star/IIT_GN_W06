@@ -315,6 +315,7 @@ text(s, 9.45, 3.5, 3.1, 2.2, f"Train cancellation rate if the 31,994 exact repea
 text(s, 9.2, 6.0, 3.55, 0.85, "Source data never edited: cleaning happens on a copy, with every step logged and checked.", size=12, color=MUTED, italic=True)
 
 exec((Path(__file__).parent / "deck_nb11_16.py").read_text(encoding="utf-8"))
+exec((Path(__file__).parent / "speaker_notes.py").read_text(encoding="utf-8"))  # spoken notes for every slide
 
 import sys  # noqa: E402
 out = Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT / "Hotel_Overbooking_New_Deck.pptx"
