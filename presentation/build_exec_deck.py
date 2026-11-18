@@ -80,6 +80,7 @@ def rgb(h):
 def text(slide, x, y, w, h, paras, size=13, color=BODY_C, bold=False, align=PP_ALIGN.LEFT, anchor=MSO_ANCHOR.TOP,
          italic=False, space_after=0, font=FONT):
     assert size >= 10, size
+    w, h = max(w, 0.05), max(h, 0.05)
     tb = slide.shapes.add_textbox(Inches(x), Inches(y), Inches(w), Inches(h))
     tf = tb.text_frame
     tf.word_wrap = True
@@ -195,7 +196,7 @@ def frame(code, title, roles=(), conf=None, source="", foot="", sowhat=None, not
     for r in roles:
         x = pill(s, x, 0.3, r, TINT, MUTED, bold=False)
     if nav is not None:  # the process diagram (A4), reused as a small step strip
-        nx = 6.2
+        nx = 5.45
         for i, step in enumerate(NAV):
             on = i in (nav if isinstance(nav, (list, tuple)) else [nav])
             nx = pill(s, nx, 0.3, step, ACCENT if on else TINT, PAPER if on else SOFT, bold=on, size=10)
@@ -217,12 +218,14 @@ def frame(code, title, roles=(), conf=None, source="", foot="", sowhat=None, not
         f"\n\n[Original slide {c}] {s_notes(c)}" for c in carries if c not in CARRIED)
     CARRIED.update(carries)
     MAP[n] = list(carries)
+    CODE_NO[code] = n
     if part == "B":
         INDEX.append((code, n, topic or title))
     return s
 
 
 CARRIED = set()
+CODE_NO = {"A0": 1}
 
 
 def hbars(s, x, y, w, rows, vmax, label_w=2.7, bar_h=0.34, gap=0.17, ref=None, fmt=None, size=12, value_w=1.9, vmin=0.0):
@@ -231,9 +234,10 @@ def hbars(s, x, y, w, rows, vmax, label_w=2.7, bar_h=0.34, gap=0.17, ref=None, f
     X = lambda v: plot_x + plot_w * (v - vmin) / (vmax - vmin)
     for i, r in enumerate(rows):
         yy = y + i * (bar_h + gap)
-        text(s, x, yy - 0.02, label_w - 0.12, bar_h + 0.06, [[(r["label"], {"bold": r.get("bold", False)})]] +
-             ([[(r["sub"], {"size": 10.5, "color": MUTED})]] if r.get("sub") else []), size=size, anchor=MSO_ANCHOR.MIDDLE,
-             align=PP_ALIGN.RIGHT)
+        if r["label"]:
+            text(s, x, yy - 0.02, label_w - 0.12, bar_h + 0.06, [[(r["label"], {"bold": r.get("bold", False)})]] +
+                 ([[(r["sub"], {"size": 10.5, "color": MUTED})]] if r.get("sub") else []), size=size, anchor=MSO_ANCHOR.MIDDLE,
+                 align=PP_ALIGN.RIGHT)
         v = r["value"]
         if isinstance(v, tuple):
             box(s, X(v[0]), yy + 0.04, max(X(v[1]) - X(v[0]), 0.04), bar_h - 0.08, r.get("color", ALT_LIGHT), radius=0.4)
@@ -243,6 +247,8 @@ def hbars(s, x, y, w, rows, vmax, label_w=2.7, bar_h=0.34, gap=0.17, ref=None, f
         else:
             box(s, X(vmin), yy, max(X(v) - X(vmin), 0.02), bar_h, r.get("color", ALT_LIGHT))
             end = X(v)
+        if ref and end < X(ref[0]) + 0.05:
+            end = X(ref[0]) + 0.05
         if r.get("text"):
             text(s, end + 0.08, yy - 0.02, value_w + plot_w - (end - plot_x), bar_h + 0.06,
                  [[(r["text"], {"bold": r.get("bold", False), "color": r.get("text_color", INK)})]], size=size,
@@ -260,7 +266,7 @@ def key_numbers(s, y, items, x=0.55, w=12.25, h=0.95):
     for i, (value, label, accent) in enumerate(items):
         xx = x + i * cw
         box(s, xx, y, cw - 0.15, h, ACCENT_TINT if accent else TINT, radius=0.06)
-        text(s, xx + 0.18, y + 0.08, cw - 0.45, 0.5, value, size=24, bold=True, color=ACCENT if accent else INK)
+        text(s, xx + 0.18, y + 0.08, cw - 0.45, 0.5, value, size=24 if len(value) <= 13 else 18, bold=True, color=ACCENT if accent else INK)
         text(s, xx + 0.18, y + 0.56, cw - 0.45, 0.4, label, size=12, color=MUTED)
 
 
@@ -547,10 +553,10 @@ for r in mt[1:]:
     if r[0].strip().startswith("+"):
         label = "LR C = 0.1 + sigmoid calibration"
     sel = "SELECTED" in r[6]
-    rows.append(dict(label=label, sub=f"{r[2]} set · {r[6]}", value=b, color=ACCENT if sel else (ALT if r[2] == "Final" and "Baseline" not in r[6] and "Same" not in r[6] else ALT_LIGHT),
-                     text=r[4], bold=sel))
+    rows.append(dict(label=label + (" · earlier set" if r[2] == "Earlier" else ""), value=b, color=ACCENT if sel else (ALT if r[2] == "Final" and "Baseline" not in r[6] and "Same" not in r[6] else ALT_LIGHT),
+                     text=r[4] + ("  SELECTED" if sel else ""), bold=sel))
 rows.sort(key=lambda d: d["value"])
-hbars(s, 0.55, 1.75, 8.2, rows, vmax=0.24, vmin=0.19, label_w=4.3, value_w=0.75, bar_h=0.26, gap=0.07, size=12)
+hbars(s, 0.55, 1.8, 8.3, rows, vmax=0.24, vmin=0.19, label_w=4.5, value_w=1.3, bar_h=0.24, gap=0.095, size=12)
 bullets(s, 9.05, 1.85, 3.75, 3.9, ["Baselines: global 0.2329, hotel rate 0.2299 — grey bars at the bottom",
                                   "Earlier set (XGBoost, CatBoost) sat close together: 0.2082–0.2112",
                                   "Selection was on Train folds (LR C = 0.1: 0.1731), then calibration was kept because it lowered Choose Brier"],
@@ -822,6 +828,8 @@ for code, n, title in [("B10", 11, "T1 and T2 decide 11 columns: values written 
         for c in range(1, 5):
             fills[(r, c)], colors[(r, c)] = marks[rows[r][c]]
         colors[(r, 5)] = ACCENT if rows[r][5] == "Input" else (AMBER if rows[r][5] == "Provisional" else MUTED)
+    for c in {11: (1, 2), 12: (3,), 13: (4,)}[n]:
+        fills[(0, c)] = ACCENT
     rh = min(0.36, 4.0 / len(rows))
     table(s, 0.55, 1.75, rows, [3.1, 0.55, 0.55, 0.55, 0.55, 1.35], row_h=rh, size=12, right=set(), fills=fills, colors=colors)
     cards = [t for t in tt[5:-1]]
@@ -989,7 +997,7 @@ hbars(s, 6.7, 4.5, 6.1, [dict(label=n, value=v, color=ALT_LIGHT, text=f"{v:.4f}"
 s = frame("B23", "Each setting was picked by a rule written in advance, then frozen with file fingerprints before the 2017 test",
           part="B", topic="Settings: every decision and the rule that made it", roles=("Model Lead",), source=s_source(20),
           sowhat=t20[2], notes="Every fixed decision, how it was chosen, and the result.")
-table(s, 0.55, 1.75, s_table(20), [1.75, 3.2, 4.3, 3.0], row_h=0.57, right=set(), key_rows=(6,))
+table(s, 0.55, 1.72, s_table(20), [1.6, 3.0, 4.55, 3.1], row_h=0.5, right=set(), key_rows=(6,))
 
 # ---- B24-B25 models
 mrows = s_table(21)
@@ -1036,8 +1044,9 @@ s = frame("B29", "Two separate choices were frozen on Choose: the model (calibra
           foot=t25[-1].split("\n")[1] if "\n" in t25[-1] else "", notes="The final choice in full.")
 card(s, 0.55, 1.75, 5.9, 1.45, t25[6], t25[7], tag=t25[5], tag_color=ALT, size=12.5)
 card(s, 0.55, 3.35, 5.9, 1.45, t25[9], t25[10], tag=t25[8], tag_color=ACCENT, fill=ACCENT_TINT, size=12.5)
-table(s, 6.75, 1.75, s_table(25), [2.0, 1.25, 0.75, 0.8, 0.65, 0.6], row_h=0.5, key_rows=(1,), colors={(4, 5): RED})
-text(s, 6.75, 4.4, 6.0, 1.4, [t25[11], [(t25[-1].split("\n")[0], {"color": AMBER})]], size=12.5, space_after=4)
+table(s, 6.75, 1.75, s_table(25), [1.85, 1.15, 0.7, 0.75, 0.65, 0.95], row_h=0.5, key_rows=(1,), colors={(4, 5): RED})
+text(s, 6.75, 4.4, 6.0, 1.4, [t25[11], [(t25[-1].split("\n")[0].replace("slide 24", "B27–B28"), {"color": AMBER})]], size=12.5,
+     space_after=4)
 
 # ---- B30 engineering
 t26 = s_texts(26)
@@ -1098,19 +1107,25 @@ for new, olds in MAP.items():
     for o in olds:
         where.setdefault(o, []).append(new)
 # content carried by text or tables without the notes, recorded by hand from the build above
-EXTRA = {1: [2], 2: [5, 6], 3: [4, 18], 4: [6, 20], 6: [4, 19], 7: [7], 8: [21, 22], 9: [23, 24], 10: [25], 11: [26], 12: [27],
-         13: [28], 14: [8, 29], 15: [30], 16: [31], 17: [32], 18: [33, 34, 35], 19: [36, 37], 20: [38, 39], 21: [9, 40, 41],
-         22: [10], 23: [11, 42], 24: [13, 43, 44], 25: [2, 12, 45], 26: [14, 46], 27: [14, 15], 5: [17]}
+BY_CODE = {1: ["A0", "A1"], 2: ["A4", "A5"], 3: ["A3", "B2"], 4: ["A5", "B4"], 5: ["B1"], 6: ["A3", "B3"], 7: ["A6"],
+           8: ["B5", "B6"], 9: ["B7", "B8"], 10: ["B9"], 11: ["B10"], 12: ["B11"], 13: ["B12"], 14: ["A7", "B13"], 15: ["B14"],
+           16: ["B15"], 17: ["B16"], 18: ["B17", "B18", "B19"], 19: ["B20", "B21"], 20: ["B22", "B23"], 21: ["A8", "B24", "B25"],
+           22: ["A9"], 23: ["A10", "B26"], 24: ["A12", "B27", "B28"], 25: ["A1", "A11", "B29"], 26: ["A13", "B30"], 27: ["A13", "A14"]}
+EXTRA = {o: [CODE_NO[c] for c in codes] for o, codes in BY_CODE.items()}
+where = {}
 for o, news in EXTRA.items():
-    where[o] = sorted(set(where.get(o, [])) | set(news))
+    where[o] = sorted(set(news))
+for new, olds in MAP.items():  # every slide that carries an original's notes must be listed for it
+    for o in olds:
+        assert new in where[o], (o, new)
 rows = [["Original", "Topic in the original", "Now on slides"]]
 for o in range(1, 28):
     topic = s_texts(o)[0].title() if o > 1 else "Title and answer"
-    rows.append([str(o), topic[:46], ", ".join(map(str, where.get(o, [])))])
+    rows.append([str(o), topic[:46], ", ".join(f"{n} ({next(c for c, k in CODE_NO.items() if k == n)})" for n in where.get(o, []))])
 s = prs.slides[MAP_NO - 1]
 half = 14
 for col, chunk in enumerate([rows[1:half + 1], rows[half + 1:]]):
-    table(s, 0.55 + col * 6.2, 1.75, [rows[0]] + chunk, [0.95, 3.6, 1.5], row_h=0.28, size=12, right={0})
+    table(s, 0.55 + col * 6.2, 1.75, [rows[0]] + chunk, [0.95, 2.85, 2.25], row_h=0.28, size=12, right={0})
 md = ["# Executive deck: where each original slide went", "",
       f"Source: `{SRC_PATH.name}` (27 slides) → `{OUT.name}` ({len(prs.slides)} slides).", "",
       "| Original slide | Topic | Now on slides |", "|---|---|---|"]
