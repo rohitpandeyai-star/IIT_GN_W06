@@ -64,7 +64,8 @@ ORDER = [
     ("col_prov", "DATA LEAD · COLUMNS · PROVISIONAL INPUTS", ["Data"]),
     ("col_excl", "DATA LEAD · COLUMNS · EXCLUDED", ["Data"]),
     ("col_traps", "DATA LEAD · COLUMNS · TEMPTING TRAPS", ["Data"]),
-    (6, "DATA + MODEL LEAD · ENCODING AND SETTINGS", ["Data", "Model"]),
+    ("enc_pipeline", "DATA LEAD · ENCODING", ["Data"]),
+    ("settings_frozen", "MODEL LEAD · SETTINGS FIXED IN ADVANCE", ["Model"]),
     (7, "MODEL LEAD · MODELS TRIED", ["Model"]),
     (11, "MODEL LEAD · PROBABILITY QUALITY", ["Model"]),
     (8, "MODEL LEAD · RULES TRIED", ["Model"]),
@@ -539,7 +540,7 @@ for i, (lead, question, tasks, ref) in enumerate(stages):
         arrow(s, x + w + 0.04, y0 + h / 2, x + w + gap - 0.04, y0 + h / 2)
 shared = [POS[k] for k, _, a in ORDER if len(a) == 2]
 text(s, 0.6, 6.68, 12.15, 0.3, f"All four roles were held by {OWNER} (docs/CHARTER.md). The questions are each role's own, from docs/ROLES.md; "
-     f"slides {shared[0]} and {shared[1]} are hand-overs between two leads.", size=11, color=MUTED)
+     f"slide {shared[0]} is shared by the Client and Data Leads." if len(shared) == 1 else f"slides {", ".join(map(str, shared))} are shared by two leads.", size=11, color=MUTED)
 
 # ============================================================ 6. Columns 1: when does the hotel know each value?
 s = frame("col_timeline", "When does the hotel know each value?",
@@ -907,15 +908,130 @@ text(s, 6.1, 6.44, 6.5, 0.36, [[("C6 · previous_cancellations: ", {"bold": True
                                ("left unchanged (no source proves it wrong); the planned with/without test was not run before the freeze", {"color": MUTED})]],
      size=10.5, anchor=MSO_ANCHOR.MIDDLE)
 
-# ============================================================ 12. Reorder, then check (source slide 5 is replaced by the two cleaning slides)
+# ============================================================ Encoding (Data Lead) and settings (Model Lead): replace source slide 6
+sys.path.insert(0, str(ROOT / "src"))
+import features  # noqa: E402
+from sklearn.preprocessing import OneHotEncoder  # noqa: E402
+
+raw = pd.read_csv(ROOT / "data" / "hotels.csv")
+raw["arrival_date"] = pd.to_datetime(raw["arrival_date_year"].astype(str) + "-" + raw["arrival_date_month"] + "-"
+                                     + raw["arrival_date_day_of_month"].astype(str), format="%Y-%B-%d")
+raw_train, raw_choose, _ = contract.split_periods(raw)
+XT, XC = features.make_features(raw_train), features.make_features(raw_choose)
+CATS = list(features.CATEGORICAL)
+NUMS = list(features.NUMERIC)
+enc = OneHotEncoder(handle_unknown="ignore").fit(XT[CATS].astype(str))
+N_CAT = {c: len(k) for c, k in zip(CATS, enc.categories_)}
+UNSEEN = {c: float((~XC[c].astype(str).isin(k)).mean()) for c, k in zip(CATS, enc.categories_)}
+N_COLS = sum(N_CAT.values()) + len(NUMS)
+MEAN, SD = XT[NUMS].mean(), XT[NUMS].std(ddof=0)  # StandardScaler uses the population standard deviation
+EX = XT.iloc[4]
+assert N_COLS == 451 and EX["agent"] == "240.0" and EX["company"] == "NO_COMPANY"
+CAND = pd.read_csv(ROOT / "evidence" / "hyperparameter_experiments" / "candidate_summary.csv")
+CALIB = json.loads((ROOT / "evidence" / "probability_calibration" / "calibration_decision.json").read_text())
+best = CAND.sort_values("mean_brier_score").iloc[0]
+assert best["model"] == "logistic_regression" and "0.1" in best["settings"]
+
+s = frame("enc_pipeline", "How were the eight inputs turned into numbers?",
+          f"Five categories become 0/1 columns, three counts are scaled: {N_COLS} numbers per booking, learnt on Train only",
+          "src/features.py (make_features) · notebooks/pipeline/05_feature_engineering.ipynb, 07–09 (make_preprocessor) · data/hotels.csv (Train)",
+          "Models need numbers, so each booking's eight inputs are turned into a row of numbers in two steps. First src/features.py keeps "
+          "only the eight approved inputs and labels a blank agent or company as NO_AGENT or NO_COMPANY, keeping IDs as text, because "
+          "agent 240 is not bigger than agent 9. Then, inside every model, the five categories are one-hot encoded: one 0/1 column for "
+          "every value seen in training, 448 in all, so each booking has exactly five ones. A value never seen in training, such as a new "
+          "agent, simply gets all zeros; that happened to 1.7 percent of agents in the second half of 2016. The three counts are scaled: "
+          "subtract the training mean and divide by the training spread, so a booking with no history becomes small negative numbers. "
+          "Everything is refitted on each fold's training rows, so a validation block never shapes the statistics it is judged with. The "
+          "earlier notebooks pooled rare categories into 143 columns; this pipeline keeps every training category.")
+text(s, 0.6, 2.3, 6.6, 0.26, f"ONE TRAIN BOOKING, STEP BY STEP · {raw_train['arrival_date'].iloc[4]:%d %b %Y} ARRIVAL".upper(), size=11,
+     color=ORANGE, bold=True)
+cat_ones = " · ".join(f"{c}={EX[c] if c != 'agent' else '240.0'}" for c in CATS)
+steps = [("Raw row", "data/hotels.csv",
+          f"{EX['hotel']} · {EX['market_segment']} · {EX['distribution_channel']} · agent 240 · company NULL · "
+          f"repeat {EX['is_repeated_guest']} · prior cancellations {EX['previous_cancellations']} · prior stays {EX['previous_bookings_not_canceled']}"),
+         ("Keep and label", "src/features.py",
+          "only the 8 approved inputs; blank agent or company → NO_AGENT / NO_COMPANY; IDs kept as text ('240.0')"),
+         ("One-hot, 5 categories", f"{sum(N_CAT.values())} columns",
+          f"a 1 in the column for each of its five values (hotel = Resort Hotel, segment = Online TA, …); the other "
+          f"{sum(N_CAT.values()) - 5} are 0"),
+         ("Scale, 3 counts", "(value − Train mean) ÷ Train spread",
+          " · ".join(f"{n.replace('previous_', 'prior ').replace('bookings_not_canceled', 'stays').replace('is_repeated_guest', 'repeat')}: "
+                     f"(0 − {MEAN[n]:.3f}) ÷ {SD[n]:.3f} = {(0 - MEAN[n]) / SD[n]:.2f}" for n in NUMS))]
+for i, (head, tag, body) in enumerate(steps):
+    y = 2.65 + i * 0.95
+    box(s, 0.6, y, 6.6, 0.8, TINT, radius=0.08)
+    box(s, 0.6, y, 0.1, 0.8, BLUE, shape=MSO_SHAPE.RECTANGLE)
+    text(s, 0.85, y + 0.08, 2.4, 0.28, head, size=12.5, bold=True)
+    text(s, 3.2, y + 0.08, 3.9, 0.28, tag, size=10.5, color=ORANGE, bold=True, align=PP_ALIGN.RIGHT)
+    text(s, 0.85, y + 0.37, 6.25, 0.42, body, size=10.5, color=MUTED)
+    if i < len(steps) - 1:
+        arrow(s, 3.9, y + 0.8, 3.9, y + 0.95)
+box(s, 0.6, 6.47, 6.6, 0.36, PEACH, radius=0.3,
+    label=f"→ {N_COLS} numbers reach the model: 5 ones, {sum(N_CAT.values()) - 5} zeros, 3 scaled values", size=11.5, bold=True)
+rows = [["Input", "Values in Train", "Unseen, Jul–Dec 2016", "Treatment"]]
+for c in CATS:
+    rows.append([c, f"{N_CAT[c]:,}", pct(UNSEEN[c]), "one-hot; unseen → all zeros"])
+rows.append(["3 counts", "numbers", "none missing", "median fill (safety net), then scaling"])
+table(s, 7.5, 2.3, rows, [1.65, 1.05, 1.15, 1.4], row_h=0.4, size=10.5, align={1: PP_ALIGN.RIGHT, 2: PP_ALIGN.RIGHT},
+      bolds={(r, 0): True for r in range(1, 7)})
+box(s, 7.5, 5.25, 5.25, 0.82, TINT, radius=0.08)
+text(s, 7.7, 5.31, 4.9, 0.72, [[("Why inside each model: ", {"bold": True}),
+                               ("the encoder and scaler are refitted on each fold's training rows, so a validation block never shapes "
+                                "the categories or statistics it is judged with.", {"color": MUTED})]], size=10.5)
+box(s, 7.5, 6.17, 5.25, 0.66, TINT, radius=0.08)
+text(s, 7.7, 6.22, 4.9, 0.58, [[("Compared with notebooks 10–16: ", {"bold": True}),
+                               ("there, categories under 30 bookings were pooled (143 columns) and counts log-scaled.", {"color": MUTED})]],
+     size=10.5)
+
+s = frame("settings_frozen", "How was each setting chosen before the test?",
+          "Each setting was picked by a rule written in advance, on Train folds or Jul–Dec 2016, then frozen before the 2017 test",
+          "notebooks/pipeline/08, 09, 11 · evidence/hyperparameter_experiments, probability_calibration, choose_policy_selection/frozen_configuration.json",
+          "Every choice in this pipeline follows the same pattern: declare the options, write the rule that will pick one, then let the "
+          "data choose. The model and its setting were chosen inside the training year, with three expanding time folds: fit on the "
+          "earliest months, check on the next three, and repeat, always predicting forward. Six candidates were declared; logistic "
+          "regression with C of 0.1 had the lowest average Brier score. Calibration was adopted only because it improved both Brier score "
+          "and log loss on the second half of 2016, the rule set before the notebook ran. The overbooking rule was the cheapest one within "
+          "10 walks per 1,000 on that period: the flat rule with a 17-room margin. All of it was frozen, with fingerprints of the evidence "
+          "files, before the 2017 test was scored. That period had been seen in earlier runs, so the test is a retrospective check.")
+text(s, 0.6, 2.25, 6.0, 0.26, "MODEL CHOICE: THREE EXPANDING TIME FOLDS INSIDE TRAIN", size=11, color=ORANGE, bold=True)
+X0, X1 = 3.3, 12.75
+mw = (X1 - X0) / 12
+folds = [("Fold 1", 3, 3, "11,779 fit · 10,217 check"), ("Fold 2", 6, 3, "21,996 fit · 10,963 check"),
+         ("Fold 3", 9, 3, "32,959 fit · 16,198 check")]
+for i, (name, fit_m, val_m, counts) in enumerate(folds):
+    y = 2.6 + i * 0.4
+    text(s, 0.6, y + 0.02, 0.8, 0.3, name, size=11.5, bold=True)
+    text(s, 1.35, y + 0.04, 1.9, 0.3, counts, size=9.5, color=MUTED)
+    box(s, X0, y, fit_m * mw - 0.03, 0.3, BLUE, radius=0.4, label="fit", size=10, color=PAPER, bold=True)
+    box(s, X0 + fit_m * mw, y, val_m * mw - 0.03, 0.3, ORANGE, radius=0.4, label="check", size=10, color=PAPER, bold=True)
+for q, lab in enumerate(["Jul–Sep 2015", "Oct–Dec 2015", "Jan–Mar 2016", "Apr–Jun 2016"]):
+    text(s, X0 + q * 3 * mw, 3.82, 3 * mw, 0.25, lab, size=10, color=MUTED, align=PP_ALIGN.CENTER)
+rows = [["Decision", "Setting fixed", "How it was chosen", "Result"],
+        ["Split", "the contract's periods, by arrival date", "fixed by src/contract.py; never random",
+         "Train 49,157 · Jul–Dec 2016 29,546 · 2017 40,687"],
+        ["Model and setting", "logistic regression, C = 0.1 (forests: seed 42)",
+         "lowest mean Brier over the 3 folds, from 6 declared candidates (C 0.1 / 1 / 10; forests 100/10, 150/20, 150/40)",
+         f"fold Brier {best['mean_brier_score']:.4f}"],
+        ["Calibration", "sigmoid, fitted on out-of-fold Train scores", "adopt only if Brier and log loss both improve on Jul–Dec 2016",
+         f"adopted: Brier {CALIB['choose_brier_uncalibrated']:.4f} → {CALIB['choose_brier_calibrated']:.4f}"],
+        ["Nightly count", "sum of booking probabilities per hotel-night", "contract.nightly_table, the same for every method", "—"],
+        ["Oversell count", "round up, subtract a margin, never below 0", "margins 0–60 tried for every rule family", "—"],
+        ["Rule selection", "cheapest rule within 10 walks per 1,000", "measured on Jul–Dec 2016, rule written before any scoring",
+         f"flat rule, margin {MARGIN}: {eur(FROZEN['choose_scores']['selected']['cost_eur'])}, {FROZEN['choose_scores']['selected']['walks_per_1000']:.2f}"],
+        ["Freeze", "settings + SHA-256 of the evidence files", "saved before the 2017 test was scored", f"frozen {FROZEN['frozen_at'][11:]}"]]
+table(s, 0.6, 4.15, rows, [1.6, 3.2, 4.25, 3.1], row_h=0.335, size=10, bolds={(r, 0): True for r in range(1, 8)},
+      fills={(6, c): PEACH for c in range(4)})
+
+# ============================================================ 12. Reorder, then check (source slides 5 and 6 are each replaced by two slides)
 ids = prs.slides._sldIdLst
 for el in list(ids):
     ids.remove(el)
-prs.part.drop_rel(OLD_IDS[5].get(qn("r:id")))
+for _old in (5, 6):
+    prs.part.drop_rel(OLD_IDS[_old].get(qn("r:id")))
 for key, _, _ in ORDER:
     ids.append(OLD_IDS[key] if isinstance(key, int) else NEW[key])
 
-assert len(prs.slides) == len(ORDER) == 26
+assert len(prs.slides) == len(ORDER) == 27
 for n, s in enumerate(prs.slides, 1):
     if n in (1, len(ORDER)):
         continue
