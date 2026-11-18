@@ -786,29 +786,42 @@ for i, (head, sub, cols, color) in enumerate(GROUPS):
 
 # ============================================================ 11. Columns 7: tempting traps
 s = frame("col_traps", "Which excluded columns look useful, but are traps?",
-          "Their patterns are too clean to be true: each is shaped by what happened after the decision morning",
+          "Each looks like a strong signal, but its value is written or corrected after the decision morning, so it leaks the outcome",
           "data/hotels_clean.pkl (deposit: all bookings; parking and country: Train) · notebooks/06 and 07 · Antonio, de Almeida & Nunes (2019)",
-          "These three would make any model look brilliant, which is exactly the warning. Non Refund bookings cancel 99 percent of the "
-          "time, the opposite of what the label promises; the deposit type is computed from payments up to arrival or cancellation, so the "
-          "cancellation itself can create the label. Not one guest with a parking space cancelled; parking is most likely registered on "
-          "arrival, which only guests who stay reach. And Portuguese bookings cancel far more than others; the paper warns that "
-          "nationality is often corrected at check-in, which cancelled bookings never reach. None of these rates was used to choose "
+          "These three would make any model look brilliant, which is exactly the warning. Read each card from the top: what the column looks like it means, what the data actually shows, why that happens, and what it would mean on the decision morning. A Non Refund booking sounds guaranteed, yet 99 percent of them cancelled; the deposit type is computed from payments up to arrival or cancellation, so the cancellation itself can create the label, and on the morning the label is not final. Not one Train guest with a parking space cancelled; parking is most likely registered on arrival, which only guests who stay reach, so on the morning almost nobody has a space. Portuguese bookings cancel about four times as often as the next countries; the paper warns that the correct nationality is often entered at check-in, which cancelled bookings never reach, so the code partly records who "
+          "arrived. None of these rates was used to choose columns: notebook 06 never read an outcome. They show why timing, not "
           "columns: notebook 06 never read an outcome. They show why timing, not score, has to decide.")
 dep_order = ["No Deposit", "Non Refund", "Refundable"]
 country = COUNTRY.reset_index()
+nr_n = int((clean["deposit_type"] == "Non Refund").sum())
+assert PARKING["With a parking space"] == 0  # not one Train booking with a parking space cancelled
+others = country["mean"].iloc[1:]
 charts = [("deposit_type", "Cancelled, by deposit type (all bookings)", dep_order, [float(DEPOSIT[k]) for k in dep_order], [1],
-           "Likely set by payments up to the cancellation itself"),
-          ("required_car_parking_spaces", f"Cancelled, Train ({PARKING_N:,} with parking)", list(PARKING), [float(v) for v in PARKING.values()],
-           [0], "Probably recorded on arrival, which only stays reach"),
+           [("Looks like", "a prepaid, guaranteed booking that should rarely cancel"),
+            ("Actually", f"{pct(DEPOSIT['Non Refund'])} of {nr_n:,} Non Refund bookings cancelled, against {pct(DEPOSIT['No Deposit'])} with no deposit"),
+            ("Why", "the type is computed from payments up to arrival or cancellation, so a charge posted at cancellation can create the label"),
+            ("On the morning", "the label is not final yet: the model would be fed the answer")]),
+          ("required_car_parking_spaces", f"Cancelled, Train ({PARKING_N:,} with parking)", list(PARKING), [float(v) for v in PARKING.values()], [0],
+           [("Looks like", "a committed guest who has planned the trip"),
+            ("Actually", f"0 of {PARKING_N:,} Train bookings with a space cancelled, against {pct(PARKING['Without'])} without"),
+            ("Why", "parking is most likely registered on arrival, a step only guests who stay ever reach"),
+            ("On the morning", "almost no booking has a space yet, so the signal is not there")]),
           ("country", "Cancelled, five largest countries (Train)", list(country["country"]), [float(v) for v in country["mean"]], [0],
-           "Nationality is often corrected at check-in")]
-for i, (col, cap, cats, vals, hl, why) in enumerate(charts):
+           [("Looks like", "a fixed fact about the guest"),
+            ("Actually", f"{pct(country['mean'].iloc[0])} of {int(country['size'].iloc[0]):,} {country['country'].iloc[0]} bookings cancelled, "
+                         f"against {pct(others.min())}–{pct(others.max())} for the next four"),
+            ("Why", "the correct nationality is often entered at check-in; cancelled bookings keep the original entry"),
+            ("On the morning", "the code partly records who arrived, not who will cancel")])]
+for i, (col, cap, cats, vals, hl, steps) in enumerate(charts):
     x = 0.6 + i * 4.1
-    box(s, x, 2.3, 3.9, 4.45, TINT, radius=0.04)
-    text(s, x + 0.2, 2.42, 3.5, 0.32, col, size=13, font=MONO, bold=True)
-    text(s, x + 0.2, 2.78, 3.5, 0.28, cap, size=10.5, color=MUTED)
-    bar_chart(s, x + 0.1, 3.1, 3.7, 2.55, cats, vals, highlight=hl, maximum=1.15, size=10.5)
-    box(s, x + 0.2, 5.82, 3.5, 0.75, PAPER, radius=0.1, label=why, size=11, color=CRIT, bold=True)
+    box(s, x, 2.3, 3.9, 4.5, TINT, radius=0.04)
+    text(s, x + 0.2, 2.4, 3.5, 0.3, col, size=13, font=MONO, bold=True)
+    text(s, x + 0.2, 2.72, 3.5, 0.26, cap, size=10.5, color=MUTED)
+    bar_chart(s, x + 0.1, 2.95, 3.7, 1.55, cats, vals, highlight=hl, maximum=1.2, size=10)
+    text(s, x + 0.2, 4.55, 3.5, 0.24, "HOW THE TRAP WORKS", size=10, color=ORANGE, bold=True)
+    text(s, x + 0.2, 4.8, 3.5, 1.95, [[(f"{k}: ", {"bold": True, "color": CRIT if k == "On the morning" else INK}),
+                                       (v, {"color": CRIT if k == "On the morning" else MUTED})] for k, v in steps],
+         size=10.5, space_after=3)
 
 # ============================================================ Cleaning 1: the rules, and the four values recoded (replaces source slide 5)
 FLAG_ROWS = {n: p[[c for c in clean.columns if c.startswith("flag_")]].sum() for n, p in [("Train", train), ("Validation", choose), ("Test", _proof)]}
