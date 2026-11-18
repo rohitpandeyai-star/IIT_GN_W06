@@ -1,7 +1,7 @@
 {
-  "run_id": "92650990-b166-48fb-a62e-490025b80323",
+  "run_id": "74a957f5-5953-4c29-939a-b4ac8aeec36e",
   "status": "SUCCESS",
-  "run_timestamp_utc": "2026-11-18T04:22:24.591715+00:00",
+  "run_timestamp_utc": "2026-11-18T10:01:41.651298+00:00",
   "input_path": "C:\\Users\\Lenovo\\Desktop\\Build_2_Repo\\IIT_GN_W06\\data\\hotels.csv",
   "input_sha256": "d10cdeb07de9309007f528d6499a2c0467ae7a6b287b80ffd759e11e61801639",
   "bookings_scored": 2157,
