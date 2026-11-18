@@ -614,20 +614,29 @@ def test_table(s, cols, focus, x=0.6, y=2.3, width_col=2.75):
     return len(cols)
 
 
-def reason_card(s, x, y, w, h, test, question, reason, examples, verdict_line, color):
+def reason_card(s, x, y, w, test, question, reason, examples, verdict_line, color):
+    """A card whose height follows its text; returns its bottom edge."""
+    inner = w - 0.5
+    lr = -(-len(reason) // int(inner * 13))
+    le = -(-len(examples) // int(inner * 15))
+    yr = y + 0.8
+    ye = yr + lr * 0.21 + 0.1
+    yv = ye + le * 0.18 + 0.08
+    h = yv + 0.34 - y
     box(s, x, y, w, h, TINT, radius=0.04)
     box(s, x, y, 0.1, h, color, shape=MSO_SHAPE.RECTANGLE)
-    text(s, x + 0.3, y + 0.15, w - 0.5, 0.28, f"T{test} · {TEST_NAMES[test].upper()}" if test else "PASSED ALL FOUR", size=11, color=ORANGE, bold=True)
-    text(s, x + 0.3, y + 0.45, w - 0.5, 0.4, question, size=15, font=HEAD, bold=True)
-    text(s, x + 0.3, y + 0.9, w - 0.5, h - 1.6, reason, size=12, color=INK)
-    text(s, x + 0.3, y + h - 0.72, w - 0.5, 0.3, examples, size=10.5, color=MUTED)
-    text(s, x + 0.3, y + h - 0.38, w - 0.5, 0.28, verdict_line, size=11, bold=True, color=color)
+    text(s, x + 0.3, y + 0.14, inner, 0.28, f"T{test} · {TEST_NAMES[test].upper()}" if test else "PASSED ALL FOUR", size=11, color=ORANGE, bold=True)
+    text(s, x + 0.3, y + 0.42, inner, 0.35, question, size=15, font=HEAD, bold=True)
+    text(s, x + 0.3, yr, inner, lr * 0.21, reason, size=12, color=INK)
+    text(s, x + 0.3, ye, inner, le * 0.18, examples, size=10.5, color=MUTED)
+    text(s, x + 0.3, yv, inner, 0.28, verdict_line, size=11, bold=True, color=color)
+    return y + h
 
 
 LEGEND = [("✓ yes   ", {"color": GOOD, "bold": True}), ("? unsure   ", {"color": WARN, "bold": True}), ("✗ no     ", {"color": CRIT, "bold": True}),
           ("each column sits on the slide of the first test it does not clearly pass; orange headers mark this slide's tests", {"color": MUTED})]
 
-s = frame("col_t12", "Which columns are the outcome, or not yet known that morning?",
+s = frame("col_t12", "Which columns are the outcome, or not known in time?",
           f"T1 and T2 decide {len(BY_TEST[1]) + len(BY_TEST[2])} columns: written because of the outcome, or only learned at check-in or later",
           "notebooks/06_forecast_column_selection.ipynb (test answers) · notebooks/07_forecast_columns_explained.ipynb (reasons) · Antonio, de Almeida & Nunes (2019)",
           "The first two tests catch the most dangerous columns. T1 asks whether a value is the outcome, or written because of it. The "
@@ -638,12 +647,13 @@ s = frame("col_t12", "Which columns are the outcome, or not yet known that morni
           "the source never says when the value is set. Company is the one exception kept: it passes everything else, so the team used it "
           "provisionally, with the doubt on record.")
 test_table(s, BY_TEST[1] + BY_TEST[2], focus=[1, 2])
-reason_card(s, 7.35, 2.3, 5.4, 2.1, 1, "Is it the outcome, or written because of it?",
-            "A value recorded because a booking cancelled, no-showed or stayed hands the model the answer; it predicts brilliantly and is useless on the morning.",
+bottom = reason_card(s, 7.0, 2.3, 5.75, 1, "Is it the outcome, or written because of it?",
+            "Recorded because the booking cancelled, no-showed or stayed, so it hands the model the answer.",
             "status and its date · assigned room · price and deposit (posted up to the outcome)", "→ never an input", CRIT)
-reason_card(s, 7.35, 4.55, 5.4, 2.2, 2, "Does the hotel have it on the decision morning?",
-            "Some values only arrive at check-in or later, or their timing is not recorded. A cancelled booking never reaches check-in, so a late value differs because of the outcome.",
+bottom = reason_card(s, 7.0, bottom + 0.15, 5.75, 2, "Does the hotel have it on the decision morning?",
+            "Learned at check-in or later, or its timing is not recorded; a cancelled booking never reaches check-in.",
             "country (corrected at check-in) · booking changes · parking · waiting list · company · customer type", "→ excluded; company used provisionally", WARN)
+assert bottom <= 6.8, bottom
 text(s, 0.6, 6.85, 12.15, 0.22, [LEGEND], size=10)
 
 s = frame("col_t3", "Which columns change between the morning and arrival?",
@@ -657,13 +667,14 @@ s = frame("col_t3", "Which columns change between the morning and arrival?",
           "may include earlier bookings cancelled after the decision morning. The team used them provisionally, and one of them, previous "
           "cancellations, turned out to shift sharply between periods.")
 test_table(s, BY_TEST[3], focus=[3])
-reason_card(s, 7.35, 2.3, 5.4, 2.6, 3, "Is the value still the one the hotel had that morning?",
+bottom = reason_card(s, 7.0, 2.3, 5.75, 3, "Is it the value the hotel had that morning?",
             "The file keeps each booking's last value from its change log. Kept bookings keep changing until check-in; cancelled ones freeze at cancellation. The value differs because of the outcome.",
             "stay length · adults, children, babies · meal · reserved room · special requests (and nights, guests built from them)",
             "→ firm 'no': excluded", CRIT)
-reason_card(s, 7.35, 5.05, 5.4, 1.7, 3, "Unsure: counts of earlier bookings",
+bottom = reason_card(s, 7.0, bottom + 0.15, 5.75, 3, "Unsure: counts of earlier bookings",
             "Earlier bookings counted here could be cancelled after the morning.",
             "is_repeated_guest · previous cancellations · previous bookings", "→ used provisionally, doubt on record", WARN)
+assert bottom <= 6.8, bottom
 text(s, 0.6, 6.85, 12.15, 0.22, [LEGEND], size=10)
 
 s = frame("col_t4", "Which columns pass all four tests, and what does T4 add?",
@@ -677,12 +688,13 @@ s = frame("col_t4", "Which columns pass all four tests, and what does T4 add?",
           "model's inputs. Lead time and the arrival-date parts were left out of the team's input set; they are the first candidates to "
           "add, tested on validation only.")
 test_table(s, BY_TEST[0], focus=[4])
-reason_card(s, 7.35, 2.3, 5.4, 2.1, 4, "Is it about this booking alone?",
+bottom = reason_card(s, 7.0, 2.3, 5.75, 4, "Is it about this booking alone?",
             "A value built by comparing rows sees bookings made after the morning, including the test period.",
             "fails: the identical-group cleaning flag · unsure: customer type (links to other bookings)", "→ every column shown here: yes", GOOD)
-reason_card(s, 7.35, 4.55, 5.4, 2.2, 0, "Set once, when the booking is made",
+bottom = reason_card(s, 7.0, bottom + 0.15, 5.75, 0, "Set once, when the booking is made",
             "Which hotel, how it was sold, through which channel and agent, how far ahead and for which night: none can change later.",
             "inputs: hotel · market_segment · distribution_channel · agent", "→ 4 inputs; 6 safe but not in the input set", BLUE)
+assert bottom <= 6.8, bottom
 text(s, 0.6, 6.85, 12.15, 0.22, [LEGEND[:3] + [("the 10 cleaning flags inherit their source column's answers; all are excluded", {"color": MUTED})]], size=10)
 
 # ============================================================ 8. Columns 4: the four safe inputs
