@@ -49,7 +49,6 @@ ORDER = [
     (1, None, []),
     ("ns_question", "CLIENT LEAD · NORTH STAR", ["Client"]),
     ("ns_metric", "CLIENT LEAD · NORTH STAR", ["Client"]),
-    ("ns_night", "CLIENT LEAD · NORTH STAR", ["Client"]),
     ("roadmap", "HOW THIS DECK RUNS", LEADS),
     (2, "CLIENT LEAD · THE DECISION", ["Client"]),
     (3, "CLIENT + DATA LEAD · THE DATA", ["Client", "Data"]),
@@ -64,14 +63,16 @@ ORDER = [
     ("col_prov", "DATA LEAD · COLUMNS · PROVISIONAL INPUTS", ["Data"]),
     ("col_excl", "DATA LEAD · COLUMNS · EXCLUDED", ["Data"]),
     ("col_traps", "DATA LEAD · COLUMNS · TEMPTING TRAPS", ["Data"]),
-    ("enc_pipeline", "DATA LEAD · ENCODING", ["Data"]),
-    ("settings_frozen", "MODEL LEAD · SETTINGS FIXED IN ADVANCE", ["Model"]),
-    (7, "MODEL LEAD · MODELS TRIED", ["Model"]),
-    (11, "MODEL LEAD · PROBABILITY QUALITY", ["Model"]),
-    (8, "MODEL LEAD · RULES TRIED", ["Model"]),
-    (9, "MODEL LEAD · EARLIER EXPERIMENTS", ["Model"]),
-    (10, "MODEL LEAD · THE CHOICE", ["Model"]),
-    (12, "BUILD LEAD · ENGINEERING", ["Build"]),
+    # Slides built on notebooks/pipeline results (source slides 7, 8, 10, 11, 12; encoding, settings, one night) are left out.
+    # Model Lead in the order the notebooks ran: 11 (fit) -> 12 (validation) -> 13 (per hotel, freeze) -> 14 (test) -> 15-16, then the recap.
+    ("m_trained", "MODEL LEAD · MODELS TRAINED", ["Model"]),
+    ("m_val_prob", "MODEL LEAD · VALIDATION · PROBABILITIES", ["Model"]),
+    ("m_shared", "MODEL LEAD · VALIDATION · ONE SHARED BUFFER", ["Model"]),
+    ("m_perhotel", "MODEL LEAD · VALIDATION · BUFFER PER HOTEL", ["Model"]),
+    ("m_run1", "MODEL LEAD · TEST · RUN 1", ["Model"]),
+    ("m_run3", "MODEL LEAD · TEST · RUNS 2 AND 3", ["Model"]),
+    (9, "MODEL LEAD · SUMMARY OF THE EXPERIMENTS", ["Model"]),
+    ("b_nightly", "BUILD LEAD · NIGHTLY COMMAND AND TESTS", ["Build"]),
     (13, "CLIENT LEAD · LIMITS AND NEXT STEPS", ["Client"]),
 ]
 POS = {key: i + 1 for i, (key, _, _) in enumerate(ORDER)}
@@ -84,29 +85,28 @@ D = json.loads((ROOT / "presentation" / "deck_data.json").read_text(encoding="ut
 TESTS, USE = D["columns"]["tests"], D["columns"]["use"]
 clean = pd.read_pickle(ROOT / "data" / "hotels_clean.pkl")
 train, choose, _proof = contract.split_periods(clean)
-RATES = json.loads((ROOT / "models" / "frozen_choice.json").read_text())["flat_rule_hotel_rates_from_train"]
-FROZEN = json.loads((ROOT / "evidence" / "choose_policy_selection" / "frozen_configuration.json").read_text())
-MARGIN = 17
-assert "17" in json.dumps(FROZEN), "the pipeline's frozen rule should be the flat rule with margin 17"
+RUN1 = json.loads((ROOT / "models" / "frozen_choice.json").read_text())  # notebooks 13-14, frozen before any test result
+RATES = RUN1["flat_rule_hotel_rates_from_train"]
+BUFFERS = RUN1["primary"]["flat_rule_buffers"]
+assert BUFFERS == {"City Hotel": 20, "Resort Hotel": 4}
+TEST1 = pd.read_csv(ROOT / "data" / "models" / "test_results_primary.csv").query("hotel == 'group'").set_index("method")
+FLAT1, CAT1 = TEST1.loc["flat rule"], TEST1.loc["CatBoost"]
+assert round(FLAT1["cost (EUR)"]) == 3214912 and FLAT1["walks per 1,000"] == 7.18 and round(CAT1["cost (EUR)"] - FLAT1["cost (EUR)"]) == 150459
 
-# One night under the deck's selected rule: ceil(hotel rate x bookings) - 17, never below 0 (validation nights).
+# One night under the client's flat rule with notebook 13's per-hotel buffers: floor(hotel rate x bookings) - buffer, never below 0.
 nights = contract.nightly_table(choose[contract.REQUIRED], choose["hotel"].map(RATES).to_numpy())
-k_all = np.maximum(np.ceil(nights["expected"].to_numpy()) - MARGIN, 0)
-choose_score = contract.night_cost(nights, k_all)
-assert round(choose_score["cost_eur"]) == 2414409 and choose_score["walks_per_1000"] == 9.06  # as notebook pipeline/11
-none_score = contract.night_cost(nights, np.zeros(len(nights)))
 
 
 def night(hotel, date):
     r = nights.loc[(hotel, pd.Timestamp(date))]
-    k = max(np.ceil(r["expected"]) - MARGIN, 0)
+    k = max(np.floor(r["expected"]) - BUFFERS[hotel], 0)
     empty, walks = max(r["cancelled"] - k, 0), max(k - r["cancelled"], 0)
     return {"hotel": hotel, "date": pd.Timestamp(date), "book": int(r["book"]), "expected": r["expected"], "k": int(k),
             "cancelled": int(r["cancelled"]), "empty": int(empty), "walks": int(walks), "value": r["stay_value"],
             "cost": empty * r["stay_value"] + walks * contract.WALK_COST}
 
 
-EXAMPLES = [night("City Hotel", "2016-07-04"), night("City Hotel", "2016-07-30"), night("Resort Hotel", "2016-07-05")]
+EXAMPLES = [night("City Hotel", "2016-07-04")]
 
 prior = {name: (part["previous_cancellations"] > 0) for name, part in [("Train", train), ("Validation", choose)]}
 PRIOR_SHARE = {n: float(m.mean()) for n, m in prior.items()}
@@ -236,7 +236,8 @@ def table(slide, x, y, rows, col_w, row_h=0.3, size=10, fills=None, colors=None,
     return tbl
 
 
-def bar_chart(slide, x, y, w, h, categories, values, highlight=None, fmt="0.0%", horizontal=True, maximum=None, size=11):
+def bar_chart(slide, x, y, w, h, categories, values, highlight=None, fmt="0.0%", horizontal=True, maximum=None, size=11,
+              highlight_color=ORANGE):
     cd = CategoryChartData()
     cd.categories = categories
     cd.add_series("Cancelled", values)
@@ -270,7 +271,7 @@ def bar_chart(slide, x, y, w, h, categories, values, highlight=None, fmt="0.0%",
     for i in highlight or []:
         pt = ser.points[i]
         pt.format.fill.solid()
-        pt.format.fill.fore_color.rgb = rgb(ORANGE)
+        pt.format.fill.fore_color.rgb = rgb(highlight_color)
     return ch
 
 
@@ -369,33 +370,58 @@ for key, label, active in ORDER:
 
 assert replace_in_runs(OLD[3], "(see slide 4)", f"(see slide {POS['col_traps']})") == 1        # Non Refund -> the traps slide
 assert replace_in_runs(OLD[3], "(kept, see slide 5)", f"(kept, see slide {POS['clean_rows']})") == 1      # repeats -> cleaning
-assert replace_in_runs(OLD[10], "earlier runs (slide 9)", f"earlier runs (slide {POS[9]})") == 1
-assert replace_in_runs(OLD[1], "which slide 9 reports in full", f"which slide {POS[9]} reports in full") == 1
 
-eng = OLD[12]  # src/nightly.py was rewired and tests/test_nightly.py added after the source deck was built
-set_text(find(eng, lambda t: t.startswith("The analysis reproduces end to end")),
-         "The analysis reproduces end to end; the nightly command now runs, but serves the earlier per-hotel rule")
-set_text(find(eng, lambda t: t == "11 automated tests pass"), "12 automated tests pass")
-set_text(find(eng, lambda t: t.startswith("scoring rule, nightly aggregation")), "scoring rule, nightly command, feature schema")
-set_text(find(eng, lambda t: t == "Nightly command stops"), "Nightly command runs")
-set_text(find(eng, lambda t: t.startswith("its model file uses the excluded")),
-         "but it serves the earlier per-hotel rule (20 / 4), not this 17-room rule")
-status = find(eng, lambda t: t == "Blocked")
-set_text(status, "Partly")
-status.text_frame.paragraphs[0].runs[0].font.color.rgb = rgb(WARN)
-for sh in eng.shapes:
-    if sh.shape_type == 1 and abs(sh.left / 914400 - 7.05) < 0.01 and abs(sh.top / 914400 - 4.27) < 0.01:
-        sh.fill.fore_color.rgb = rgb(WARN)
-set_text(find(eng, lambda t: t.startswith("Source: evidence/pipeline_run")),
-         "Source: evidence/pipeline_run/run_manifest.json · tests/ · src/nightly.py · tests/test_nightly.py · docs/COMPARISON.md")
-eng.notes_slide.notes_text_frame.text = (
-    "All ten pipeline notebooks run in order with no errors; each later notebook reads the earlier one's saved choice, so nothing is "
-    "copied by hand. 12 automated tests pass (contract, nightly command, feature schema). Data, code and 49 evidence files are "
-    "fingerprinted. The nightly command, python src/nightly.py --from 2017-08-18 --nights 14, now runs: it checks the frozen files' "
-    "fingerprints, never retrains, never reads outcomes, and prints a table per hotel and night. But it serves the run-1 freeze from "
-    "notebooks 11-16 (the flat rule with City 20 / Resort 4, CatBoost alongside), not this deck's 17-room rule, so wiring the selected "
-    "rule into it is still to do. It also has no 'as of' filter, so it would score bookings not yet made on the decision morning. The "
-    "independent AI benchmark branch was never created, so no AI comparison is claimed.")
+# Source slide 9 becomes the recap after the detail slides: one name for the period ("Jul–Dec 2016"), and a subtitle that
+# matches the detail (with a buffer per hotel only XGBoost and CatBoost were cheaper, by 1.0-1.4%).
+recap = OLD[9]
+set_text(find(recap, lambda t: t == "What did XGBoost and CatBoost show?"), "What did the experiments show, from validation to test?")
+set_text(find(recap, lambda t: t.startswith("On Choose they looked")),
+         "On Jul–Dec 2016 only XGBoost and CatBoost beat the flat rule with a buffer per hotel, by 1.0–1.4%; "
+         "on the 2017 test neither was cheaper within the walk limit")
+set_text(find(recap, lambda t: t.startswith("Run 3 · decided after run 1")), "Run 3 · decided after run 1, refitted on Train + Jul–Dec 2016")
+assert replace_in_runs(recap, "Every row met the walk limit on Choose.", "Costs on Jul–Dec 2016; every row met the walk limit.") == 1
+_heads = {"Choose AUC": "AUC, Jul–Dec 2016", "Choose cost, one buffer": "Cost, one buffer", "Choose cost, buffer per hotel": "Cost, buffer per hotel"}
+_done = 0
+for sh in recap.shapes:
+    if sh.has_table:
+        for cell in sh.table.rows[0].cells:
+            if cell.text in _heads:
+                runs = cell.text_frame.paragraphs[0].runs
+                runs[0].text = _heads[cell.text]
+                for r in runs[1:]:
+                    r._r.getparent().remove(r._r)
+                _done += 1
+assert _done == 3, _done
+recap.notes_slide.notes_text_frame.text = (
+    "This recaps the Model Lead's work from notebooks 11 to 16. Four models and the flat rule were fitted on Train and scored on "
+    "July to December 2016, each with its own buffer (rule: floor of expected cancellations minus the buffer). With one buffer for "
+    "both hotels every model beat the flat rule, but mostly because the flat rule needed a large shared buffer. Giving every method "
+    "a separate buffer per hotel, only XGBoost and CatBoost were cheaper, by 1.0 and 1.4 percent, and CatBoost was frozen. Test run "
+    "1, frozen before any test result: CatBoost cost €3,365,371 against €3,214,912 for the per-hotel flat rule, €150,459 more, both "
+    "within the limit. Run 3 was decided after seeing run 1: CatBoost and XGBoost refitted on Train plus July to December 2016, "
+    "buffers unchanged. They cost less but walked about 13 per 1,000, breaking the limit, so the contract rejects them. All runs "
+    "are reported.")
+
+# Title slide: the headline now comes from notebooks 12-16 (run 1), not from notebooks/pipeline.
+cover = OLD[1]
+set_text(find(cover, lambda t: t.startswith("Keep the client's flat rule")),
+         f"Keep the client's flat rule, with a margin per hotel (City {BUFFERS['City Hotel']}, Resort {BUFFERS['Resort Hotel']}). "
+         "CatBoost, the model chosen on Jul–Dec 2016, cost more on the 2017 test; refitted models that cost less broke the walk limit.")
+set_text(find(cover, lambda t: t == "€3.94M"), f"€{FLAT1['cost (EUR)'] / 1e6:.2f}M")
+set_text(find(cover, lambda t: t.startswith("cost on the 2017 test")), "flat rule's cost on the 2017 test period (Jan–Aug)")
+set_text(find(cover, lambda t: t == "6.21"), f"{FLAT1['walks per 1,000']:.2f}")
+set_text(find(cover, lambda t: t == "15 + 5"), f"+€{(CAT1['cost (EUR)'] - FLAT1['cost (EUR)']) / 1e3:.0f}k")
+set_text(find(cover, lambda t: t.startswith("probability models · overbooking")), "CatBoost's extra cost against the flat rule (run 1)")
+set_text(find(cover, lambda t: t.startswith("Evidence: notebooks/pipeline")),
+         "Evidence: notebooks 10–16 · data/models/test_results_primary.csv · scoring rule src/contract.py, unchanged")
+cover.notes_slide.notes_text_frame.text = (
+    f"The answer first. Keep the client's own flat rule: each hotel's cancellation rate times the night's bookings, rounded down, "
+    f"minus a margin set on Jul–Dec 2016 for each hotel (City {BUFFERS['City Hotel']}, Resort {BUFFERS['Resort Hotel']}). On the 2017 "
+    f"test period it cost {eur(FLAT1['cost (EUR)'])} under the client's contract and walked {FLAT1['walks per 1,000']:.2f} guests per "
+    f"1,000 arrivals, inside the limit of 10. Four probability models were fitted on Train (logistic regression, random forest, XGBoost, "
+    f"CatBoost); CatBoost was the cheapest on Jul–Dec 2016 and was frozen before any test result. On the 2017 test it cost "
+    f"{eur(CAT1['cost (EUR)'])}, {eur(CAT1['cost (EUR)'] - FLAT1['cost (EUR)'])} more than the flat rule. Models refitted after that "
+    f"result cost less but walked about 13 per 1,000, breaking the limit. Slide {POS[9]} reports every run.")
 
 # ============================================================ 2. North star 1: what are we trying to find out?
 s = frame("ns_question", "What are we trying to find out?",
@@ -405,7 +431,7 @@ s = frame("ns_question", "What are we trying to find out?",
           "many rooms to sell beyond capacity. Today that number comes from a flat rule: the hotel's average cancellation rate times the "
           "night's bookings, less a safety margin. So we have to find out three things: how many of tonight's bookings will cancel; how to "
           "turn that into one whole number of rooms; and whether that number is better than today's rule, in euros, without walking more "
-          "guests than the brand allows. The right-hand side is one real morning, worked through on the next slides.")
+          "guests than the brand allows. The right-hand side is one real morning, scored with the flat rule and the City Hotel's 20-room margin.")
 box(s, 0.6, 2.3, 6.2, 1.55, INK, radius=0.05)
 text(s, 0.85, 2.42, 5.8, 0.28, "THE CLIENT'S QUESTION", size=11, color=ORANGE, bold=True)
 text(s, 0.85, 2.75, 5.75, 1.05, "“For every arrival night at each hotel, tell us how many rooms beyond capacity we can keep selling, so "
@@ -419,10 +445,11 @@ for i, (head, body) in enumerate([("How many of tonight's bookings will cancel?"
     text(s, 1.3, y - 0.02, 5.5, 0.32, head, size=15, font=HEAD, bold=True)
     text(s, 1.3, y + 0.33, 5.5, 0.5, body, size=12, color=MUTED)
 e = EXAMPLES[0]
+assert e["walks"] == 0 and e["k"] > 0  # the 'Result' line below says no one walked
 text(s, 7.35, 2.3, 5.4, 0.3, f"ONE MORNING · {e['hotel'].upper()} · ARRIVALS ON {e['date']:%a %d %b %Y}".upper(), size=11, color=ORANGE, bold=True)
 steps = [("On the books", f"{e['book']} bookings due to arrive"),
-         ("Expected to cancel", f"{e['book']} × {RATES[e['hotel']]:.1%} = {e['expected']:.1f}, rounded up to {int(np.ceil(e['expected']))}"),
-         ("Decision", f"oversell {e['k']} rooms  ({int(np.ceil(e['expected']))} − {MARGIN} safety rooms)"),
+         ("Expected to cancel", f"{e['book']} × {RATES[e['hotel']]:.1%} = {e['expected']:.1f}, rounded down to {int(np.floor(e['expected']))}"),
+         ("Decision", f"oversell {e['k']} rooms  ({int(np.floor(e['expected']))} − {BUFFERS[e['hotel']]} safety rooms)"),
          ("What happened", f"{e['cancelled']} cancelled"),
          ("Result", f"{e['empty']} rooms empty × {eur(e['value'])} = {eur(e['cost'])}; no one walked")]
 for i, (head, body) in enumerate(steps):
@@ -468,62 +495,28 @@ rows = [["", "North star", "Guardrail"],
         ["Shown with", "empty rooms, walks, each hotel separately", "each hotel separately"]]
 table(s, 6.55, 2.35, rows, [1.35, 2.6, 2.25], row_h=0.73, size=11, bolds={(r, 0): True for r in range(1, 6)})
 
-# ============================================================ 4. North star 3: one night in euros
-s = frame("ns_night", "What does one night look like in euros?",
-          "Each night the rule can miss in one of two directions; the north star adds those misses over every night",
-          "src/contract.py (nightly_table, night_cost) · data/hotels_clean.pkl (validation nights) · notebooks/pipeline/11_choose_policy_selection.ipynb",
-          "Three real nights from the validation period, scored with the rule this deck selects: the hotel's rate times the night's "
-          "bookings, rounded up, minus 17 rooms. On the first night 30 guests cancelled but we only oversold 22, so 8 rooms stood empty at "
-          "about 440 euros each. On the second, only 27 cancelled but we had oversold 43, so 16 guests were walked at 300 euros. On the "
-          "third, a small Resort night, the 17-room margin swallowed the whole forecast, so we oversold nothing and 3 rooms stood empty at "
-          "869 euros each: one shared margin is too big for a small hotel. Add up all 368 nights and this rule cost 2.41 million euros "
-          "with 9.06 walks per 1,000; selling nothing extra would have cost 4.16 million.")
-tags = [("Too few oversold", BLUE), ("Too many oversold", ORANGE), ("Margin too big for a small night", CRIT)]
-for i, (e, (tag, color)) in enumerate(zip(EXAMPLES, tags)):
-    x = 0.6 + i * 4.1
-    box(s, x, 2.3, 3.85, 3.65, TINT, radius=0.04)
-    box(s, x + 0.25, 2.5, 3.35, 0.36, color, radius=0.5, label=tag, size=11, color=PAPER, bold=True)
-    text(s, x + 0.25, 3.0, 3.4, 0.3, f"{e['hotel']} · {e['date']:%a %d %b %Y}", size=14, font=HEAD, bold=True)
-    lines = [("On the books", f"{e['book']} bookings"),
-             ("Expected", f"{e['book']} × {RATES[e['hotel']]:.1%} = {e['expected']:.1f} → {int(np.ceil(e['expected']))}"),
-             ("Oversold", f"{int(np.ceil(e['expected']))} − {MARGIN} = {e['k']}" if e["k"] > 0 else f"{int(np.ceil(e['expected']))} − {MARGIN} → 0"),
-             ("Cancelled", f"{e['cancelled']}"),
-             ("Empty rooms", f"{e['empty']}" + (f" × {eur(e['value'])}" if e["empty"] else "")),
-             ("Walked", f"{e['walks']}" + (" × €300" if e["walks"] else ""))]
-    for j, (a, b) in enumerate(lines):
-        y = 3.45 + j * 0.34
-        text(s, x + 0.25, y, 1.4, 0.3, a, size=12, color=MUTED)
-        text(s, x + 1.6, y, 2.05, 0.3, b, size=12, bold=a in ("Oversold",), align=PP_ALIGN.RIGHT)
-    text(s, x + 0.25, 5.53, 1.4, 0.32, "Night cost", size=13, bold=True)
-    text(s, x + 1.6, 5.53, 2.05, 0.32, eur(e["cost"]), size=15, font=HEAD, bold=True, color=color, align=PP_ALIGN.RIGHT)
-box(s, 0.6, 6.15, 12.15, 0.65, PEACH, radius=0.1)
-text(s, 0.85, 6.2, 11.7, 0.55, [[("Over all 368 validation nights: ", {"bold": True}),
-                                 (f"this rule cost {eur(choose_score['cost_eur'])} with {choose_score['walks_per_1000']:.2f} walks per 1,000; "
-                                  f"selling nothing extra would have cost {eur(none_score['cost_eur'])}. That gap is what the north star chases.", {})]],
-     size=13, anchor=MSO_ANCHOR.MIDDLE)
-
 # ============================================================ 5. Roadmap: who did what, in which order
 s = frame("roadmap", "In what order was the work done, and by which lead?",
           "Four roles in turn: frame the decision, prepare the data, choose the rule, build it, close with the client",
           "docs/ROLES.md · docs/CHARTER.md",
           "This deck follows the order in which the work was done. As Client Lead I set the north star and framed the decision: one number "
           "per hotel-night, the two costs and the walk limit. As Data Lead I profiled and cleaned the data, chose the columns by when the "
-          "hotel knows them, and encoded them on Train only. As Model Lead I tried probability models, checked their calibration and the "
-          "uncertainty of a night's count, chose an overbooking rule within the walk limit, froze it, and tested it on 2017. As Build Lead "
-          "I made it reproducible and testable, with one nightly command. And as Client Lead again I close with the limits and next steps. "
-          "All four roles were mine.")
+          "hotel knows them. As Model Lead I fitted four probability models on Train, chose each method's buffers on the second half of "
+          "2016 within the walk limit, froze the choice, and tested it on 2017. As Build Lead I turned the frozen choice into one nightly "
+          "command, with fingerprint checks and automated tests. And as "
+          "Client Lead again I close with the limits and next steps. All four roles were mine.")
 client1 = [k for k, _, a in ORDER if a == ["Client"] and k != 13] + [3]
 data = [k for k, _, a in ORDER if "Data" in a and k != "roadmap"]
 model = [k for k, _, a in ORDER if "Model" in a and k != "roadmap"]
 stages = [("CLIENT LEAD", "What is decided, for whom, at what cost per wrong call?",
            ["North star and guardrail", "The decision and its two costs", "Check the brief's numbers"], slide_range(client1)),
           ("DATA LEAD", "What did the hotel know on the decision morning?",
-           ["Profile and clean the data", "Choose columns by timing", "Encode them on Train only"], slide_range(data)),
+           ["Profile and clean the data", "Choose columns by timing"], slide_range(data)),
           ("MODEL LEAD", "How many will cancel tonight, and how sure are we?",
-           ["Try models, calibrate", "Measure nightly uncertainty", "Choose a rule within the limit", "Freeze, then test once"],
+           ["Fit four models on Train", "Score them on Jul–Dec 2016", "Choose buffers within the limit", "Freeze, then test on 2017"],
            slide_range(model)),
           ("BUILD LEAD", "What could the revenue manager use tomorrow morning?",
-           ["Reproduce end to end", "Automated tests", "The nightly command"], slide_range([12])),
+           ["The nightly command", "Fingerprint checks", "Automated tests"], slide_range(["b_nightly"])),
           ("CLIENT LEAD", "What is the honest range, and what comes next?", ["Limits of the evidence", "Proposed next steps"],
            slide_range([13]))]
 w, gap, y0, h = 2.19, 0.3, 2.35, 4.15
@@ -655,7 +648,7 @@ bottom = reason_card(s, 7.0, bottom + 0.15, 5.75, 2, "Does the hotel have it on 
             "Learned at check-in or later, or its timing is not recorded; a cancelled booking never reaches check-in.",
             "country (corrected at check-in) · booking changes · parking · waiting list · company · customer type", "→ excluded; company used provisionally", WARN)
 assert bottom <= 6.8, bottom
-text(s, 0.6, 6.85, 12.15, 0.22, [LEGEND], size=10)
+text(s, 0.6, 6.76, 12.15, 0.24, [LEGEND], size=11)
 
 s = frame("col_t3", "Which columns change between the morning and arrival?",
           f"T3 decides {len(BY_TEST[3])} columns: our file holds each value's last version, and a cancelled booking stops changing when it cancels",
@@ -676,7 +669,7 @@ bottom = reason_card(s, 7.0, bottom + 0.15, 5.75, 3, "Unsure: counts of earlier 
             "Earlier bookings counted here could be cancelled after the morning.",
             "is_repeated_guest · previous cancellations · previous bookings", "→ used provisionally, doubt on record", WARN)
 assert bottom <= 6.8, bottom
-text(s, 0.6, 6.85, 12.15, 0.22, [LEGEND], size=10)
+text(s, 0.6, 6.76, 12.15, 0.24, [LEGEND], size=11)
 
 s = frame("col_t4", "Which columns pass all four tests, and what does T4 add?",
           "T4 rules out anything built by comparing rows; the 10 columns that pass every test were all set once, at booking",
@@ -696,7 +689,7 @@ bottom = reason_card(s, 7.0, bottom + 0.15, 5.75, 0, "Set once, when the booking
             "Which hotel, how it was sold, through which channel and agent, how far ahead and for which night: none can change later.",
             "inputs: hotel · market_segment · distribution_channel · agent", "→ 4 inputs; 6 safe but not in the input set", BLUE)
 assert bottom <= 6.8, bottom
-text(s, 0.6, 6.85, 12.15, 0.22, [LEGEND[:3] + [("the 10 cleaning flags inherit their source column's answers; all are excluded", {"color": MUTED})]], size=10)
+text(s, 0.6, 6.76, 12.15, 0.24, [LEGEND[:3] + [("the 10 cleaning flags inherit their source column's answers; all are excluded", {"color": MUTED})]], size=11)
 
 # ============================================================ 8. Columns 4: the four safe inputs
 s = frame("col_safe", "What do the four safe inputs tell the model?",
@@ -776,14 +769,9 @@ for i, (head, sub, cols, color) in enumerate(GROUPS):
     box(s, x + 3.25, y + 0.15, 0.5, 0.36, color, radius=0.5, label=str(len(cols)), size=12, color=PAPER, bold=True)
     text(s, x + 0.2, y + 0.15, 3.0, 0.3, head, size=13.5, font=HEAD, bold=True)
     text(s, x + 0.2, y + 0.5, 3.5, 0.3, sub, size=10.5, color=MUTED)
-    cx, cy = x + 0.2, y + 0.88
-    for c in cols:
-        label = c.replace("flag_", "") if c in FLAGS else c
-        cw = max(0.45, 0.2 + 0.062 * len(label))
-        if cx + cw > x + 3.75:
-            cx, cy = x + 0.2, cy + 0.3
-        box(s, cx, cy, cw, 0.24, PAPER, radius=0.5, line=color, label=label, size=8.5, color=INK)
-        cx += cw + 0.06
+    names = [c.replace("flag_", "") if c in FLAGS else c for c in cols]
+    box(s, x + 0.2, y + 0.86, 0.06, 1.1, color, shape=MSO_SHAPE.RECTANGLE)
+    text(s, x + 0.38, y + 0.84, 3.37, 1.2, " · ".join(names), size=11, color=INK)
 
 # ============================================================ 11. Columns 7: tempting traps
 s = frame("col_traps", "Which excluded columns look useful, but are traps?",
@@ -791,7 +779,7 @@ s = frame("col_traps", "Which excluded columns look useful, but are traps?",
           "data/hotels_clean.pkl (deposit: all bookings; parking and country: Train) · notebooks/06 and 07 · Antonio, de Almeida & Nunes (2019)",
           "These three would make any model look brilliant, which is exactly the warning. Read each card from the top: what the column looks like it means, what the data actually shows, why that happens, and what it would mean on the decision morning. A Non Refund booking sounds guaranteed, yet 99 percent of them cancelled; the deposit type is computed from payments up to arrival or cancellation, so the cancellation itself can create the label, and on the morning the label is not final. Not one Train guest with a parking space cancelled; parking is most likely registered on arrival, which only guests who stay reach, so on the morning almost nobody has a space. Portuguese bookings cancel about four times as often as the next countries; the paper warns that the correct nationality is often entered at check-in, which cancelled bookings never reach, so the code partly records who "
           "arrived. None of these rates was used to choose columns: notebook 06 never read an outcome. They show why timing, not "
-          "columns: notebook 06 never read an outcome. They show why timing, not score, has to decide.")
+          "score, has to decide.")
 dep_order = ["No Deposit", "Non Refund", "Refundable"]
 country = COUNTRY.reset_index()
 nr_n = int((clean["deposit_type"] == "Non Refund").sum())
@@ -908,130 +896,399 @@ text(s, 6.1, 6.44, 6.5, 0.36, [[("C6 · previous_cancellations: ", {"bold": True
                                ("left unchanged (no source proves it wrong); the planned with/without test was not run before the freeze", {"color": MUTED})]],
      size=10.5, anchor=MSO_ANCHOR.MIDDLE)
 
-# ============================================================ Encoding (Data Lead) and settings (Model Lead): replace source slide 6
-sys.path.insert(0, str(ROOT / "src"))
-import features  # noqa: E402
-from sklearn.preprocessing import OneHotEncoder  # noqa: E402
+# ============================================================ Model Lead and Build Lead: results of notebooks 11-16, src/nightly.py, tests/
+MD = ROOT / "data" / "models"
+METHODS = ["flat-rule reference", "logistic regression", "random forest", "XGBoost", "CatBoost"]
+SHORT = {"flat-rule reference": "Flat rule", "logistic regression": "Logistic regression", "random forest": "Random forest",
+         "XGBoost": "XGBoost", "CatBoost": "CatBoost"}
 
-raw = pd.read_csv(ROOT / "data" / "hotels.csv")
-raw["arrival_date"] = pd.to_datetime(raw["arrival_date_year"].astype(str) + "-" + raw["arrival_date_month"] + "-"
-                                     + raw["arrival_date_day_of_month"].astype(str), format="%Y-%B-%d")
-raw_train, raw_choose, _ = contract.split_periods(raw)
-XT, XC = features.make_features(raw_train), features.make_features(raw_choose)
-CATS = list(features.CATEGORICAL)
-NUMS = list(features.NUMERIC)
-enc = OneHotEncoder(handle_unknown="ignore").fit(XT[CATS].astype(str))
-N_CAT = {c: len(k) for c, k in zip(CATS, enc.categories_)}
-UNSEEN = {c: float((~XC[c].astype(str).isin(k)).mean()) for c, k in zip(CATS, enc.categories_)}
-N_COLS = sum(N_CAT.values()) + len(NUMS)
-MEAN, SD = XT[NUMS].mean(), XT[NUMS].std(ddof=0)  # StandardScaler uses the population standard deviation
-EX = XT.iloc[4]
-assert N_COLS == 451 and EX["agent"] == "240.0" and EX["company"] == "NO_COMPANY"
-CAND = pd.read_csv(ROOT / "evidence" / "hyperparameter_experiments" / "candidate_summary.csv")
-CALIB = json.loads((ROOT / "evidence" / "probability_calibration" / "calibration_decision.json").read_text())
-best = CAND.sort_values("mean_brier_score").iloc[0]
-assert best["model"] == "logistic_regression" and "0.1" in best["settings"]
 
-s = frame("enc_pipeline", "How were the eight inputs turned into numbers?",
-          f"Five categories become 0/1 columns, three counts are scaled: {N_COLS} numbers per booking, learnt on Train only",
-          "src/features.py (make_features) · notebooks/pipeline/05_feature_engineering.ipynb, 07–09 (make_preprocessor) · data/hotels.csv (Train)",
-          "Models need numbers, so each booking's eight inputs are turned into a row of numbers in two steps. First src/features.py keeps "
-          "only the eight approved inputs and labels a blank agent or company as NO_AGENT or NO_COMPANY, keeping IDs as text, because "
-          "agent 240 is not bigger than agent 9. Then, inside every model, the five categories are one-hot encoded: one 0/1 column for "
-          "every value seen in training, 448 in all, so each booking has exactly five ones. A value never seen in training, such as a new "
-          "agent, simply gets all zeros; that happened to 1.7 percent of agents in the second half of 2016. The three counts are scaled: "
-          "subtract the training mean and divide by the training spread, so a booking with no history becomes small negative numbers. "
-          "Everything is refitted on each fold's training rows, so a validation block never shapes the statistics it is judged with. The "
-          "earlier notebooks pooled rare categories into 143 columns; this pipeline keeps every training category.")
-text(s, 0.6, 2.3, 6.6, 0.26, f"ONE TRAIN BOOKING, STEP BY STEP · {raw_train['arrival_date'].iloc[4]:%d %b %Y} ARRIVAL".upper(), size=11,
-     color=ORANGE, bold=True)
-cat_ones = " · ".join(f"{c}={EX[c] if c != 'agent' else '240.0'}" for c in CATS)
-steps = [("Raw row", "data/hotels.csv",
-          f"{EX['hotel']} · {EX['market_segment']} · {EX['distribution_channel']} · agent 240 · company NULL · "
-          f"repeat {EX['is_repeated_guest']} · prior cancellations {EX['previous_cancellations']} · prior stays {EX['previous_bookings_not_canceled']}"),
-         ("Keep and label", "src/features.py",
-          "only the 8 approved inputs; blank agent or company → NO_AGENT / NO_COMPANY; IDs kept as text ('240.0')"),
-         ("One-hot, 5 categories", f"{sum(N_CAT.values())} columns",
-          f"a 1 in the column for each of its five values (hotel = Resort Hotel, segment = Online TA, …); the other "
-          f"{sum(N_CAT.values()) - 5} are 0"),
-         ("Scale, 3 counts", "(value − Train mean) ÷ Train spread",
-          " · ".join(f"{n.replace('previous_', 'prior ').replace('bookings_not_canceled', 'stays').replace('is_repeated_guest', 'repeat')}: "
-                     f"(0 − {MEAN[n]:.3f}) ÷ {SD[n]:.3f} = {(0 - MEAN[n]) / SD[n]:.2f}" for n in NUMS))]
-for i, (head, tag, body) in enumerate(steps):
-    y = 2.65 + i * 0.95
-    box(s, 0.6, y, 6.6, 0.8, TINT, radius=0.08)
-    box(s, 0.6, y, 0.1, 0.8, BLUE, shape=MSO_SHAPE.RECTANGLE)
-    text(s, 0.85, y + 0.08, 2.4, 0.28, head, size=12.5, bold=True)
-    text(s, 3.2, y + 0.08, 3.9, 0.28, tag, size=10.5, color=ORANGE, bold=True, align=PP_ALIGN.RIGHT)
-    text(s, 0.85, y + 0.37, 6.25, 0.42, body, size=10.5, color=MUTED)
-    if i < len(steps) - 1:
-        arrow(s, 3.9, y + 0.8, 3.9, y + 0.95)
-box(s, 0.6, 6.47, 6.6, 0.36, PEACH, radius=0.3,
-    label=f"→ {N_COLS} numbers reach the model: 5 ones, {sum(N_CAT.values()) - 5} zeros, 3 scaled values", size=11.5, bold=True)
-rows = [["Input", "Values in Train", "Unseen, Jul–Dec 2016", "Treatment"]]
-for c in CATS:
-    rows.append([c, f"{N_CAT[c]:,}", pct(UNSEEN[c]), "one-hot; unseen → all zeros"])
-rows.append(["3 counts", "numbers", "none missing", "median fill (safety net), then scaling"])
-table(s, 7.5, 2.3, rows, [1.65, 1.05, 1.15, 1.4], row_h=0.4, size=10.5, align={1: PP_ALIGN.RIGHT, 2: PP_ALIGN.RIGHT},
-      bolds={(r, 0): True for r in range(1, 7)})
-box(s, 7.5, 5.25, 5.25, 0.82, TINT, radius=0.08)
-text(s, 7.7, 5.31, 4.9, 0.72, [[("Why inside each model: ", {"bold": True}),
-                               ("the encoder and scaler are refitted on each fold's training rows, so a validation block never shapes "
-                                "the categories or statistics it is judged with.", {"color": MUTED})]], size=10.5)
-box(s, 7.5, 6.17, 5.25, 0.66, TINT, radius=0.08)
-text(s, 7.7, 6.22, 4.9, 0.58, [[("Compared with notebooks 10–16: ", {"bold": True}),
-                               ("there, categories under 30 bookings were pooled (143 columns) and counts log-scaled.", {"color": MUTED})]],
-     size=10.5)
+def nb_out(name, cell):
+    """The saved text output of one notebook cell (cells counted from 1, markdown included)."""
+    cells = json.loads((ROOT / "notebooks" / name).read_text(encoding="utf-8"))["cells"]
+    return "\n".join("".join(o.get("text", "")) or "".join(o.get("data", {}).get("text/plain", "")) for o in cells[cell - 1].get("outputs", []))
 
-s = frame("settings_frozen", "How was each setting chosen before the test?",
-          "Each setting was picked by a rule written in advance, on Train folds or Jul–Dec 2016, then frozen before the 2017 test",
-          "notebooks/pipeline/08, 09, 11 · evidence/hyperparameter_experiments, probability_calibration, choose_policy_selection/frozen_configuration.json",
-          "Every choice in this pipeline follows the same pattern: declare the options, write the rule that will pick one, then let the "
-          "data choose. The model and its setting were chosen inside the training year, with three expanding time folds: fit on the "
-          "earliest months, check on the next three, and repeat, always predicting forward. Six candidates were declared; logistic "
-          "regression with C of 0.1 had the lowest average Brier score. Calibration was adopted only because it improved both Brier score "
-          "and log loss on the second half of 2016, the rule set before the notebook ran. The overbooking rule was the cheapest one within "
-          "10 walks per 1,000 on that period: the flat rule with a 17-room margin. All of it was frozen, with fingerprints of the evidence "
-          "files, before the 2017 test was scored. That period had been seen in earlier runs, so the test is a retrospective check.")
-text(s, 0.6, 2.25, 6.0, 0.26, "MODEL CHOICE: THREE EXPANDING TIME FOLDS INSIDE TRAIN", size=11, color=ORANGE, bold=True)
-X0, X1 = 3.3, 12.75
-mw = (X1 - X0) / 12
-folds = [("Fold 1", 3, 3, "11,779 fit · 10,217 check"), ("Fold 2", 6, 3, "21,996 fit · 10,963 check"),
-         ("Fold 3", 9, 3, "32,959 fit · 16,198 check")]
-for i, (name, fit_m, val_m, counts) in enumerate(folds):
-    y = 2.6 + i * 0.4
-    text(s, 0.6, y + 0.02, 0.8, 0.3, name, size=11.5, bold=True)
-    text(s, 1.35, y + 0.04, 1.9, 0.3, counts, size=9.5, color=MUTED)
-    box(s, X0, y, fit_m * mw - 0.03, 0.3, BLUE, radius=0.4, label="fit", size=10, color=PAPER, bold=True)
-    box(s, X0 + fit_m * mw, y, val_m * mw - 0.03, 0.3, ORANGE, radius=0.4, label="check", size=10, color=PAPER, bold=True)
-for q, lab in enumerate(["Jul–Sep 2015", "Oct–Dec 2015", "Jan–Mar 2016", "Apr–Jun 2016"]):
-    text(s, X0 + q * 3 * mw, 3.82, 3 * mw, 0.25, lab, size=10, color=MUTED, align=PP_ALIGN.CENTER)
-rows = [["Decision", "Setting fixed", "How it was chosen", "Result"],
-        ["Split", "the contract's periods, by arrival date", "fixed by src/contract.py; never random",
-         "Train 49,157 · Jul–Dec 2016 29,546 · 2017 40,687"],
-        ["Model and setting", "logistic regression, C = 0.1 (forests: seed 42)",
-         "lowest mean Brier over the 3 folds, from 6 declared candidates (C 0.1 / 1 / 10; forests 100/10, 150/20, 150/40)",
-         f"fold Brier {best['mean_brier_score']:.4f}"],
-        ["Calibration", "sigmoid, fitted on out-of-fold Train scores", "adopt only if Brier and log loss both improve on Jul–Dec 2016",
-         f"adopted: Brier {CALIB['choose_brier_uncalibrated']:.4f} → {CALIB['choose_brier_calibrated']:.4f}"],
-        ["Nightly count", "sum of booking probabilities per hotel-night", "contract.nightly_table, the same for every method", "—"],
-        ["Oversell count", "round up, subtract a margin, never below 0", "margins 0–60 tried for every rule family", "—"],
-        ["Rule selection", "cheapest rule within 10 walks per 1,000", "measured on Jul–Dec 2016, rule written before any scoring",
-         f"flat rule, margin {MARGIN}: {eur(FROZEN['choose_scores']['selected']['cost_eur'])}, {FROZEN['choose_scores']['selected']['walks_per_1000']:.2f}"],
-        ["Freeze", "settings + SHA-256 of the evidence files", "saved before the 2017 test was scored", f"frozen {FROZEN['frozen_at'][11:]}"]]
-table(s, 0.6, 4.15, rows, [1.6, 3.2, 4.25, 3.1], row_h=0.335, size=10, bolds={(r, 0): True for r in range(1, 8)},
-      fills={(6, c): PEACH for c in range(4)})
+
+def eur_m(v):
+    return f"€{v / 1e6:.2f}M"
+
+
+TR = pd.read_csv(MD / "train_scores.csv", index_col="model")
+TRN = pd.read_csv(MD / "train_nightly_scores.csv").query("hotel == 'group'").set_index("model")
+VS = pd.read_csv(MD / "val_scores.csv", index_col="method")
+VN = pd.read_csv(MD / "val_nightly_scores.csv").set_index(["hotel", "method"])
+VR = pd.read_csv(MD / "val_results.csv").set_index(["hotel", "method"])
+ACC = pd.read_csv(MD / "test_accuracy.csv", index_col=[0, 1])
+EARLIER = D["earlier"]["val"]
+IMP = dict(zip(["random forest", "logistic regression", "XGBoost", "CatBoost"],
+               map(int, re.findall(r"previous_cancellations \((\d+)%\)", nb_out("11_train_models.ipynb", 17)))))
+FIT_S = dict(re.findall(r"Fitted (.+?) in ([\d.]+) s", nb_out("11_train_models.ipynb", 9)))
+GAP = [float(g) for g in re.findall(r"average gap \(weighted\)\s+([\d.]+)%", nb_out("12_validate_models.ipynb", 9))]
+_b = nb_out("13_validation_results_explained.ipynb", 20).split("B. A separate buffer")[1]
+MONTHS13 = dict(re.findall(r"(logistic regression|random forest|XGBoost|CatBoost)\s+(\d) of 6", _b))
+RESAMPLE13 = dict(re.findall(r"(logistic regression|random forest|XGBoost|CatBoost)\s+(\d+)%", _b.split("resamples cheaper")[1]))
+assert IMP == {"random forest": 44, "logistic regression": 2, "XGBoost": 17, "CatBoost": 70} and len(GAP) == 5 and len(FIT_S) == 4
+assert RESAMPLE13["CatBoost"] == "74" and RESAMPLE13["XGBoost"] == "69" and MONTHS13["CatBoost"] == "3"
+assert EARLIER["CatBoost"]["per_hotel"]["city"] == 6 and round(EARLIER["flat-rule reference"]["per_hotel"]["cost"]) == 1950066
+P1 = pd.read_csv(MD / "test_results_primary.csv").set_index(["hotel", "method"])
+S1 = pd.read_csv(MD / "test_results_secondary.csv").set_index(["hotel", "method"])
+R3 = pd.read_csv(MD / "test_run3_results_primary.csv").set_index(["hotel", "method"])
+A3 = pd.read_csv(MD / "test_run3_accuracy.csv", index_col=0)
+RUN2 = json.loads((ROOT / "models" / "frozen_choice_run2_xgboost.json").read_text())
+RUN3 = json.loads((ROOT / "models" / "frozen_choice_run3_train_val.json").read_text())
+MONTHS14 = re.search(r"cheaper than the flat rule in (\d) of 8", nb_out("14_test_run.ipynb", 15)).group(1)
+MONTHS16 = re.search(r"CatBoost cheaper than the flat rule in (\d) of 8", nb_out("16_final_test_run.ipynb", 15)).group(1)
+N_FIT3 = int(re.search(r"Fitted CatBoost on ([\d,]+)", nb_out("15_retrain_train_val.ipynb", 9)).group(1).replace(",", ""))
+COLS3 = int(re.search(r"(\d+) prepared columns", nb_out("15_retrain_train_val.ipynb", 7)).group(1))
+assert round(P1.loc[("group", "CatBoost"), "cost (EUR)"]) == 3365371 and R3.loc[("group", "CatBoost"), "walks per 1,000"] == 13.11
+assert N_FIT3 == 78703 and COLS3 == 167 and RUN2["frozen_before_test"] is False
+NIGHTLY = pd.read_csv(ROOT / "outputs" / "nightly_recommendations.csv", parse_dates=["arrival_date"])
+NMAN = json.loads((ROOT / "outputs" / "nightly_recommendations.manifest.json").read_text(encoding="utf-8"))
+assert NMAN["status"] == "SUCCESS" and NMAN["fingerprints_checked"] and NMAN["outcome_column_read"] is False
+import subprocess  # noqa: E402
+
+_pytest = subprocess.run([sys.executable, "-m", "pytest", "-q"], cwd=ROOT, capture_output=True, text=True).stdout
+N_TESTS = int(re.search(r"(\d+) passed", _pytest).group(1))
+assert "failed" not in _pytest and N_TESTS == 12, _pytest[-300:]
+TEST_FILES = {f: len(re.findall(r"^\s*def test_", (ROOT / "tests" / f).read_text(encoding="utf-8"), re.M))
+              for f in ("test_contract.py", "test_features.py", "test_nightly.py")}
+assert sum(TEST_FILES.values()) == N_TESTS
+
+# --- Model 1: the models trained (notebook 11)
+s = frame("m_trained", "Which models were trained, and how well did they fit Train?",
+          "Four models and the flat-rule reference, each fitted once on all 49,157 Train bookings with fixed settings; no folds, no tuning",
+          "notebooks/11_train_models.ipynb (cells 7, 9, 11, 13, 17) · data/models/train_scores.csv, train_nightly_scores.csv",
+          "Notebook 11 fits five methods on the whole training year, July 2015 to June 2016: the client's flat rule, which simply uses "
+          "each hotel's training cancellation rate, and four models: logistic regression, a random forest, XGBoost and CatBoost. The "
+          "settings were fixed in the code before fitting, with seed 0, and nothing was tuned: there are no folds in these notebooks. "
+          "All four models use notebook 10's 143 prepared columns. On the training rows the three tree models and logistic regression "
+          "all reach an AUC of about 0.81 to 0.82 and miss a night's cancellation count by about 6 rooms, against almost 10 for the flat "
+          "rule. But these are the rows the models learned from, so the numbers flatter them; the fair check is the second half of 2016, "
+          "on the next slide. Previous cancellations dominate the tree models: 70 percent of CatBoost's importance.")
+rows = [["Method", "Settings (cell 7)", "Fit time", "Log loss", "Brier", "AUC", "Nightly miss"]]
+SETTINGS = {"flat-rule reference": "each hotel's Train rate: City 41.7%, Resort 25.2%",
+            "logistic regression": "C = 1, max_iter 2,000", "random forest": "300 trees, min leaf 20, seed 0",
+            "XGBoost": "300 trees, depth 4, rate 0.05, subsample 0.8", "CatBoost": "300 iterations, depth 4, rate 0.05, seed 0"}
+for m in METHODS:
+    rows.append([SHORT[m], SETTINGS[m], f"{float(FIT_S[m]):.1f} s" if m in FIT_S else "–", f"{TR.loc[m, 'log loss']:.3f}",
+                 f"{TR.loc[m, 'Brier score']:.4f}", f"{TR.loc[m, 'ROC AUC']:.3f}", f"{TRN.loc[m, 'mean absolute error (rooms)']:.2f} rooms"])
+table(s, 0.6, 2.3, rows, [2.1, 4.15, 0.95, 1.1, 1.1, 1.0, 1.75], row_h=0.4, size=11, bolds={(r, 0): True for r in range(1, 6)},
+      align={j: PP_ALIGN.RIGHT for j in range(2, 7)})
+text(s, 0.6, 4.95, 6.0, 0.28, "PREVIOUS CANCELLATIONS: SHARE OF EACH MODEL'S IMPORTANCE", size=11, color=ORANGE, bold=True)
+order = ["CatBoost", "random forest", "XGBoost", "logistic regression"]
+bar_chart(s, 0.6, 5.2, 6.0, 1.65, [SHORT[m] for m in order], [IMP[m] / 100 for m in order], highlight=[0], fmt="0%", maximum=0.85)
+box(s, 7.0, 4.95, 5.75, 1.9, TINT, radius=0.06)
+text(s, 7.25, 5.05, 5.3, 1.75, [[("Read with care: ", {"bold": True}),
+                                 ("these scores are on the rows each model learned from, so they flatter it. Validation on Jul–Dec 2016 "
+                                  "(next slide) is the fair check.", {"color": MUTED})],
+                                [("Importance: ", {"bold": True}),
+                                 ("trees report their own importance; logistic regression's is its share of absolute coefficients "
+                                  "(agent 236 ranks first, 4%).", {"color": MUTED})],
+                                [("Nightly miss: ", {"bold": True}),
+                                 ("average rooms between expected and actual cancellations per hotel-night.", {"color": MUTED})]],
+     size=11, space_after=5)
+
+# --- Model 2: probability quality on validation (notebook 12)
+city_miss = {m: VN.loc[("City Hotel", m), "mean error (rooms)"] for m in METHODS}
+s = frame("m_val_prob", "How good were the probabilities on Jul–Dec 2016?",
+          f"The models ranked bookings better than the flat rule (AUC 0.70–0.71 against {VS.loc['flat-rule reference', 'ROC AUC (val)']:.2f}), "
+          f"but predicted 28–29% cancellations against {VS['actual rate (val)'].iloc[0]:.1%} actual",
+          "notebooks/12_validate_models.ipynb (cells 7, 9, 11) · 13 (cell 10) · data/models/val_scores.csv, val_nightly_scores.csv · "
+          "test_accuracy.csv (val rows, notebook 14 cell 17)",
+          "Notebook 12 scores every method on the 29,546 bookings arriving in the second half of 2016, 368 hotel-nights, which none of "
+          "them saw in training. The models sort bookings far better than the flat rule: an AUC of 0.70 to 0.71 against 0.56, and a lower "
+          "log loss and Brier score. But every model predicts too few cancellations: an average of 28 to 29 percent against 36.9 percent "
+          "actual. On a City Hotel night that means about 10 to 11 rooms too few expected cancellations, while the flat rule is within one "
+          "room. Notebook 13 found why: in training, 11.8 percent of bookings had a previous cancellation and almost all of them cancelled "
+          "again, so the models leaned on that column; in the second half of 2016 only 1.3 percent did. The band check tells the same "
+          "story: the models' predictions sit 8 to 9 points away from what happened, the flat rule's 1.6.")
+rows = [["Method", "Log loss", "Brier", "AUC", "Predicted rate", "City night miss", "Band gap"]]
+for i, m in enumerate(METHODS):
+    rows.append([SHORT[m], f"{VS.loc[m, 'log loss (val)']:.3f}", f"{VS.loc[m, 'Brier (val)']:.4f}", f"{VS.loc[m, 'ROC AUC (val)']:.3f}",
+                 pct(VS.loc[m, "mean predicted rate (val)"]), f"{city_miss[m]:+.1f} rooms", f"{GAP[i]:.1f} pts"])
+best_auc = int(np.argmax([VS.loc[m, "ROC AUC (val)"] for m in METHODS])) + 1
+table(s, 0.6, 2.3, rows, [2.0, 1.0, 1.0, 0.85, 1.3, 1.5, 1.05], row_h=0.42, size=11, bolds={(r, 0): True for r in range(1, 6)},
+      align={j: PP_ALIGN.RIGHT for j in range(1, 7)}, fills={(best_auc, 3): PEACH})
+cat_acc, none_acc = ACC.loc[("val", "CatBoost"), "accuracy (50% cut-off)"], ACC.loc[("val", "CatBoost"), "accuracy of 'nobody cancels'"]
+text(s, 0.6, 4.95, 8.7, 0.5, [[("Actual rate: ", {"bold": True}), (f"{VS['actual rate (val)'].iloc[0]:.1%}. ", {"color": MUTED}),
+                               ("City night miss: ", {"bold": True}), ("expected minus actual cancellations; negative = too few. ", {"color": MUTED}),
+                               ("Band gap: ", {"bold": True}), ("average distance between predicted and actual rate across 10% bands (cell 9).",
+                                                                 {"color": MUTED})]], size=10.5)
+box(s, 0.6, 5.55, 8.7, 1.25, TINT, radius=0.06)
+text(s, 0.85, 5.65, 8.3, 1.1, [[("Accuracy at a 50% cut-off: ", {"bold": True}),
+                                (f"CatBoost classified {cat_acc:.1%} of validation bookings correctly; predicting 'nobody cancels' scores "
+                                 f"{none_acc:.1%}. Ranking is better than the flat rule; the level is not.", {"color": MUTED})]], size=11.5,
+     anchor=MSO_ANCHOR.MIDDLE)
+box(s, 9.6, 2.3, 3.15, 4.5, INK, radius=0.05)
+text(s, 9.85, 2.45, 2.7, 0.28, "WHY THE MODELS RAN LOW", size=11, color=ORANGE, bold=True)
+text(s, 9.85, 2.8, 2.7, 0.3, "Bookings with a prior cancellation", size=11, color="C9D2DA")
+for j, (period, share) in enumerate([("Train", PRIOR_SHARE["Train"]), ("Jul–Dec 2016", PRIOR_SHARE["Validation"])]):
+    text(s, 9.85, 3.2 + j * 0.85, 2.7, 0.5, f"{share:.1%}", size=26, font=HEAD, bold=True, color=PAPER)
+    text(s, 9.85, 3.68 + j * 0.85, 2.7, 0.3, period, size=10.5, color="C9D2DA")
+text(s, 9.85, 5.0, 2.7, 1.7, f"{train.loc[train['previous_cancellations'] > 0, 'is_canceled'].mean():.1%} of those Train bookings cancelled, "
+     f"so the models leaned on the column; by late 2016 it had almost vanished (notebook 13, cell 10; chart on slide {POS['col_prov']}).",
+     size=10.5, color="C9D2DA")
+
+# --- Model 3: one shared buffer (notebook 12)
+s = frame("m_shared", "What did each method cost with one shared buffer?",
+          "Every model cost 11–16% less than the flat rule, mostly because one 16-room buffer fitted the two hotels badly",
+          "notebooks/12_validate_models.ipynb (cells 13, 15, 19) · 13_validation_results_explained.ipynb (cell 15) · data/models/val_results.csv",
+          "Next, each method's expected cancellations become a decision: oversell the expected count, rounded down, minus a buffer, and "
+          "never below zero. Notebook 12 tried buffers from 0 to 60 rooms, the same buffer for both hotels and every night, and kept the "
+          "cheapest that held walks at or under 10 per 1,000 across the group. The flat rule needed 16 rooms; the models needed 5 or 6, "
+          "because they already forecast too few cancellations. On cost every model looked 11 to 16 percent cheaper. But look at where the "
+          "flat rule's walks fall: 167 at the City Hotel and only 2 at the Resort. One shared buffer is far too small for the City and far "
+          "too big for the Resort, so the comparison handicaps the flat rule. That is what notebook 13 tested next.")
+flat_cost = VR.loc[("group", "flat-rule reference"), "cost (EUR)"]
+text(s, 0.6, 2.3, 5.2, 0.28, "COST ON 368 HOTEL-NIGHTS, € MILLION", size=11, color=ORANGE, bold=True)
+bar_chart(s, 0.6, 2.6, 5.2, 3.3, [SHORT[m] for m in METHODS], [VR.loc[("group", m), "cost (EUR)"] / 1e6 for m in METHODS],
+          highlight=[0], fmt='"€"0.00"M"', maximum=2.8)
+rows = [["Method", "Buffer", "Empty", "Walked", "Per 1,000", "City walks", "Resort walks", "vs flat"]]
+for m in METHODS:
+    g = VR.loc[("group", m)]
+    rows.append([SHORT[m], f"{int(g['buffer'])}", f"{int(g['empty rooms']):,}", f"{int(g['walked guests'])}", f"{g['walks per 1,000']:.2f}",
+                 f"{int(VR.loc[('City Hotel', m), 'walked guests'])}", f"{int(VR.loc[('Resort Hotel', m), 'walked guests'])}",
+                 "–" if m == METHODS[0] else f"{(g['cost (EUR)'] - flat_cost) / flat_cost:+.1%}"])
+table(s, 6.1, 2.3, rows, [1.65, 0.65, 0.7, 0.7, 0.8, 0.7, 0.75, 0.7], row_h=0.45, size=11, bolds={(r, 0): True for r in range(1, 6)},
+      align={j: PP_ALIGN.RIGHT for j in range(1, 8)}, fills={(1, 5): PEACH, (1, 6): PEACH})
+box(s, 6.1, 5.2, 6.65, 1.6, TINT, radius=0.06)
+text(s, 6.35, 5.3, 6.2, 1.4, [[("The rule: ", {"bold": True}),
+                               ("oversell = max(0, floor(expected cancellations) − buffer); buffers 0–60 tried; the cheapest within 10 walks "
+                                "per 1,000, group-wide, kept (cell 13).", {"color": MUTED})],
+                              [("The catch: ", {"bold": True}),
+                               (f"the flat rule's walks are {int(VR.loc[('City Hotel', METHODS[0]), 'walked guests'])} at the City "
+                                f"({VR.loc[('City Hotel', METHODS[0]), 'walks per 1,000']:.2f} per 1,000) and "
+                                f"{int(VR.loc[('Resort Hotel', METHODS[0]), 'walked guests'])} at the Resort: one buffer cannot fit both.",
+                                {"color": MUTED})]], size=11, space_after=6)
+text(s, 0.6, 6.1, 5.2, 0.7, "Probabilities uncalibrated; no folds. Each method scored once at its own buffer on the same hotel-nights.",
+     size=10.5, color=MUTED)
+
+# --- Model 4: a buffer per hotel, and the freeze (notebook 13)
+s = frame("m_perhotel", "What changed with a separate buffer for each hotel?",
+          f"The flat rule fell to {eur_m(EARLIER['flat-rule reference']['per_hotel']['cost'])}; CatBoost was only 1.4% cheaper, "
+          "not a reliable difference, and was frozen before any test result",
+          "notebooks/13_validation_results_explained.ipynb (cells 17, 20, 24, 30) · presentation/deck_data.py (per-hotel recomputation) · models/frozen_choice.json",
+          "Notebook 13 gives every method its own buffer at each hotel. It tries every pair of buffers from 0 to 60 and keeps the cheapest "
+          "pair that holds walks at or under 10 per 1,000 for the group, the only limit the client set. The flat rule improves most: "
+          "City 20 and Resort 4 rooms bring it down to 1.95 million euros. Logistic regression and the random forest now cost more than "
+          "the flat rule. XGBoost and CatBoost are 1.0 and 1.4 percent cheaper, but only in three of six months, and CatBoost comes out "
+          "cheaper in 74 percent of resamples: not a reliable difference. If each hotel also had to stay within 10 per 1,000, which the "
+          "client did not ask for, the flat rule would be cheapest. CatBoost was frozen with City 6 and Resort 3 at 01:57, before the test "
+          "was opened.")
+flat_ph = EARLIER["flat-rule reference"]["per_hotel"]["cost"]
+rows = [["Method", "City / Resort", "Cost", "Per 1,000", "vs flat", "Months cheaper", "Resamples cheaper"]]
+for m in METHODS:
+    ph = EARLIER[m]["per_hotel"]
+    rows.append([SHORT[m], f"{ph['city']} / {ph['resort']}", eur(ph["cost"]), f"{ph['walks_per_1000']:.2f}",
+                 "–" if m == METHODS[0] else f"{(ph['cost'] - flat_ph) / flat_ph:+.1%}",
+                 "–" if m == METHODS[0] else f"{MONTHS13[m]} of 6", "–" if m == METHODS[0] else f"{RESAMPLE13[m]}%"])
+table(s, 0.6, 2.3, rows, [2.1, 1.35, 1.35, 1.0, 0.9, 1.45, 1.6], row_h=0.45, size=11.5, bolds={(r, 0): True for r in range(1, 6)},
+      align={j: PP_ALIGN.RIGHT for j in range(1, 7)}, fills={(5, c): PEACH for c in range(7)})
+text(s, 0.6, 5.1, 9.75, 0.5, [[("How chosen: ", {"bold": True}),
+                               ("every (City, Resort) pair from 0–60 tried; cheapest pair within 10 walks per 1,000 group-wide (cell 17). "
+                                "Months and resamples: cell 20; all figures checked by cell 30.", {"color": MUTED})]], size=10.5)
+box(s, 0.6, 5.7, 9.75, 1.1, TINT, radius=0.06)
+text(s, 0.85, 5.78, 9.3, 0.95, [[("If each hotel were also held to 10 per 1,000 ", {"bold": True}),
+                                 ("(not a client requirement): the flat rule would be the cheapest method, and CatBoost 2.4% more expensive "
+                                  "(cell 24).", {"color": MUTED})]], size=11.5, anchor=MSO_ANCHOR.MIDDLE)
+box(s, 10.6, 2.3, 2.15, 4.5, INK, radius=0.05)
+text(s, 10.8, 2.45, 1.8, 0.28, "FROZEN", size=11, color=ORANGE, bold=True)
+text(s, 10.8, 2.8, 1.8, 0.5, RUN1["frozen_at"][11:16], size=26, font=HEAD, bold=True, color=PAPER)
+text(s, 10.8, 3.35, 1.8, 0.3, RUN1["frozen_at"][:10], size=10.5, color="C9D2DA")
+text(s, 10.8, 3.85, 1.8, 2.8, [[(f"{RUN1['chosen_method']} ", {"bold": True, "color": PAPER}),
+                                (f"City {RUN1['primary']['chosen_buffers']['City Hotel']} / Resort {RUN1['primary']['chosen_buffers']['Resort Hotel']}",
+                                 {"color": "C9D2DA"})],
+                               [("Flat rule ", {"bold": True, "color": PAPER}),
+                                (f"City {BUFFERS['City Hotel']} / Resort {BUFFERS['Resort Hotel']}", {"color": "C9D2DA"})],
+                               [("before any test result, with SHA-256 of model and preprocessor", {"color": "C9D2DA"})]],
+     size=11, space_after=8)
+
+# --- Model 5: run 1 on the 2017 test (notebook 14)
+g_flat, g_cat = P1.loc[("group", "flat rule")], P1.loc[("group", "CatBoost")]
+s = frame("m_run1", "How did the frozen choice do on the 2017 test?",
+          f"Run 1, frozen before any result: CatBoost cost {eur(g_cat['cost (EUR)'] - g_flat['cost (EUR)'])} more than the flat rule; "
+          "both stayed within the walk limit",
+          "notebooks/14_test_run.ipynb (cells 3, 5, 7, 9, 13, 15, 19) · data/models/test_results_primary.csv, test_accuracy.csv, test_results_secondary.csv",
+          "Notebook 14 opens the 2017 test, January to August, 40,687 bookings on 486 hotel-nights, once. It first checks that the model "
+          "and preprocessor match the fingerprints taken at the freeze, predicts every booking, saves the predictions, and only then reads "
+          "the outcomes. The flat rule with City 20 and Resort 4 cost 3.21 million euros and walked 7.18 guests per 1,000. CatBoost with "
+          "City 6 and Resort 3 cost 3.37 million, 150,459 euros more, and walked 8.42 per 1,000. Both met the limit. CatBoost saved a "
+          "little at the City Hotel but lost 169 thousand at the Resort, and was cheaper in only three of eight months. It again "
+          "predicted too few cancellations: 27 percent against 38.7. A shared-buffer view, disclosed in the notebook, would show CatBoost "
+          "saving 432 thousand, but only because one buffer handicaps the flat rule.")
+tiles = [(eur(g_flat["cost (EUR)"]), f"flat rule (City {BUFFERS['City Hotel']} / Resort {BUFFERS['Resort Hotel']}), {g_flat['walks per 1,000']:.2f} per 1,000", INK),
+         (eur(g_cat["cost (EUR)"]), f"CatBoost (City 6 / Resort 3), {g_cat['walks per 1,000']:.2f} per 1,000", INK),
+         (f"+{eur(g_cat['cost (EUR)'] - g_flat['cost (EUR)'])}", f"CatBoost's extra cost (+{(g_cat['cost (EUR)'] - g_flat['cost (EUR)']) / g_flat['cost (EUR)']:.1%}); "
+          f"cheaper in {MONTHS14} of 8 months", CRIT)]
+for i, (big, small, color) in enumerate(tiles):
+    x = 0.6 + i * 4.1
+    box(s, x, 2.3, 3.85, 1.2, TINT, radius=0.06)
+    text(s, x + 0.25, 2.38, 3.4, 0.55, big, size=24, font=HEAD, bold=True, color=color)
+    text(s, x + 0.25, 2.95, 3.45, 0.5, small, size=11, color=MUTED)
+rows = [["Hotel · method", "Buffer", "Cost", "Empty", "Walked", "Per 1,000", "Limit (group)"]]
+for hotel in ["group", "City Hotel", "Resort Hotel"]:
+    for m in ["flat rule", "CatBoost"]:
+        r = P1.loc[(hotel, m)]
+        rows.append([f"{'Both hotels' if hotel == 'group' else hotel} · {m}",
+                     f"{BUFFERS['City Hotel']} / {BUFFERS['Resort Hotel']}" if hotel == "group" and m == "flat rule" else
+                     ("6 / 3" if hotel == "group" else f"{int(r['buffer'])}"),
+                     eur(r["cost (EUR)"]), f"{int(r['empty rooms']):,}", f"{int(r['walked guests'])}", f"{r['walks per 1,000']:.2f}",
+                     r["guardrail (<= 10, group)"].capitalize() if hotel == "group" else "not judged"])
+table(s, 0.6, 3.75, rows, [2.65, 0.85, 1.3, 0.9, 0.85, 0.95, 1.3], row_h=0.4, size=11, bolds={(1, c): True for c in range(7)},
+      align={j: PP_ALIGN.RIGHT for j in range(1, 6)})
+acc_cat = ACC.loc[("test", "CatBoost")]
+box(s, 9.6, 3.75, 3.15, 3.05, TINT, radius=0.06)
+text(s, 9.85, 3.85, 2.7, 0.28, "CATBOOST'S PROBABILITIES", size=11, color=ORANGE, bold=True)
+none_test = acc_cat["accuracy of 'nobody cancels'"]
+text(s, 9.85, 4.2, 2.7, 2.5, [[("Correct at 50%: ", {"bold": True}), (f"{acc_cat['accuracy (50% cut-off)']:.1%} (nobody cancels: "
+                                                                       f"{none_test:.1%})", {"color": MUTED})],
+                              [("AUC: ", {"bold": True}), (f"{acc_cat['ROC AUC']:.3f} (flat rule {ACC.loc[('test', 'flat-rule reference'), 'ROC AUC']:.3f})", {"color": MUTED})],
+                              [("Predicted rate: ", {"bold": True}), (f"{acc_cat['mean predicted rate']:.1%} against {acc_cat['actual rate']:.1%} actual", {"color": MUTED})],
+                              [("Shared-buffer view (disclosed): ", {"bold": True}),
+                               (f"flat 16 {eur(S1.loc[('group', 'flat rule'), 'cost (EUR)'])}, CatBoost 5 {eur(S1.loc[('group', 'CatBoost'), 'cost (EUR)'])}; "
+                                "handicaps the flat rule", {"color": MUTED})]], size=10.5, space_after=5)
+
+# --- Model 6: runs 2 and 3, decided after run 1 (notebooks 15-16)
+c3, x3 = R3.loc[("group", "CatBoost")], R3.loc[("group", "XGBoost")]
+fair = R3.loc[("group", "flat rule (train + val rates)")]
+s = frame("m_run3", "What happened when the models were refitted after run 1?",
+          f"Refitted on Train + Jul–Dec 2016, both models cost about €{c3['saving vs flat rule (EUR)'] / 1e3:.0f}k less but walked "
+          f"{c3['walks per 1,000']:.0f} per 1,000, so the contract rejects them",
+          "notebooks/15_retrain_train_val.ipynb (cells 7, 9, 13, 15) · 16_final_test_run.ipynb (cells 3, 13, 15, 17, 21) · data/models/test_run3_results_primary.csv, test_all_runs.csv",
+          "After run 1's result, two more runs were decided, and both are disclosed. Run 2, XGBoost fitted on Train only, was frozen but "
+          "never run. Run 3 refitted the preprocessor, CatBoost and XGBoost on Train plus the second half of 2016, 78,703 bookings, with "
+          "the same settings and the same buffers, and froze them at 02:05 before reopening the test. The refit raised the expected "
+          "cancellations by about three rooms a night. Both models then cost about 410 thousand euros less than the flat rule and were "
+          "cheaper in all eight months, but they walked about 13 guests per 1,000, over the limit of 10, so the contract rejects them. A "
+          "fair check refits the flat rule's rates on the same data: 3.19 million and 8.10 walks per 1,000, within the limit. Because run "
+          "3 was chosen after seeing the test, it is not clean evidence of a saving.")
+runs = [("Run 1", RUN1["frozen_at"][11:16], "CatBoost, fitted on Train; frozen before any test result", f"{eur(g_cat['cost (EUR)'])} · {g_cat['walks per 1,000']:.2f} · met", GOOD),
+        ("Run 2", RUN2["frozen_at"][11:16], "XGBoost, fitted on Train; frozen after run 1", "never run (superseded)", SOFT),
+        ("Run 3", RUN3["frozen_at"][11:16], f"CatBoost + XGBoost refitted on {N_FIT3:,} Train + Jul–Dec 2016 bookings ({COLS3} columns); "
+         "decided after run 1", f"{eur(c3['cost (EUR)'])} · {c3['walks per 1,000']:.2f} · breached", CRIT)]
+for i, (name, at, what, result, color) in enumerate(runs):
+    y = 2.3 + i * 1.2
+    box(s, 0.6, y, 4.2, 1.05, TINT, radius=0.06)
+    box(s, 0.6, y, 0.1, 1.05, color, shape=MSO_SHAPE.RECTANGLE)
+    text(s, 0.85, y + 0.08, 2.0, 0.3, name, size=13, bold=True)
+    text(s, 3.2, y + 0.08, 1.45, 0.3, f"frozen {at}", size=10.5, color=SOFT, align=PP_ALIGN.RIGHT)
+    text(s, 0.85, y + 0.38, 3.85, 0.4, what, size=10, color=MUTED)
+    text(s, 0.85, y + 0.75, 3.85, 0.26, result, size=10.5, bold=True, color=color)
+text(s, 0.6, 5.95, 4.2, 0.85, [[("Disclosure: ", {"bold": True}),
+                                ("runs 2 and 3 were decided after run 1's test result (notebook 16, cell 21), so only run 1 is a clean test.",
+                                 {"color": MUTED})]], size=10.5)
+text(s, 5.1, 2.3, 7.65, 0.28, "WALKED GUESTS PER 1,000 ARRIVALS ON THE 2017 TEST · LIMIT 10", size=11, color=ORANGE, bold=True)
+wl = [("Flat rule, Train rates", g_flat["walks per 1,000"]), ("Flat rule, Train + val rates", fair["walks per 1,000"]),
+      ("CatBoost, run 1", g_cat["walks per 1,000"]), ("CatBoost, run 3", c3["walks per 1,000"]), ("XGBoost, run 3", x3["walks per 1,000"])]
+bar_chart(s, 5.1, 2.55, 7.65, 2.2, [a for a, _ in wl], [b for _, b in wl], highlight=[i for i, (_, b) in enumerate(wl) if b > 10],
+          highlight_color=CRIT,
+          fmt="0.00", maximum=16, size=10.5)
+rows = [["Run 3 (Train + val)", "Cost", "vs flat", "Walked", "Per 1,000", "City / Resort per 1,000", "Correct · AUC"]]
+for m, r in [("CatBoost", c3), ("XGBoost", x3)]:
+    rows.append([m, eur(r["cost (EUR)"]), f"−{eur(r['saving vs flat rule (EUR)'])}", f"{int(r['walked guests'])}", f"{r['walks per 1,000']:.2f}",
+                 f"{R3.loc[('City Hotel', m), 'walks per 1,000']:.2f} / {R3.loc[('Resort Hotel', m), 'walks per 1,000']:.2f}",
+                 f"{A3.loc[m, 'accuracy (50% cut-off)']:.1%} · {A3.loc[m, 'ROC AUC']:.3f}"])
+rows.append(["Flat rule, Train + val rates", eur(fair["cost (EUR)"]), "fairness check", f"{int(fair['walked guests'])}",
+             f"{fair['walks per 1,000']:.2f}", "–", "–"])
+table(s, 5.1, 4.9, rows, [1.95, 1.05, 1.0, 0.7, 0.8, 1.15, 1.0], row_h=0.38, size=10, bolds={(r, 0): True for r in range(1, 4)},
+      align={j: PP_ALIGN.RIGHT for j in range(1, 7)}, colors={(1, 4): CRIT, (2, 4): CRIT})
+text(s, 5.1, 6.5, 7.65, 0.3, f"Refit raised expected cancellations by {RUN3['val_expected_count_shift_rooms']['CatBoost / group']:.1f} rooms a night; "
+     f"models cheaper in {MONTHS16} of 8 months, but over the limit.", size=10.5, color=MUTED)
+
+# --- Build: the nightly command and the tests (src/nightly.py, tests/)
+s = frame("b_nightly", "What does the nightly command do, and is it tested?",
+          f"One command reads the frozen run-1 choice, checks its fingerprints and prints each hotel's oversell for 14 nights; "
+          f"{N_TESTS} automated tests pass",
+          "src/nightly.py · outputs/nightly_recommendations.csv (+ .manifest.json) · tests/test_contract.py, test_features.py, test_nightly.py",
+          "As Build Lead I turned the frozen choice into one command the revenue manager could run each morning. It reads "
+          "models/frozen_choice.json, refuses to run if the model or preprocessor file has changed since the freeze, never retrains and "
+          "never reads the cancellation outcome. For each hotel and night it prints the bookings on the books, the flat rule's expected "
+          "cancellations and its oversell, with CatBoost's alongside for comparison, and saves a CSV with a manifest of fingerprints. The "
+          f"replay from 18 August 2017 scored {NMAN['bookings_scored']:,} bookings. {N_TESTS} automated tests pass: five on the scoring "
+          "contract, four on the input columns, three on the nightly command, including that it reproduces notebook 14's predictions and "
+          "refuses a changed model file. Two limits remain: the data is the final book, not a morning snapshot, so this is a replay, not a "
+          "live forecast; and there is no 'as of' booking filter yet.")
+box(s, 0.6, 2.3, 5.3, 0.75, INK, radius=0.08)
+text(s, 0.8, 2.3, 4.95, 0.75, "python src/nightly.py --from 2017-08-18 --nights 14", size=12.5, font=MONO, color=PAPER, anchor=MSO_ANCHOR.MIDDLE)
+steps = [("Checks", f"model and preprocessor SHA-256 against {Path(NMAN['freeze_file']).name} (frozen {NMAN['frozen_at'][11:16]})"),
+         ("Never", "fits, tunes or recalibrates; never reads is_canceled"),
+         ("Prints", f"per hotel and night: on the books, flat-rule oversell (City {BUFFERS['City Hotel']}, Resort {BUFFERS['Resort Hotel']}), CatBoost alongside"),
+         ("Saves", "outputs/nightly_recommendations.csv and a manifest of fingerprints")]
+for i, (head, body) in enumerate(steps):
+    y = 3.2 + i * 0.52
+    text(s, 0.6, y, 0.9, 0.45, head, size=11.5, bold=True, color=ORANGE)
+    text(s, 1.5, y, 4.4, 0.48, body, size=10.5, color=MUTED)
+box(s, 0.6, 5.55, 5.3, 1.15, PAPER, radius=0.06, line=WARN)
+text(s, 0.85, 5.63, 4.85, 1.0, [[("Limits", {"bold": True, "color": WARN})],
+                                [("Historical replay on final-book data, not a live forecast; no 'as of' booking filter; serves the run-1 "
+                                  "freeze from notebooks 13–14.", {"color": MUTED})]], size=11, space_after=3)
+text(s, 6.2, 2.3, 6.55, 0.28, f"ITS OUTPUT, FIRST 7 OF 14 NIGHTS · {NMAN['bookings_scored']:,} BOOKINGS SCORED", size=11, color=ORANGE, bold=True)
+city, resort = NIGHTLY[NIGHTLY["hotel"] == "City Hotel"].head(7), NIGHTLY[NIGHTLY["hotel"] == "Resort Hotel"].head(7)
+rows = [["Arrival", "City: on books", "expected", "Oversell", "Resort: on books", "expected", "Oversell"]]
+for (_, c), (_, r) in zip(city.iterrows(), resort.iterrows()):
+    rows.append([f"{c['arrival_date']:%a %d %b}", f"{c['bookings']}", f"{c['flat_expected']:.1f}", f"{c['flat_oversell']}",
+                 f"{r['bookings']}", f"{r['flat_expected']:.1f}", f"{r['flat_oversell']}"])
+table(s, 6.2, 2.6, rows, [1.1, 1.0, 0.85, 0.9, 1.05, 0.8, 0.85], row_h=0.3, size=11, align={j: PP_ALIGN.RIGHT for j in range(1, 7)},
+      bolds={(r, c): True for r in range(1, 8) for c in (3, 6)})
+TEST_WHAT = {"test_contract.py": "nightly totals, too few and too many oversold, period dates, bad inputs refused",
+             "test_features.py": "only the 8 approved inputs; outcome fields and country never used; no silent fills",
+             "test_nightly.py": "buffer per hotel; reproduces notebook 14's predictions; refuses a changed model file"}
+rows = [["Test file", "Tests", "What they check"]] + [[f, str(n), TEST_WHAT[f]] for f, n in TEST_FILES.items()]
+table(s, 6.2, 5.15, rows, [1.65, 0.6, 4.3], row_h=0.41, size=10, bolds={(r, 0): True for r in range(1, 4)}, align={1: PP_ALIGN.RIGHT})
 
 # ============================================================ 12. Reorder, then check (source slides 5 and 6 are each replaced by two slides)
 ids = prs.slides._sldIdLst
 for el in list(ids):
     ids.remove(el)
-for _old in (5, 6):
+for _old in (5, 6, 7, 8, 10, 11, 12):  # 5 and 6 are replaced; 7, 8, 10, 11 and 12 report notebooks/pipeline results
     prs.part.drop_rel(OLD_IDS[_old].get(qn("r:id")))
 for key, _, _ in ORDER:
     ids.append(OLD_IDS[key] if isinstance(key, int) else NEW[key])
 
-assert len(prs.slides) == len(ORDER) == 27
+assert len(prs.slides) == len(ORDER) == 26
+
+
+# ============================================================ 13. One type scale for every slide (readability)
+# 10 pt only for page furniture (source line, page number, lead chips); content is never below 11 pt.
+def snap(pt, furniture=False):
+    if furniture:
+        return 10.0
+    for upper, size in [(11.0, 11.0), (12.5, 12.0), (15.0, 14.0), (17.0, 17.0), (20.0, 20.0), (26.0, 24.0)]:
+        if pt <= upper:
+            return size
+    return pt  # titles (30) and the cover's large type stay as designed
+
+
+def is_furniture(sh):
+    t = sh.text_frame.text.strip() if sh.has_text_frame else ""
+    return (sh.name.startswith("Lead tracker") or t.startswith("Source: ") or
+            (t.isdigit() and sh.left / 914400 > 11 and sh.top / 914400 > 6.9))
+
+
+for s in prs.slides:
+    for sh in s.shapes:
+        frames = [sh.text_frame] if sh.has_text_frame else []
+        if sh.has_table:
+            frames += [c.text_frame for row in sh.table.rows for c in row.cells]
+        furniture = is_furniture(sh)
+        for tf in frames:
+            for para in tf.paragraphs:
+                for r in para.runs:
+                    if r.font.size is not None:
+                        r.font.size = Pt(snap(r.font.size.pt, furniture))
+        if sh.has_chart:
+            ch = sh.chart
+            ch.font.size = Pt(max(11.0, snap(ch.font.size.pt if ch.font.size else 11.0)))
+            plot = ch.plots[0]
+            if plot.has_data_labels:
+                plot.data_labels.font.size = ch.font.size
+            try:
+                ch.category_axis.tick_labels.font.size = ch.font.size
+            except (ValueError, AttributeError):
+                pass
+sizes = {r.font.size.pt for s in prs.slides for sh in s.shapes if sh.has_text_frame
+         for para in sh.text_frame.paragraphs for r in para.runs if r.font.size}
+assert sizes <= {10.0, 11.0, 12.0, 14.0, 17.0, 20.0, 24.0, 30.0, 40.0, 44.0}, sorted(sizes)
 for n, s in enumerate(prs.slides, 1):
     if n in (1, len(ORDER)):
         continue
