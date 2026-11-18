@@ -160,3 +160,11 @@ Under `docs/EVALUATION_CONTRACT.md` a rule that saves euros but breaks the ceili
 | P11 | `evidence/expanded_benchmark/` is treated as **not comparable** with this pipeline: it used `country`, its source code (`src/run_cv_benchmark.py`, `src/mlops_tracking.py`) is absent, and its Proof rows were already exposed | Cannot be reproduced or audited | notebook 13 |
 
 `src/contract.py` is unchanged: its SHA-256 differs from the benchmark's record only because this checkout stores CRLF line endings (LF-normalised hash matches `7be10099…`).
+
+## Nightly command rewired to the frozen run-1 choice (2026-11-18)
+
+- **Change:** `src/nightly.py` no longer loads `models/xgboost.joblib`. That model was trained with `country` and was rejected by the schema check. The command now reads `models/frozen_choice.json` and refuses to run unless the CatBoost and preprocessor files match their SHA-256 fingerprints.
+- **Output:** for each hotel-night it prints the recommended flat rule (Train hotel rates, buffers City 20 / Resort 4), with the frozen CatBoost (buffers 6 / 3) alongside. Both use `max(0, floor(expected) - buffer)`.
+- **What it does not do:** it never fits anything and never reads `is_canceled`. It is a historical replay on final-book data, not a live forecast (project rule 7).
+- **What did not change:** no choice changed. The frozen files, buffers and recommendation are as recorded before the test, and the old XGBoost and conformal files are left in `models/`, unused.
+- **Verification:** `tests/test_nightly.py` checks that the command's expected counts for 18–31 Aug 2017 equal notebook 14's saved predictions. It also checks that a changed model file is refused. 12 tests pass.

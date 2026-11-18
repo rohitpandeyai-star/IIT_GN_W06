@@ -1,37 +1,41 @@
-"""Frozen-model nightly cancellation and overbooking recommendation pipeline.
+"""Nightly overbooking recommendations from the frozen choice (models/frozen_choice.json).
 
 Example:
-    python src/nightly.py --input data/hotels.csv --from 2017-08-18 --nights 14
+    python src/nightly.py --from 2017-08-18 --nights 14
 
-This script performs inference only. It never fits, tunes, or recalibrates a model.
+For each hotel and arrival night it prints two oversell counts, both with the rule
+k = max(0, floor(expected cancellations) - buffer):
+  - the flat rule (each hotel's Train cancellation rate, buffers City 20 / Resort 4): the policy the
+    deck recommends;
+  - the frozen CatBoost model (buffers City 6 / Resort 3), shown alongside: on the 2017 test it cost
+    EUR 150,459 more than the flat rule (notebooks/14_test_run.ipynb).
+
+Inference only: it never fits, tunes or recalibrates anything, and it refuses to run if the model or
+preprocessor file differs from the fingerprint recorded at the freeze. It never reads `is_canceled`.
+The input is the final-book export, not a snapshot of the reservations on the books on a real
+morning, so this is a historical replay, not a live forecast.
 """
 from __future__ import annotations
 
 import argparse
 import hashlib
 import json
-import math
 import platform
 import sys
 import uuid
-from datetime import date
+import warnings
 from pathlib import Path
-from typing import Iterable
 
 import joblib
 import numpy as np
 import pandas as pd
-import sklearn
-import xgboost
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from features import CATEGORICAL, FEATURE_COLUMNS, NUMERIC, make_features  # noqa: E402
+from features import FEATURE_COLUMNS, FORBIDDEN  # noqa: E402
 
 EXPECTED_HOTELS = ("City Hotel", "Resort Hotel")
-TARGET = "is_canceled"
 DATE_PARTS = ("arrival_date_year", "arrival_date_month", "arrival_date_day_of_month")
-NIGHT_PARTS = ("stays_in_weekend_nights", "stays_in_week_nights")
 
 
 def sha256(path: Path) -> str:
@@ -42,244 +46,171 @@ def sha256(path: Path) -> str:
     return h.hexdigest()
 
 
-def load_bookings(path: Path) -> pd.DataFrame:
+def load_freeze(path: Path) -> dict:
+    """Read the frozen choice and refuse to go on if a frozen file has changed since the freeze."""
+    freeze = json.loads(path.read_text(encoding="utf-8"))
+    for key in ("model", "preprocessor"):
+        file = ROOT / freeze[f"{key}_file"]
+        if not file.exists():
+            raise FileNotFoundError(f"Frozen {key} file not found: {file}")
+        if sha256(file) != freeze[f"{key}_sha256"]:
+            raise ValueError(f"{file} differs from the fingerprint recorded at the freeze; refusing to run.")
+    return freeze
+
+
+def load_bookings(path: Path, start: pd.Timestamp, nights: int) -> pd.DataFrame:
+    """Bookings due to arrive in the requested nights, with the 8 inputs labelled as in notebook 05."""
     if not path.exists():
         raise FileNotFoundError(f"Input file does not exist: {path}")
-    df = pd.read_csv(path)
-    if "arrival_date" not in df.columns:
+    df = pd.read_csv(path, dtype={"agent": str, "company": str}, low_memory=False)
+    if "arrival_date" in df.columns:
+        df["arrival_date"] = pd.to_datetime(df["arrival_date"], errors="coerce")
+    else:
         missing = [c for c in DATE_PARTS if c not in df.columns]
         if missing:
             raise ValueError(f"Input needs arrival_date or all date parts; missing: {missing}")
         df["arrival_date"] = pd.to_datetime(
-            df["arrival_date_year"].astype(str)
-            + "-" + df["arrival_date_month"].astype(str)
-            + "-" + df["arrival_date_day_of_month"].astype(str),
-            format="%Y-%B-%d",
-            errors="coerce",
-        )
-    else:
-        df["arrival_date"] = pd.to_datetime(df["arrival_date"], errors="coerce")
-
+            df["arrival_date_year"].astype(str) + "-" + df["arrival_date_month"].astype(str)
+            + "-" + df["arrival_date_day_of_month"].astype(str), format="%Y-%B-%d", errors="coerce")
     if df["arrival_date"].isna().any():
-        bad = int(df["arrival_date"].isna().sum())
-        raise ValueError(f"{bad} rows have invalid arrival_date values")
+        raise ValueError(f"{int(df['arrival_date'].isna().sum())} rows have invalid arrival dates")
 
-    if "nights" not in df.columns and all(c in df.columns for c in NIGHT_PARTS):
-        df["nights"] = df[NIGHT_PARTS[0]] + df[NIGHT_PARTS[1]]
-
-    required = ["hotel", "arrival_date", *FEATURE_COLUMNS]
-    missing = sorted(set(required) - set(df.columns))
+    missing = sorted(set(FEATURE_COLUMNS) - set(df.columns))
     if missing:
         raise ValueError(f"Input is missing required prediction columns: {missing}")
+    unexpected = sorted(set(df["hotel"].dropna().astype(str)) - set(EXPECTED_HOTELS))
+    if unexpected or df["hotel"].isna().any():
+        raise ValueError(f"Unexpected or missing hotel values: {unexpected}")
 
-    unexpected_hotels = sorted(set(df["hotel"].dropna().astype(str)) - set(EXPECTED_HOTELS))
-    if unexpected_hotels:
-        raise ValueError(f"Unexpected hotel values: {unexpected_hotels}")
-    if df["hotel"].isna().any():
-        raise ValueError("hotel contains missing values")
-    if df.empty:
-        raise ValueError("Input contains zero booking rows")
-
-    return df
-
-
-def one_sided_lower_quantile(residuals: Iterable[float], alpha: float = 0.01) -> tuple[float, int]:
-    """Match the saved conformal run's lower-tail finite-sample rank."""
-    values = np.sort(np.asarray(list(residuals), dtype=float))
-    if values.size == 0 or not np.isfinite(values).all():
-        raise ValueError("Conformal residual state is empty or non-finite")
-    rank = int(math.ceil((values.size + 1) * alpha))
-    if rank < 1:
-        return float("-inf"), rank
-    if rank > values.size:
-        return float("-inf"), rank
-    return float(values[rank - 1]), rank
+    end = start + pd.Timedelta(days=nights)
+    window = df[(df["arrival_date"] >= start) & (df["arrival_date"] < end)].copy()
+    # Cleaning choice C2 (notebook 05): agent and company are labels; a blank ('NULL') means none.
+    for col in ("agent", "company"):
+        window[col] = window[col].fillna("none").astype(str)
+    for col in FEATURE_COLUMNS:
+        if window[col].isna().any():
+            raise ValueError(f"Unexpected missing values in input {col}")
+    return window
 
 
-def validate_model_schema(model) -> None:
-    if not hasattr(model, "named_steps") or not {"prep", "model"}.issubset(model.named_steps):
-        raise TypeError("Expected a fitted sklearn Pipeline with 'prep' and 'model' steps")
-    prep = model.named_steps["prep"]
-    transformers = {name: cols for name, _, cols in prep.transformers}
-    # Compare with the approved schema in features.py, not a separate hard-coded copy of it.
-    expected_cat, expected_num = list(CATEGORICAL), list(NUMERIC)
-    found_cat, found_num = list(transformers.get("cat", [])), list(transformers.get("num", []))
-    if found_cat != expected_cat or found_num != expected_num:
-        raise ValueError(
-            "Saved model feature schema does not match the approved features.py schema. "
-            f"Model: categorical={found_cat}, numeric={found_num}. "
-            f"Approved: categorical={expected_cat}, numeric={expected_num}. "
-            "Retrain the artifact on the approved features; do not edit the schema to fit the artifact."
-        )
+def oversell(expected: pd.Series, buffers: dict) -> pd.Series:
+    """k = max(0, floor(expected) - buffer), with the buffer for each row's hotel."""
+    b = expected.index.get_level_values("hotel").map(buffers).to_numpy(dtype=float)
+    return pd.Series(np.maximum(np.floor(expected.to_numpy()) - b, 0), index=expected.index)
 
 
-def build_report(
-    bookings: pd.DataFrame,
-    probabilities: np.ndarray,
-    *,
-    start: pd.Timestamp,
-    nights: int,
-    model_name: str,
-    q95_lower: float,
-    q95_upper: float,
-    q99_lower_residual: float,
-) -> pd.DataFrame:
-    if len(probabilities) != len(bookings):
-        raise ValueError("Model returned a different number of probabilities than input rows")
-    p = np.asarray(probabilities, dtype=float)
-    if not np.isfinite(p).all() or ((p < 0) | (p > 1)).any():
-        raise ValueError("Model probabilities must be finite and within [0, 1]")
-
-    work = bookings[["hotel", "arrival_date"]].copy()
-    work["_p"] = p
-    work["_var"] = p * (1.0 - p)
-    agg = work.groupby(["hotel", "arrival_date"], observed=True).agg(
-        bookings=("_p", "size"),
-        expected_cancellations=("_p", "sum"),
-        probability_spread=("_var", lambda x: float(np.sqrt(x.sum()))),
-    ).reset_index()
-
-    dates = pd.date_range(start=start, periods=nights, freq="D")
-    grid = pd.MultiIndex.from_product(
-        [EXPECTED_HOTELS, dates], names=["hotel", "arrival_date"]
-    ).to_frame(index=False)
-    out = grid.merge(agg, on=["hotel", "arrival_date"], how="left")
+def build_report(bookings: pd.DataFrame, p_flat: np.ndarray, p_model: np.ndarray, *, start: pd.Timestamp,
+                 nights: int, flat_buffers: dict, model_buffers: dict) -> pd.DataFrame:
+    """One row per hotel and night: bookings on the books, expected cancellations and oversell per method."""
+    for p in (p_flat, p_model):
+        p = np.asarray(p, dtype=float)
+        if len(p) != len(bookings) or not np.isfinite(p).all() or ((p < 0) | (p > 1)).any():
+            raise ValueError("Each method needs one probability in [0, 1] per booking")
+    work = bookings[["hotel", "arrival_date"]].assign(_flat=p_flat, _model=p_model)
+    agg = work.groupby(["hotel", "arrival_date"]).agg(
+        bookings=("_flat", "size"), flat_expected=("_flat", "sum"), model_expected=("_model", "sum"))
+    grid = pd.MultiIndex.from_product([EXPECTED_HOTELS, pd.date_range(start, periods=nights, freq="D")],
+                                      names=["hotel", "arrival_date"])
+    out = agg.reindex(grid)
+    has_data = out["bookings"].notna()
     out["bookings"] = out["bookings"].fillna(0).astype(int)
-
-    has_data = out["bookings"] > 0
-    out["expected_cancellations"] = out["expected_cancellations"].where(has_data)
-    out["probability_spread"] = out["probability_spread"].where(has_data)
-    out["interval_95_lower"] = np.where(
-        has_data, np.maximum(0.0, out["expected_cancellations"] + q95_lower), np.nan
-    )
-    out["interval_95_upper"] = np.where(
-        has_data,
-        np.minimum(out["bookings"], out["expected_cancellations"] + q95_upper),
-        np.nan,
-    )
-    lower99 = np.where(
-        has_data, np.maximum(0.0, out["expected_cancellations"] + q99_lower_residual), np.nan
-    )
-    out["lower_99_policy_bound"] = lower99
-    out["recommended_oversell"] = np.where(has_data, np.floor(lower99), np.nan)
-    out["recommended_oversell"] = out["recommended_oversell"].astype("Int64")
+    out["flat_oversell"] = oversell(out["flat_expected"].fillna(0), flat_buffers).where(has_data).astype("Int64")
+    out["model_oversell"] = oversell(out["model_expected"].fillna(0), model_buffers).where(has_data).astype("Int64")
     out["status"] = np.where(has_data, "OK", "NO_BOOKINGS_DATA")
-    out["model"] = model_name
-
-    ordered = [
-        "hotel", "arrival_date", "bookings", "expected_cancellations",
-        "probability_spread", "interval_95_lower", "interval_95_upper",
-        "lower_99_policy_bound", "recommended_oversell", "model", "status",
-    ]
-    return out[ordered]
+    out = out.reset_index()
+    return out[["hotel", "arrival_date", "bookings", "flat_expected", "flat_oversell",
+                "model_expected", "model_oversell", "status"]]
 
 
 def run(args: argparse.Namespace) -> tuple[pd.DataFrame, dict]:
-    input_path = Path(args.input).resolve()
-    model_path = Path(args.model).resolve()
-    state_path = Path(args.conformal_state).resolve()
-    quantiles_path = Path(args.quantiles).resolve()
-    output_path = Path(args.output).resolve()
-    start = pd.Timestamp(args.from_date)
-
-    if args.nights < 1 or args.nights > 90:
+    if not 1 <= args.nights <= 90:
         raise ValueError("--nights must be between 1 and 90")
+    start = pd.Timestamp(args.from_date)
+    freeze_path, input_path, output_path = (Path(args.freeze).resolve(), Path(args.input).resolve(),
+                                            Path(args.output).resolve())
+    freeze = load_freeze(freeze_path)
+    preprocessor = joblib.load(ROOT / freeze["preprocessor_file"])
+    model = joblib.load(ROOT / freeze["model_file"])
+    if set(preprocessor.feature_names_in_) != set(FEATURE_COLUMNS):
+        raise ValueError(f"Frozen preprocessor inputs {list(preprocessor.feature_names_in_)} differ from "
+                         f"the approved features.py inputs {list(FEATURE_COLUMNS)}")
 
-    for path in [model_path, state_path, quantiles_path]:
-        if not path.exists():
-            raise FileNotFoundError(f"Required frozen artifact not found: {path}")
+    bookings = load_bookings(input_path, start, args.nights)
+    X = bookings[list(preprocessor.feature_names_in_)]
+    assert not FORBIDDEN & set(X.columns), "an outcome column reached the model"
+    with warnings.catch_warnings():
+        # Agents/companies never seen in Train go to the 'infrequent' column by design (notebook 10).
+        warnings.filterwarnings("ignore", message="Found unknown categories", category=UserWarning)
+        p_model = model.predict_proba(preprocessor.transform(X).to_numpy(dtype=float))[:, 1] if len(X) else np.array([])
+    p_flat = bookings["hotel"].map(freeze["flat_rule_hotel_rates_from_train"]).to_numpy(dtype=float)
 
-    bookings = load_bookings(input_path)
-    model = joblib.load(model_path)
-    validate_model_schema(model)
-
-    state = joblib.load(state_path)
-    if state.get("model_name") != "XGBoost":
-        raise ValueError(f"Conformal state is for {state.get('model_name')}, not XGBoost")
-    q99, q99_rank = one_sided_lower_quantile(state["calibration_signed_residuals"])
-
-    quantiles = json.loads(quantiles_path.read_text(encoding="utf-8"))
-    xgb_q = quantiles.get("XGBoost", {})
-    if "0.95" not in xgb_q:
-        raise ValueError("XGBoost 95% conformal quantiles are missing")
-    q95_lower = float(xgb_q["0.95"]["q_lower"])
-    q95_upper = float(xgb_q["0.95"]["q_upper"])
-    if not np.isfinite([q95_lower, q95_upper, q99]).all() or q95_lower > q95_upper:
-        raise ValueError("Invalid conformal quantiles")
-
-    # Only approved prediction features are passed to the model.
-    X = make_features(bookings)
-    probabilities = model.predict_proba(X)[:, 1]
-
-    report = build_report(
-        bookings, probabilities, start=start, nights=args.nights,
-        model_name="XGBoost", q95_lower=q95_lower, q95_upper=q95_upper,
-        q99_lower_residual=q99,
-    )
-
+    buffers = freeze["primary"]
+    report = build_report(bookings, p_flat, p_model, start=start, nights=args.nights,
+                          flat_buffers=buffers["flat_rule_buffers"], model_buffers=buffers["chosen_buffers"])
     output_path.parent.mkdir(parents=True, exist_ok=True)
     report.to_csv(output_path, index=False)
 
-    run_id = str(uuid.uuid4())
     manifest = {
-        "run_id": run_id,
+        "run_id": str(uuid.uuid4()),
         "status": "SUCCESS_WITH_MISSING_NIGHT_FLAGS" if (report["status"] != "OK").any() else "SUCCESS",
         "run_timestamp_utc": pd.Timestamp.now(tz="UTC").isoformat(),
-        "input_path": str(input_path),
-        "input_sha256": sha256(input_path),
-        "input_rows": int(len(bookings)),
-        "rows_scored": int(len(probabilities)),
-        "requested_from": start.date().isoformat(),
-        "requested_nights": int(args.nights),
-        "report_rows": int(len(report)),
-        "missing_hotel_nights": int((report["status"] != "OK").sum()),
-        "model_name": "XGBoost",
-        "model_path": str(model_path),
-        "model_sha256": sha256(model_path),
-        "conformal_state_path": str(state_path),
-        "conformal_state_sha256": sha256(state_path),
-        "quantiles_path": str(quantiles_path),
-        "quantiles_sha256": sha256(quantiles_path),
-        "conformal_calibration_nights": int(len(state["calibration_signed_residuals"])),
-        "one_sided_99_lower_residual_quantile": q99,
-        "one_sided_99_lower_rank": q99_rank,
-        "two_sided_95_q_lower": q95_lower,
-        "two_sided_95_q_upper": q95_upper,
-        "policy": "floor(max(0, expected_cancellations + one_sided_99pct_lower_residual_quantile))",
-        "feature_columns": list(FEATURE_COLUMNS),
-        "forbidden_target_and_post_outcome_fields_excluded": True,
-        "code_python": platform.python_version(),
-        "code_pandas": pd.__version__,
-        "code_sklearn": sklearn.__version__,
-        "code_xgboost": xgboost.__version__,
-        "output_path": str(output_path),
-        "output_sha256": sha256(output_path),
+        "input_path": str(input_path), "input_sha256": sha256(input_path), "bookings_scored": int(len(bookings)),
+        "requested_from": start.date().isoformat(), "requested_nights": int(args.nights),
+        "freeze_file": str(freeze_path), "freeze_sha256": sha256(freeze_path), "frozen_at": freeze["frozen_at"],
+        "model": freeze["chosen_method"], "model_sha256": freeze["model_sha256"],
+        "preprocessor_sha256": freeze["preprocessor_sha256"], "fingerprints_checked": True,
+        "rule": freeze["rule"],
+        "policy_recommended": {"method": "flat rule", "hotel_rates": freeze["flat_rule_hotel_rates_from_train"],
+                               "buffers": buffers["flat_rule_buffers"]},
+        "model_shown_alongside": {"method": freeze["chosen_method"], "buffers": buffers["chosen_buffers"]},
+        "inputs": list(FEATURE_COLUMNS), "outcome_column_read": False,
+        "python": platform.python_version(),
+        "output_path": str(output_path), "output_sha256": sha256(output_path),
         "limitations": [
-            "Booking-time availability of source features is not verified.",
-            "Booking rows are not verified physical rooms or individual guests.",
-            "Conformal coverage may be affected by temporal dependence and distribution shift.",
-            "No physical room capacity or actual walk records are available.",
+            "Final-book export, not a snapshot of the reservations on the books on a real morning.",
+            "Booking-time availability of four provisional inputs is not verified.",
+            "Booking rows are not verified rooms; there is no room capacity in the data.",
         ],
     }
-    manifest_path = output_path.with_suffix(".manifest.json")
-    manifest_path.write_text(json.dumps(manifest, indent=2), encoding="utf-8")
+    output_path.with_suffix(".manifest.json").write_text(json.dumps(manifest, indent=2), encoding="utf-8")
     return report, manifest
 
 
+def show(report: pd.DataFrame, manifest: dict) -> str:
+    """The table a revenue manager reads: one block per hotel, the recommended column first."""
+    pol, alt = manifest["policy_recommended"], manifest["model_shown_alongside"]
+    lines = [f"Frozen choice {Path(manifest['freeze_file']).name} ({manifest['frozen_at']}); model and preprocessor "
+             f"fingerprints match.",
+             "Rule: oversell = max(0, floor(expected cancellations) - buffer). Outcomes are not read.", ""]
+    for hotel in EXPECTED_HOTELS:
+        part = report[report["hotel"] == hotel]
+        lines.append(f"{hotel}: recommended flat rule (rate {pol['hotel_rates'][hotel]:.1%}, buffer "
+                     f"{pol['buffers'][hotel]}) | {alt['method']} shown alongside (buffer {alt['buffers'][hotel]})")
+        table = pd.DataFrame({
+            "arrival": part["arrival_date"].dt.strftime("%a %d %b %Y"),
+            "on books": part["bookings"],
+            "flat: expected": part["flat_expected"].round(1),
+            "OVERSELL (flat)": part["flat_oversell"],
+            f"{alt['method']}: expected": part["model_expected"].round(1),
+            f"oversell ({alt['method']})": part["model_oversell"],
+        })
+        lines += [table.to_string(index=False, na_rep="-"), ""]
+    lines.append(f"Run status: {manifest['status']} · {manifest['bookings_scored']:,} bookings scored")
+    lines.append(f"Saved: {manifest['output_path']} (+ .manifest.json)")
+    lines.append("Historical replay on final-book data, not a live forecast.")
+    return "\n".join(lines)
+
+
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Generate frozen-model 14-night overbooking recommendations.")
+    parser = argparse.ArgumentParser(description="Nightly overbooking recommendations from the frozen choice.")
     parser.add_argument("--input", default="data/hotels.csv", help="Booking extract CSV")
     parser.add_argument("--from", dest="from_date", required=True, help="First arrival date, YYYY-MM-DD")
-    parser.add_argument("--nights", type=int, default=14, help="Number of consecutive arrival nights")
-    parser.add_argument("--model", default="models/xgboost.joblib", help="Frozen XGBoost model artifact")
-    parser.add_argument("--conformal-state", default="models/xgboost_conformal_state.joblib")
-    parser.add_argument("--quantiles", default="models/conformal_quantiles.json")
+    parser.add_argument("--nights", type=int, default=14, help="Number of consecutive arrival nights (1-90)")
+    parser.add_argument("--freeze", default="models/frozen_choice.json", help="Frozen choice written before the test")
     parser.add_argument("--output", default="outputs/nightly_recommendations.csv")
     return parser.parse_args()
 
 
 if __name__ == "__main__":
     report, manifest = run(parse_args())
-    print(report.to_string(index=False))
-    print(f"\nRun status: {manifest['status']}")
-    print(f"Manifest: {Path(manifest['output_path']).with_suffix('.manifest.json')}")
+    print(show(report, manifest))

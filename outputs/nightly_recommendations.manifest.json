@@ -1,31 +1,40 @@
 {
-  "run_id": "a4e682e2-4c26-4dd7-b76b-af84fba4c418",
+  "run_id": "92650990-b166-48fb-a62e-490025b80323",
   "status": "SUCCESS",
-  "run_timestamp_utc": "2026-11-15T07:26:17.376787+00:00",
-  "input_path": "/mnt/data/IIT_GN_W06_extracted/IIT_GN_W06/data/hotels.csv",
+  "run_timestamp_utc": "2026-11-18T04:22:24.591715+00:00",
+  "input_path": "C:\\Users\\Lenovo\\Desktop\\Build_2_Repo\\IIT_GN_W06\\data\\hotels.csv",
   "input_sha256": "d10cdeb07de9309007f528d6499a2c0467ae7a6b287b80ffd759e11e61801639",
-  "input_rows": 119390,
-  "rows_scored": 119390,
+  "bookings_scored": 2157,
   "requested_from": "2017-08-18",
   "requested_nights": 14,
-  "report_rows": 28,
-  "missing_hotel_nights": 0,
-  "model_name": "XGBoost",
-  "model_path": "/mnt/data/IIT_GN_W06_extracted/IIT_GN_W06/models/xgboost.joblib",
-  "model_sha256": "87c8dadb8d7451b9cd7afd8cf0511c4ff9eea7433cd8e7b89a5f36d128fe699e",
-  "conformal_state_path": "/mnt/data/IIT_GN_W06_extracted/IIT_GN_W06/models/xgboost_conformal_state.joblib",
-  "conformal_state_sha256": "44161743de21a861359190f059155e8c0b93c2d454fd14da8bd493e0379058be",
-  "quantiles_path": "/mnt/data/IIT_GN_W06_extracted/IIT_GN_W06/models/conformal_quantiles.json",
-  "quantiles_sha256": "beb63597bb92bde98623fcf0cb8aa05b10e4d4eb0cd43e270f0dd3cc5258915b",
-  "conformal_calibration_nights": 148,
-  "one_sided_99_lower_residual_quantile": -13.52310562133789,
-  "one_sided_99_lower_rank": 2,
-  "two_sided_95_q_lower": -9.516090393066406,
-  "two_sided_95_q_upper": 66.50603485107422,
-  "policy": "floor(max(0, expected_cancellations + one_sided_99pct_lower_residual_quantile))",
-  "feature_columns": [
+  "freeze_file": "C:\\Users\\Lenovo\\Desktop\\Build_2_Repo\\IIT_GN_W06\\models\\frozen_choice.json",
+  "freeze_sha256": "1c9c2449fd086fa5072b7914810bf381d34ba41518ac94fe9239e39b20c7cd90",
+  "frozen_at": "2026-11-18T01:57:07",
+  "model": "CatBoost",
+  "model_sha256": "7e88c38b10a5a390c934e9f3780fb39b3092a0cf5a21230c1037a7d4589e173a",
+  "preprocessor_sha256": "61668e8ae1bcc3e244ab1f491a431a5aa78cf34587b482bd0c867d427a9d59ab",
+  "fingerprints_checked": true,
+  "rule": "k = max(0, floor(expected cancellations) - buffer), buffer per hotel",
+  "policy_recommended": {
+    "method": "flat rule",
+    "hotel_rates": {
+      "City Hotel": 0.416627,
+      "Resort Hotel": 0.251511
+    },
+    "buffers": {
+      "City Hotel": 20,
+      "Resort Hotel": 4
+    }
+  },
+  "model_shown_alongside": {
+    "method": "CatBoost",
+    "buffers": {
+      "City Hotel": 6,
+      "Resort Hotel": 3
+    }
+  },
+  "inputs": [
     "hotel",
-    "country",
     "market_segment",
     "distribution_channel",
     "agent",
@@ -34,17 +43,13 @@
     "previous_cancellations",
     "previous_bookings_not_canceled"
   ],
-  "forbidden_target_and_post_outcome_fields_excluded": true,
-  "code_python": "3.13.5",
-  "code_pandas": "2.2.3",
-  "code_sklearn": "1.8.0",
-  "code_xgboost": "3.1.3",
-  "output_path": "/mnt/data/IIT_GN_W06_extracted/IIT_GN_W06/outputs/nightly_recommendations.csv",
-  "output_sha256": "cfd65c1e704544a95593502140999864ca91fb4f3505e2c4131739729c1dcbf5",
+  "outcome_column_read": false,
+  "python": "3.14.5",
+  "output_path": "C:\\Users\\Lenovo\\Desktop\\Build_2_Repo\\IIT_GN_W06\\outputs\\nightly_recommendations.csv",
+  "output_sha256": "23e7ec9a39f7c9a67b6c86da8fa8663677141238a0f48007c132151e323cbe99",
   "limitations": [
-    "Booking-time availability of source features is not verified.",
-    "Booking rows are not verified physical rooms or individual guests.",
-    "Conformal coverage may be affected by temporal dependence and distribution shift.",
-    "No physical room capacity or actual walk records are available."
+    "Final-book export, not a snapshot of the reservations on the books on a real morning.",
+    "Booking-time availability of four provisional inputs is not verified.",
+    "Booking rows are not verified rooms; there is no room capacity in the data."
   ]
 }
